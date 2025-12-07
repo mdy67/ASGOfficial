@@ -3,40 +3,32 @@ package org.firstinspires.ftc.teamcode.GEN4.Subsystems;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Wait {
+
     private ElapsedTime timer = new ElapsedTime();
     private double duration = 0;
     private boolean active = false;
 
-    // Start waiting for a given duration in seconds
+    /** Start a wait for a given number of seconds */
     public void waitSeconds(double seconds) {
         duration = seconds;
         timer.reset();
         active = true;
     }
 
-    // Update method to be called each loop (required for consistency)
+    /** Call this every loop to update wait state */
     public void update() {
-        // Nothing needed here for ElapsedTime, but placeholder if needed
-    }
-
-    // Returns true if the wait is complete
-    public boolean isFinished() {
-        if (!active) return false;
-        if (timer.seconds() >= duration) {
+        if (active && timer.seconds() >= duration) {
             active = false;
-            return true;
         }
-        return false;
     }
 
-    // Returns true if wait is currently active
+    /** Returns true if a wait is currently active */
     public boolean isActive() {
         return active;
     }
 
-    // Reset timer and deactivate
-    public void reset() {
-        active = false;
-        timer.reset();
+    /** Returns true if the wait has finished */
+    public boolean isFinished() {
+        return !active && duration > 0;
     }
 }
