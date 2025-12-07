@@ -104,7 +104,7 @@ public class SampleAutonomous extends LinearOpMode {
                 break;
 
             case POINT_3:
-                robot.goToPoint(new Pose2D(DistanceUnit.INCH, -40, 12, AngleUnit.DEGREES, 180),
+                robot.goToPoint(new Pose2D(DistanceUnit.INCH, -49, 12, AngleUnit.DEGREES, 180),
                         0.25, 1, 5);
                 robot.update();
                 atPosition = robot.drivetrain.DTatTarget();
@@ -127,7 +127,7 @@ public class SampleAutonomous extends LinearOpMode {
                 if (atPosition) { state = State.POINT_6; }
                 break;
             case POINT_6:
-                robot.goToPoint(new Pose2D(DistanceUnit.INCH, -40, -12, AngleUnit.DEGREES, 180),
+                robot.goToPoint(new Pose2D(DistanceUnit.INCH, -49, -12, AngleUnit.DEGREES, 180),
                         0.4, 3, 5);
                 robot.update();
                 atPosition = robot.drivetrain.DTatTarget();
@@ -141,7 +141,7 @@ public class SampleAutonomous extends LinearOpMode {
                 if (atPosition) { state = State.POINT_8; }
                 break;
             case POINT_8:
-                robot.goToPoint(new Pose2D(DistanceUnit.INCH, -17, -40, AngleUnit.DEGREES, 270),
+                robot.goToPoint(new Pose2D(DistanceUnit.INCH, -17, -20, AngleUnit.DEGREES, 270),
                         0.4, 8, 5);
                 robot.update();
                 atPosition = robot.drivetrain.DTatTarget();
@@ -149,7 +149,7 @@ public class SampleAutonomous extends LinearOpMode {
                 break;
             case POINT_9:
                 robot.goToPoint(new Pose2D(DistanceUnit.INCH, -17, -62, AngleUnit.DEGREES, 270),
-                        0.15, 1, 2);
+                        0.1, 1, 2);
                 robot.update();
                 atPosition = robot.drivetrain.DTatTarget();
                 if (atPosition) { state = State.FINISHED; }
