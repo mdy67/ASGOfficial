@@ -83,10 +83,11 @@ public class GEN4Teleop extends OpMode {
 
         telemetry.addLine("=== DIFFERENTIAL ===");
         telemetry.addData("Encoders L/R", "%d / %d",
-                robot.differential.encL.getCurrentPosition(),
+                -robot.differential.encL.getCurrentPosition(),
                 robot.differential.encR.getCurrentPosition());
         telemetry.addData("Target L/R", "%.1f / %.1f",
                 -robot.differential.targetL, robot.differential.targetR);
+        telemetry.addData("TARGET DIFFY ANGLE: ", robot.differential.compensatedAngle);
 
         double dx = goal.getX(DistanceUnit.INCH) - robot.drivetrain.robotPose.getX(DistanceUnit.INCH);
         double dy = goal.getY(DistanceUnit.INCH) - robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
