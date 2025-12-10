@@ -26,6 +26,14 @@ public class Drivetrain {
     public DcMotor leftFront, leftBack, rightBack, rightFront;
     GoBildaPinpointDriver pinpoint;
 
+    // -------------------------
+    //     TELEOP INPUT VARS
+    // -------------------------
+    private double teleopStrafe = 0;
+    private double teleopForward = 0;
+    private double teleopTurn = 0;
+
+
     public Drivetrain(HardwareMap hardwareMap) {
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftBack = hardwareMap.get(DcMotorEx.class, "leftBack");
@@ -47,15 +55,20 @@ public class Drivetrain {
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint"); // CONFIG NAMED 12/6/2025
-        pinpoint.setOffsets(69.19, -154.75, DistanceUnit.MM); // ACCURATE POS TUNED 12/6/2025
+        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        pinpoint.setOffsets(69.19, -154.75, DistanceUnit.MM);
         pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, // ACCURATE DIRECTION TUNED 12/6/2025
+        pinpoint.setEncoderDirections(
+                GoBildaPinpointDriver.EncoderDirection.FORWARD,
                 GoBildaPinpointDriver.EncoderDirection.FORWARD);
         pinpoint.resetPosAndIMU();
     }
 
-    public void setPosition(double x, double y, double heading) { // DEGREES FOR HEADING
+
+    // -------------------------
+    //  POSE / MOVEMENT TOOLS
+    // -------------------------
+    public void setPosition(double x, double y, double heading) {
         pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, x, y, AngleUnit.DEGREES, heading));
     }
 
@@ -66,8 +79,8 @@ public class Drivetrain {
         rightFront.setPower(rf);
     }
 
-    public void setWeightedMotorPowers(double strafe, double fwd, double heading) { // Mecanum movement
-        double denominator = Math.max(Math.abs(strafe) + Math.abs(fwd) + Math.abs(heading), 1); // Scaling
+    public void setWeightedMotorPowers(double strafe, double fwd, double heading) {
+        double denominator = Math.max(Math.abs(strafe) + Math.abs(fwd) + Math.abs(heading), 1);
         double[] weightPowers = new double[]{
                 (fwd - strafe - heading) / denominator,
                 (fwd + strafe - heading) / denominator,
@@ -77,10 +90,23 @@ public class Drivetrain {
         setMotorPowers(weightPowers[0], weightPowers[1], weightPowers[2], weightPowers[3]);
     }
 
-    // ROBOT POSE
+    // -------------------------
+    // TELEOP CONTROL METHOD
+    // -------------------------
+    public void driveTeleOp(double strafe, double forward, double turn) {
+        teleopStrafe = strafe;
+        teleopForward = forward;
+        teleopTurn = turn;
+    }
+
+
+    // -------------------------
+    // GOTOPOINT VARIABLES
+    // -------------------------
     public Pose2D robotPose = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
     public Pose2D targetPose = new Pose2D(DistanceUnit.INCH, 0.01, 0.01, AngleUnit.DEGREES, 0.01);
     private Pose2D lastTarget = targetPose;
+
     public double targetX, targetY, targetT, maxPower, xyThreshold, hThreshold;
 
     public double XVel() { return pinpoint.getVelX(DistanceUnit.INCH); }
@@ -100,13 +126,16 @@ public class Drivetrain {
 
             this.xyThreshold = xyThreshold;
             this.hThreshold = hThreshold;
-
         }
     }
 
 
+    // -------------------------
+    // PID CONTROL FOR AUTON
+    // -------------------------
     public double tError, xError, yError;
     public double globalXerror, globalYerror;
+
     public void getErrors() {
         double heading = robotPose.getHeading(AngleUnit.RADIANS);
         tError = Utils.headingClip(targetT - heading);
@@ -115,15 +144,12 @@ public class Drivetrain {
 
         xError = globalXerror * Math.cos(heading) + globalYerror * Math.sin(heading);
         yError = globalYerror * Math.cos(heading) - globalXerror * Math.sin(heading);
-
     }
-
 
     public boolean DTatTarget() {
         return ((Math.abs(xError) + Math.abs(yError)) <= xyThreshold && Math.abs(tError) < hThreshold);
     }
 
-    // ADJUSTED 12/6/2025
     public static final double xkP = 0.07;
     public static final double xkD = 0.007;
     public static final double ykP = 0.07;
@@ -136,6 +162,7 @@ public class Drivetrain {
     DTPID tPID = new DTPID(tkP, tkD);
 
     public double xPower, yPower, tPower;
+
     public void applyPIDPowers() {
         getErrors();
 
@@ -147,39 +174,33 @@ public class Drivetrain {
     }
 
 
+    // -------------------------
+    //       MAIN UPDATE
+    // -------------------------
     public void update(){
         pinpoint.update();
-        // ROBOT POSE DEFINED
         robotPose = pinpoint.getPosition();
 
         switch (state) {
+
             case GO_TO_POINT:
                 applyPIDPowers();
-             //   setWeightedMotorPowers(0, 1, 0);
-
-                if (DTatTarget()) {
-                    state = State.IDLE;
-                }
-
+                if (DTatTarget()) state = State.IDLE;
                 break;
 
             case TELEOP:
+                // *** FIXED — TeleOp now works ***
+                setWeightedMotorPowers(teleopStrafe, teleopForward, teleopTurn);
                 break;
 
             case HOLD_POINT:
-                applyPIDPowers(); // still goes to TARGET POINT but never exits running PID so it holds pos
+                applyPIDPowers();
                 break;
 
             case IDLE:
                 setMotorPowers(0,0,0,0);
                 break;
-
-            default:
-                break;
         }
     }
-
-
-
 
 }

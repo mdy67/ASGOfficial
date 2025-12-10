@@ -4,21 +4,35 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+
 public class Colors {
 
     private ColorSensor color1, color2, color3;
     private Servo led1, led2, led3;
 
-    // Thresholds
-    private static final double PRESENCE = 80;   // min red to detect a ball
-    private static final double PURPLE_T = 200;  // min red to classify as purple
+    private final int averageWindowMs = 250;
+    private final int loopPeriodMs = 40;
+    private final int bufferLength = averageWindowMs / loopPeriodMs;
 
-    public enum BallState {
-        EMPTY,
-        GREEN,
-        PURPLE
-    }
+    // Buffers for sensors
+    private final Deque<Integer> rBuf1 = new ArrayDeque<>();
+    private final Deque<Integer> gBuf1 = new ArrayDeque<>();
+    private final Deque<Integer> bBuf1 = new ArrayDeque<>();
+    private double sumR1 = 0, sumG1 = 0, sumB1 = 0;
 
+    private final Deque<Integer> rBuf2 = new ArrayDeque<>();
+    private final Deque<Integer> gBuf2 = new ArrayDeque<>();
+    private final Deque<Integer> bBuf2 = new ArrayDeque<>();
+    private double sumR2 = 0, sumG2 = 0, sumB2 = 0;
+
+    private final Deque<Integer> rBuf3 = new ArrayDeque<>();
+    private final Deque<Integer> gBuf3 = new ArrayDeque<>();
+    private final Deque<Integer> bBuf3 = new ArrayDeque<>();
+    private double sumR3 = 0, sumG3 = 0, sumB3 = 0;
+
+    public enum BallState { EMPTY, GREEN, PURPLE }
     private BallState state1 = BallState.EMPTY;
     private BallState state2 = BallState.EMPTY;
     private BallState state3 = BallState.EMPTY;
@@ -33,64 +47,94 @@ public class Colors {
         led3 = hardwareMap.get(Servo.class, "led3");
     }
 
-    /** Converts one sensor reading into EMPTY / GREEN / PURPLE */
-    private BallState classify(ColorSensor sensor) {
-        double r = sensor.red();
-
-        if (r < PRESENCE) {
-            return BallState.EMPTY;
+    private void addToBuffer(Deque<Integer> buffer, int value, SumHolder sum) {
+        if (buffer.size() >= bufferLength) {
+            int removed = buffer.pollFirst();
+            sum.value -= removed;
         }
-        if (r < PURPLE_T) {
-            return BallState.GREEN;
-        }
-        return BallState.PURPLE;
+        buffer.addLast(value);
+        sum.value += value;
     }
 
-    /** Sets the LED servo based on the ball state */
+    private static class SumHolder { double value; }
+
+    private void addToBuffers1(int r, int g, int b) {
+        addToBuffer(rBuf1, r, new SumHolder(){ {value=sumR1;} }); sumR1 = rBuf1.stream().mapToInt(Integer::intValue).sum();
+        addToBuffer(gBuf1, g, new SumHolder(){ {value=sumG1;} }); sumG1 = gBuf1.stream().mapToInt(Integer::intValue).sum();
+        addToBuffer(bBuf1, b, new SumHolder(){ {value=sumB1;} }); sumB1 = bBuf1.stream().mapToInt(Integer::intValue).sum();
+    }
+
+    private void addToBuffers2(int r, int g, int b) {
+        addToBuffer(rBuf2, r, new SumHolder(){ {value=sumR2;} }); sumR2 = rBuf2.stream().mapToInt(Integer::intValue).sum();
+        addToBuffer(gBuf2, g, new SumHolder(){ {value=sumG2;} }); sumG2 = gBuf2.stream().mapToInt(Integer::intValue).sum();
+        addToBuffer(bBuf2, b, new SumHolder(){ {value=sumB2;} }); sumB2 = bBuf2.stream().mapToInt(Integer::intValue).sum();
+    }
+
+    private void addToBuffers3(int r, int g, int b) {
+        addToBuffer(rBuf3, r, new SumHolder(){ {value=sumR3;} }); sumR3 = rBuf3.stream().mapToInt(Integer::intValue).sum();
+        addToBuffer(gBuf3, g, new SumHolder(){ {value=sumG3;} }); sumG3 = gBuf3.stream().mapToInt(Integer::intValue).sum();
+        addToBuffer(bBuf3, b, new SumHolder(){ {value=sumB3;} }); sumB3 = bBuf3.stream().mapToInt(Integer::intValue).sum();
+    }
+
+    private double avg(Deque<Integer> buffer, double sum) {
+        return buffer.isEmpty() ? 0 : sum / buffer.size();
+    }
+
+    private BallState classifySensor(double r, double g, double b, int sensorNumber) {
+        switch (sensorNumber) {
+            case 1:
+                if (r > 20 || g > 20 || b > 20) return (g > r * 2) ? BallState.GREEN : BallState.PURPLE;
+                break;
+            case 2:
+            case 3:
+                if (r > 200 || g > 200 || b > 200) return (g > r * 3) ? BallState.GREEN : BallState.PURPLE;
+                break;
+        }
+        return BallState.EMPTY;
+    }
+
     private void applyLED(Servo led, BallState state) {
         switch (state) {
-            case EMPTY:
-                led.setPosition(0.0); // LED OFF
-                break;
-            case GREEN:
-                led.setPosition(0.47); // LED GREEN
-                break;
-            case PURPLE:
-                led.setPosition(0.722); // LED PURPLE
-                break;
+            case EMPTY: led.setPosition(0); break;
+            case GREEN: led.setPosition(0.47); break;
+            case PURPLE: led.setPosition(0.722); break;
         }
     }
 
-    /** Call this every loop */
     public void update() {
-        state1 = classify(color1);
-        state2 = classify(color2);
-        state3 = classify(color3);
+        addToBuffers1(color1.red(), color1.green(), color1.blue());
+        addToBuffers2(color2.red(), color2.green(), color2.blue());
+        addToBuffers3(color3.red(), color3.green(), color3.blue());
+
+        double r1 = avg(rBuf1, sumR1), g1 = avg(gBuf1, sumG1), b1 = avg(bBuf1, sumB1);
+        double r2 = avg(rBuf2, sumR2), g2 = avg(gBuf2, sumG2), b2 = avg(bBuf2, sumB2);
+        double r3 = avg(rBuf3, sumR3), g3 = avg(gBuf3, sumG3), b3 = avg(bBuf3, sumB3);
+
+        state1 = classifySensor(r1, g1, b1, 1);
+        state2 = classifySensor(r2, g2, b2, 2);
+        state3 = classifySensor(r3, g3, b3, 3);
 
         applyLED(led1, state1);
         applyLED(led2, state2);
         applyLED(led3, state3);
     }
 
-    // ===========================
-    // ACCESSORS / HELPERS
-    // ===========================
-
+    // =========================
+    // GETTERS
+    // =========================
     public BallState getBall1() { return state1; }
     public BallState getBall2() { return state2; }
     public BallState getBall3() { return state3; }
 
-    public boolean hasBall1() { return state1 != BallState.EMPTY; }
-    public boolean hasBall2() { return state2 != BallState.EMPTY; }
-    public boolean hasBall3() { return state3 != BallState.EMPTY; }
-    public boolean hasBall() { return state1 != BallState.EMPTY || state2 != BallState.EMPTY || state3 != BallState.EMPTY; }
+    public double avgRed1()   { return avg(rBuf1, sumR1); }
+    public double avgGreen1() { return avg(gBuf1, sumG1); }
+    public double avgBlue1()  { return avg(bBuf1, sumB1); }
 
+    public double avgRed2()   { return avg(rBuf2, sumR2); }
+    public double avgGreen2() { return avg(gBuf2, sumG2); }
+    public double avgBlue2()  { return avg(bBuf2, sumB2); }
 
-    public boolean isPurple1() { return state1 == BallState.PURPLE; }
-    public boolean isPurple2() { return state2 == BallState.PURPLE; }
-    public boolean isPurple3() { return state3 == BallState.PURPLE; }
-
-    public boolean isGreen1() { return state1 == BallState.GREEN; }
-    public boolean isGreen2() { return state2 == BallState.GREEN; }
-    public boolean isGreen3() { return state3 == BallState.GREEN; }
+    public double avgRed3()   { return avg(rBuf3, sumR3); }
+    public double avgGreen3() { return avg(gBuf3, sumG3); }
+    public double avgBlue3()  { return avg(bBuf3, sumB3); }
 }

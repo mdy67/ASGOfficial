@@ -45,7 +45,7 @@ public class Flywheel {
         shooterL.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         shooterR.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
-        lastTicks = shooterL.getCurrentPosition();
+        lastTicks = -shooterR.getCurrentPosition();
         lastTime = System.nanoTime() / 1e9;
     }
 
@@ -62,7 +62,7 @@ public class Flywheel {
     public double getTargetVelocity() { return targetVelocity; }
 
     public void updateVelocity() {
-        double currentTicks = shooterL.getCurrentPosition();
+        double currentTicks = -shooterR.getCurrentPosition();
         double currentTime = System.nanoTime() / 1e9;
 
         double deltaTicks = currentTicks - lastTicks;
@@ -96,8 +96,8 @@ public class Flywheel {
 
         power = Range.clip(power, 0.0, 1.0);
 
-        shooterL.setPower(power);
-        shooterR.setPower(power);
+        shooterL.setPower(-power);
+        shooterR.setPower(-power);
     }
 
     public void stop() {

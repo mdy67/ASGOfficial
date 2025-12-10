@@ -12,19 +12,38 @@ public class Robot {
     public Drivetrain drivetrain;
     public Differential differential;
     public Flywheel flywheel;
+    public Intake intake;
+    public Colors colors;
+    public Arms arms; // <--- ADDED
 
     public Pose2D blueGoal = new Pose2D(DistanceUnit.INCH, -60, 60, AngleUnit.DEGREES, 0);
     public Pose2D redGoal  = new Pose2D(DistanceUnit.INCH, 60, 60, AngleUnit.DEGREES, 0);
 
     private boolean flywheelEnabled = false;
-    public Wait wait = new Wait();  // Wait helper
+    public Wait wait = new Wait();
 
     public Robot(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
 
         drivetrain = new Drivetrain(hardwareMap);
         differential = new Differential(hardwareMap);
+        colors = new Colors(hardwareMap);
 
+        // Add arms subsystem
+        try {
+            arms = new Arms(hardwareMap);
+        } catch (Exception e) {
+            arms = null;
+        }
+
+        // Add intake
+        try {
+            intake = new Intake(hardwareMap);
+        } catch (Exception e) {
+            intake = null;
+        }
+
+        // Add flywheel
         try {
             flywheel = new Flywheel(hardwareMap, hardwareMap.voltageSensor.iterator().hasNext()
                     ? hardwareMap.voltageSensor.iterator().next() : null);
@@ -34,36 +53,39 @@ public class Robot {
         }
     }
 
-    /** Reset sensors and encoders */
     public void startup() {
         drivetrain.pinpoint.resetPosAndIMU();
         differential.resetEncoders();
     }
 
-    /** Update drivetrain, wait timer, and optionally flywheel/differential */
     public void update() {
         drivetrain.update();
-        wait.update(); // Update wait every loop
+        wait.update();
+        colors.update();
 
-        if (flywheelEnabled && flywheel != null) {
-            flywheel.update();
-            differential.update();
-        }
+        flywheel.update();
+        differential.update();
+
     }
 
-    /** Drive to a point using drivetrain */
     public void goToPoint(Pose2D targetPoint, double maxPower, double xyThreshold, double hThreshold){
         drivetrain.state = Drivetrain.State.GO_TO_POINT;
         drivetrain.goToPoint(targetPoint, maxPower, xyThreshold, hThreshold);
     }
 
-    /** Hold at a position */
     public void holdPoint(Pose2D targetPoint, double maxPower){
         drivetrain.state = Drivetrain.State.HOLD_POINT;
         drivetrain.goToPoint(targetPoint, maxPower, 0, 0);
     }
 
-    /** Disable flywheel if present */
+    public Pose2D getTargetGoal() {
+        if (org.firstinspires.ftc.teamcode.GEN4.Subsystems.alliance.isRed()) {
+            return redGoal;
+        } else {
+            return blueGoal;
+        }
+    }
+
     public void disableFlywheel() {
         flywheelEnabled = false;
         flywheel = null;

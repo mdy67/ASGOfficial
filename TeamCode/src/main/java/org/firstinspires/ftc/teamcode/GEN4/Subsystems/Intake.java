@@ -1,13 +1,13 @@
 package org.firstinspires.ftc.teamcode.GEN4.Subsystems;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 public class Intake {
 
-    DcMotor intakeL, intakeR;
+    private final DcMotorEx intakeL, intakeR;
 
     public Intake(HardwareMap hardwareMap) {
         intakeL = hardwareMap.get(DcMotorEx.class, "intakeL");
@@ -28,7 +28,18 @@ public class Intake {
         intakeR.setPower(power);
     }
 
-    public void update(){
+    public void update() {
+        // Nothing needed for now
+    }
 
+    // =========================
+    // AMPERAGE GETTERS FOR TELEMETRY
+    // =========================
+    public double getCurrentL() {
+        return intakeL.getCurrent(org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit.AMPS);
+    }
+
+    public double getCurrentR() {
+        return intakeR.getCurrent(org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit.AMPS);
     }
 }
