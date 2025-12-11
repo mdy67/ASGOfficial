@@ -10,7 +10,7 @@ public class alliance {
 
 
     // Global alliance value for the entire robot code
-    private static Color currentAlliance = Color.RED;  // default
+    private static Color currentAlliance = Color.BLUE;  // default
 
 
     // Set alliance

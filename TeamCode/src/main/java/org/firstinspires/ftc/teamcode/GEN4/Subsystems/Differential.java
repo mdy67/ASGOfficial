@@ -13,10 +13,15 @@ public class Differential {
     // --------------------
     // PID / control constants
     // --------------------
-    public static double kP = 0.0005;
-    public static double kD = 0.001;
+    public static double kP = 0.0002;
+    public static double kI = 0.00001;
+    public static double kD = 0.00001;
+    public static double kS = 0.1;          // static offset
     public static double maxPower = 0.5;
-    public static double toleranceTicks = 20;
+    public static double toleranceTicks = 50;
+
+    // Integral anti-windup limit
+    public static double MAX_INTEGRAL = 5000;
 
     // --------------------
     // Physical angle / encoder mapping
@@ -26,7 +31,7 @@ public class Differential {
     public static double slot1Pos = -5300;
     public static double slot2Pos = -2300;
     public static double slot3Pos = 0;
-    public static double angleScale = 37.78; // 3400 ticks = 90 deg → 1 deg ≈ 37.78 ticks
+    public static double angleScale = 43.61;
 
     private double currentSlotBase = 0;
 
@@ -41,10 +46,14 @@ public class Differential {
     // --------------------
     public double targetL = 0;
     public double targetR = 0;
+
     private double lastErrorL = 0;
     private double lastErrorR = 0;
 
-    public double compensatedAngle = 0; // target angle in degrees 0-180
+    private double integralL = 0;
+    private double integralR = 0;
+
+    public double compensatedAngle = 0;
 
     // --------------------
     // Constructor
@@ -65,6 +74,7 @@ public class Differential {
     public void resetEncoders() {
         encL.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         encR.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
         encL.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         encR.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
     }
@@ -94,16 +104,20 @@ public class Differential {
     }
 
     /**
-     * Aim differential toward goal directly, ignoring velocities.
+     * Aim differential toward goal directly, no velocity compensation.
      */
     public void aimToGoal(Pose2D currentPose, Pose2D targetGoal) {
         double dx = targetGoal.getX(DistanceUnit.INCH) - currentPose.getX(DistanceUnit.INCH);
         double dy = targetGoal.getY(DistanceUnit.INCH) - currentPose.getY(DistanceUnit.INCH);
 
-        // Desired angle relative to robot heading
-        double desiredAngle = Math.toDegrees(Math.atan2(dy, dx)) - currentPose.getHeading(AngleUnit.DEGREES);
-        desiredAngle = Range.clip(desiredAngle, MIN_ANGLE, MAX_ANGLE);
+        double desiredAngle =
+                Math.toDegrees(Math.atan2(dy, dx))
+                        - currentPose.getHeading(AngleUnit.DEGREES) - 90;
 
+        while (Math.abs(desiredAngle) > 180) {
+            desiredAngle -= 180 * Math.signum(desiredAngle);
+        }
+        desiredAngle = Range.clip(desiredAngle, MIN_ANGLE, MAX_ANGLE);
         setTargetAngle(desiredAngle);
     }
 
@@ -117,18 +131,47 @@ public class Differential {
         double errorL = targetL - currL;
         double errorR = targetR - currR;
 
-        // Deadzone
-        if (Math.abs(errorL) < toleranceTicks) errorL = 0;
-        if (Math.abs(errorR) < toleranceTicks) errorR = 0;
+        // Combined error tolerance check
+        if (Math.abs(errorL) + Math.abs(errorR) <= toleranceTicks) {
+            integralL = 0;
+            integralR = 0;
+        }
 
+        // Accumulate integral
+        integralL += errorL;
+        integralR += errorR;
+
+        // Anti-windup
+        integralL = Range.clip(integralL, -MAX_INTEGRAL, MAX_INTEGRAL);
+        integralR = Range.clip(integralR, -MAX_INTEGRAL, MAX_INTEGRAL);
+
+        // Derivative
         double dL = errorL - lastErrorL;
         double dR = errorR - lastErrorR;
+
         lastErrorL = errorL;
         lastErrorR = errorR;
 
-        double powerL = Range.clip(errorL * kP + dL * kD, -maxPower, maxPower);
-        double powerR = Range.clip(errorR * kP + dR * kD, -maxPower, maxPower);
+        // PID + static feedforward
+        double powerL =
+                (errorL * kP) +
+                        (integralL * kI) +
+                        (dL * kD);
 
+        double powerR =
+                (errorR * kP) +
+                        (integralR * kI) +
+                        (dR * kD);
+
+        // Add static feedforward when moving
+        if (Math.abs(errorL) > toleranceTicks) powerL += Math.signum(errorL) * kS;
+        if (Math.abs(errorR) > toleranceTicks) powerR += Math.signum(errorR) * kS;
+
+        // Clamp
+        powerL = Range.clip(powerL, -maxPower, maxPower);
+        powerR = Range.clip(powerR, -maxPower, maxPower);
+
+        // Apply to CR servos
         diffyL.setPower(powerL);
         diffyR.setPower(powerR);
     }
