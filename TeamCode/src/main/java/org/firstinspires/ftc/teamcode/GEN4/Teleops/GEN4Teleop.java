@@ -56,8 +56,7 @@ public class GEN4Teleop extends OpMode {
         Pose2D goal = robot.getTargetGoal();
         robot.flywheel.aimToGoal(goal, robot.drivetrain.robotPose,
                 robot.drivetrain.XVel(), robot.drivetrain.YVel());
-        robot.differential.aimToGoal(robot.drivetrain.robotPose,
-                robot.drivetrain.XVel(), robot.drivetrain.YVel(), robot.drivetrain.TVel(), goal);
+        robot.differential.aimToGoal(robot.drivetrain.robotPose, goal);
 
         // ---------- UPDATE ----------
         robot.update();
@@ -83,7 +82,7 @@ public class GEN4Teleop extends OpMode {
 
         telemetry.addLine("=== DIFFERENTIAL ===");
         telemetry.addData("Encoders L/R", "%d / %d",
-                -robot.differential.encL.getCurrentPosition(),
+                robot.differential.encL.getCurrentPosition(),
                 robot.differential.encR.getCurrentPosition());
         telemetry.addData("Target L/R", "%.1f / %.1f",
                 -robot.differential.targetL, robot.differential.targetR);
