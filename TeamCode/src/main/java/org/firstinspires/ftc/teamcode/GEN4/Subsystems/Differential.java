@@ -13,9 +13,9 @@ public class Differential {
     // --------------------
     // PID / control constants
     // --------------------
-    public static double kP = 0.0002;
-    public static double kI = 0.00001;
-    public static double kD = 0.00001;
+    public static double kP = 0.00012;
+    public static double kI = 0.000013;
+    public static double kD = 0.00004;
     public static double kS = 0.1;          // static offset
     public static double maxPower = 0.5;
     public static double toleranceTicks = 50;
@@ -31,7 +31,7 @@ public class Differential {
     public static double slot1Pos = -5300;
     public static double slot2Pos = -2300;
     public static double slot3Pos = 0;
-    public static double angleScale = 43.61;
+    public static double angleScale = 38.76;
 
     private double currentSlotBase = 0;
 

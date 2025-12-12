@@ -116,14 +116,14 @@ public class Flywheel {
         double x = currentPose.getX(DistanceUnit.INCH);
         double y = currentPose.getY(DistanceUnit.INCH);
 
-        double kVX = 0.5;
-        double kVY = 0.5;
+        double kVX = 0.2;
+        double kVY = 0.2;
 
         double dx = tx - (x + (kVX * velX));
         double dy = ty - (y + (kVY * velY));
         double distance = Math.sqrt(dx * dx + dy * dy);
         double targetVelABCD = ((a * (Math.pow(distance, 3))) + (b * Math.pow(distance, 2)) + ((c * distance) + d));
 
-        setTargetVelocity(targetVelABCD);
+        setTargetVelocity(targetVelABCD+170);
     }
 }

@@ -101,6 +101,7 @@ public class Colors {
         }
     }
 
+    public boolean hasBall;
     public void update() {
         addToBuffers1(color1.red(), color1.green(), color1.blue());
         addToBuffers2(color2.red(), color2.green(), color2.blue());
@@ -117,6 +118,12 @@ public class Colors {
         applyLED(led1, state1);
         applyLED(led2, state2);
         applyLED(led3, state3);
+
+        if (state1 != BallState.EMPTY || state2 != BallState.EMPTY || state3 != BallState.EMPTY) {
+            hasBall = true;
+        } else {
+            hasBall = false;
+        }
     }
 
     // =========================
@@ -137,4 +144,6 @@ public class Colors {
     public double avgRed3()   { return avg(rBuf3, sumR3); }
     public double avgGreen3() { return avg(gBuf3, sumG3); }
     public double avgBlue3()  { return avg(bBuf3, sumB3); }
+
+
 }

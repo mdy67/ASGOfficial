@@ -34,22 +34,52 @@ public class GEN4Teleop extends OpMode {
         double turn   = -gamepad1.right_stick_x;
 
         if (gamepad1.right_trigger > 0.01) {
-            drive  *= 0.5;
-            strafe *= 0.5;
-            turn   *= 0.5;
+            drive  *= 0.3;
+            strafe *= 0.3;
+            turn   *= 0.3;
         }
         robot.drivetrain.driveTeleOp(strafe, drive, turn);
 
         // ---------- ARMS & INTAKE ----------
         double intakePower = 0;
         if (gamepad1.right_bumper) {
+            robot.arms.arm1_flickOFF();
+            robot.arms.arm2_flickOFF();
+            robot.arms.arm3_flickRAPID(); // rf
+
+            intakePower = -1.0; // RAPID FIRE
+        } else if (gamepad1.left_bumper) {
+
+            robot.arms.arm1_flickOFF();
+            robot.arms.arm2_flickOFF();
+            robot.arms.arm3_flickOFF();
+
+            intakePower = -1.0; // INTAKE
+        } else if (gamepad1.dpad_down) {
+
+            robot.arms.arm1_flickOFF();
+            robot.arms.arm2_flickOFF();
+            robot.arms.arm3_flickOFF();
+
+            intakePower = 0.75; // OUTTAKE
+        } else if (gamepad1.a) {
+            robot.arms.arm1_flickOFF();
+            robot.arms.arm2_flickOFF();
             robot.arms.arm3_flickON();
-            intakePower = -0.5;
+
+            intakePower = -1; // STANDARD FIRE
         } else {
             robot.arms.arm1_flickOFF();
             robot.arms.arm2_flickOFF();
             robot.arms.arm3_flickOFF();
         }
+
+        /*
+        if (intakePower == 0 && robot.colors.hasBall) {
+            intakePower = -0.3;
+        }
+
+         */
         robot.intake.runIntake(intakePower);
 
         // ---------- GOAL TRACKING ----------

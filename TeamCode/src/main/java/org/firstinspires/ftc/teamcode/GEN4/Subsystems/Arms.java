@@ -8,10 +8,10 @@ public class Arms {
     public Servo arm1, arm2, arm3;
 
     // Saved positions — tune these with the test TeleOp
-    public double arm1_off = 0.5, arm1_on = 0.3;
-    public double arm2_off = 0.816, arm2_on = 0.602;
-    public double arm3_off = 0.61, arm3_on = 0.4;
-    public double arm3_rapid = 0.51;
+    public double arm1_off = 0.55, arm1_on = 0.35;
+    public double arm2_off = 0.825, arm2_on = 0.622;
+    public double arm3_off = 0.64, arm3_on = 0.42;
+    public double arm3_rapid = 0.56;
 
     public Arms(HardwareMap hw) {
         arm1 = hw.get(Servo.class, "arm1");
