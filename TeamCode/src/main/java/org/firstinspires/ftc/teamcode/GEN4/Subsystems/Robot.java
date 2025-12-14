@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.GEN4.Subsystems;
 
+import com.acmerobotics.roadrunner.Pose2d;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -14,13 +16,21 @@ public class Robot {
     public Flywheel flywheel;
     public Intake intake;
     public Colors colors;
-    public Arms arms; // <--- ADDED
+    public Arms arms;
+    public Limelight limelight;
 
-    public Pose2D blueGoal = new Pose2D(DistanceUnit.INCH, -60, 60, AngleUnit.DEGREES, 0);
-    public Pose2D redGoal  = new Pose2D(DistanceUnit.INCH, 60, 60, AngleUnit.DEGREES, 0);
+    public Pose2D blueGoal = new Pose2D(DistanceUnit.INCH, -62, 65, AngleUnit.DEGREES, 0);
+    public Pose2D redGoal  = new Pose2D(DistanceUnit.INCH, 62, 65, AngleUnit.DEGREES, 0);
 
     private boolean flywheelEnabled = false;
     public Wait wait = new Wait();
+
+    // =========================
+    // RELOCALIZATION VARIABLES
+    // =========================
+    private static final int RELOCALIZE_SAMPLE_COUNT = 5;
+    private double lastRelocalizeTime = 0; // seconds
+    private static final double RELOCALIZE_INTERVAL = 1.0; // seconds
 
     public Robot(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
@@ -28,22 +38,12 @@ public class Robot {
         drivetrain = new Drivetrain(hardwareMap);
         differential = new Differential(hardwareMap);
         colors = new Colors(hardwareMap);
+        arms = new Arms(hardwareMap);
+        intake = new Intake(hardwareMap);
 
-        // Add arms subsystem
-        try {
-            arms = new Arms(hardwareMap);
-        } catch (Exception e) {
-            arms = null;
-        }
+        // Limelight using our new sliding window logic
+        limelight = new Limelight(hardwareMap, RELOCALIZE_SAMPLE_COUNT);
 
-        // Add intake
-        try {
-            intake = new Intake(hardwareMap);
-        } catch (Exception e) {
-            intake = null;
-        }
-
-        // Add flywheel
         try {
             flywheel = new Flywheel(hardwareMap, hardwareMap.voltageSensor.iterator().hasNext()
                     ? hardwareMap.voltageSensor.iterator().next() : null);
@@ -62,10 +62,22 @@ public class Robot {
         drivetrain.update();
         wait.update();
         colors.update();
-
-        flywheel.update();
+        if(flywheel != null) flywheel.update();
         differential.update();
 
+        // =========================
+        // RELOCALIZATION LOGIC
+        // =========================
+        double currentTime = System.nanoTime() / 1e9; // seconds
+        Pose2d stablePose = limelight.tryRelocalize(currentTime);
+
+        if (stablePose != null) {
+            drivetrain.setPosition(
+                    stablePose.position.x,
+                    stablePose.position.y,
+                    stablePose.heading.real
+            );
+        }
     }
 
     public void goToPoint(Pose2D targetPoint, double maxPower, double xyThreshold, double hThreshold){

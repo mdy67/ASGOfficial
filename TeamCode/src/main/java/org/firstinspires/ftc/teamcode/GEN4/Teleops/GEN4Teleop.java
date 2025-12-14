@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.GEN4.Teleops;
 
+import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -43,43 +44,20 @@ public class GEN4Teleop extends OpMode {
         // ---------- ARMS & INTAKE ----------
         double intakePower = 0;
         if (gamepad1.right_bumper) {
-            robot.arms.arm1_flickOFF();
-            robot.arms.arm2_flickOFF();
-            robot.arms.arm3_flickRAPID(); // rf
-
+            robot.arms.arm3_flickRAPID();
             intakePower = -1.0; // RAPID FIRE
         } else if (gamepad1.left_bumper) {
-
-            robot.arms.arm1_flickOFF();
-            robot.arms.arm2_flickOFF();
-            robot.arms.arm3_flickOFF();
-
             intakePower = -1.0; // INTAKE
         } else if (gamepad1.dpad_down) {
-
-            robot.arms.arm1_flickOFF();
-            robot.arms.arm2_flickOFF();
-            robot.arms.arm3_flickOFF();
-
             intakePower = 0.75; // OUTTAKE
         } else if (gamepad1.a) {
-            robot.arms.arm1_flickOFF();
-            robot.arms.arm2_flickOFF();
             robot.arms.arm3_flickON();
-
             intakePower = -1; // STANDARD FIRE
         } else {
             robot.arms.arm1_flickOFF();
             robot.arms.arm2_flickOFF();
             robot.arms.arm3_flickOFF();
         }
-
-        /*
-        if (intakePower == 0 && robot.colors.hasBall) {
-            intakePower = -0.3;
-        }
-
-         */
         robot.intake.runIntake(intakePower);
 
         // ---------- GOAL TRACKING ----------
@@ -88,20 +66,27 @@ public class GEN4Teleop extends OpMode {
                 robot.drivetrain.XVel(), robot.drivetrain.YVel());
         robot.differential.aimToGoal(robot.drivetrain.robotPose, goal);
 
+        if (robot.differential.atTarget && robot.colors.hasBall) {
+            gamepad1.rumble(100);
+        }
+
         // ---------- UPDATE ----------
         robot.update();
 
         // ---------- TELEMETRY ----------
-        telemetry.addLine("=== ROBOT ===");
-        telemetry.addData("X/Y/Heading", "%.1f / %.1f / %.1f",
+        telemetry.addLine("=== ROBOT POSE ===");
+        telemetry.addData("X / Y / Heading", "%.1f / %.1f / %.1f",
                 robot.drivetrain.robotPose.getX(DistanceUnit.INCH),
                 robot.drivetrain.robotPose.getY(DistanceUnit.INCH),
                 robot.drivetrain.robotPose.getHeading(AngleUnit.DEGREES));
-        telemetry.addData("Drive State", robot.drivetrain.state);
+
+        telemetry.addLine("=== DRIVE STATE ===");
+        telemetry.addData("State", robot.drivetrain.state);
 
         telemetry.addLine("=== INTAKE ===");
         telemetry.addData("Power", "%.2f", intakePower);
-        telemetry.addData("Current L/R", "%.2f / %.2f", robot.intake.getCurrentL(), robot.intake.getCurrentR());
+        telemetry.addData("Current L/R", "%.2f / %.2f",
+                robot.intake.getCurrentL(), robot.intake.getCurrentR());
 
         telemetry.addLine("=== FLYWHEEL ===");
         telemetry.addData("Target/Actual (rad/s)", "%.1f / %.1f",
@@ -116,11 +101,27 @@ public class GEN4Teleop extends OpMode {
                 robot.differential.encR.getCurrentPosition());
         telemetry.addData("Target L/R", "%.1f / %.1f",
                 -robot.differential.targetL, robot.differential.targetR);
-        telemetry.addData("TARGET DIFFY ANGLE: ", robot.differential.compensatedAngle);
+        telemetry.addData("Target Angle", "%.1f", robot.differential.compensatedAngle);
 
         double dx = goal.getX(DistanceUnit.INCH) - robot.drivetrain.robotPose.getX(DistanceUnit.INCH);
         double dy = goal.getY(DistanceUnit.INCH) - robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
         telemetry.addData("Distance to Goal", "%.2f", Math.hypot(dx, dy));
+
+        // ---------- LIMELIGHT DEBUG ----------
+        telemetry.addLine("=== LIMELIGHT ===");
+        if (robot.limelight.getLimelightPose() == null) {
+            telemetry.addData("Pose", "NULL");
+        } else {
+            telemetry.addData("Pose", "%.1f / %.1f / %.1f",
+                    robot.limelight.getLimelightPose().position.x,
+                    robot.limelight.getLimelightPose().position.y,
+                    robot.limelight.getLimelightPose().heading.toDouble());
+        }
+
+        // Show if robot has just relocalized
+        double currentTime = System.nanoTime() / 1e9;
+        Pose2d stablePose = robot.limelight.tryRelocalize(currentTime);
+        telemetry.addData("Relocalized?", stablePose != null ? "YES" : "no");
 
         telemetry.update();
     }

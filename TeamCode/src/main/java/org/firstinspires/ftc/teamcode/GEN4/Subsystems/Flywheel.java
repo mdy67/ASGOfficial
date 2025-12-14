@@ -106,10 +106,10 @@ public class Flywheel {
     }
 
     public void aimToGoal(Pose2D targetGoal, Pose2D currentPose, double velX, double velY) {
-        double a = 0.000123738;
-        double b = -0.0304146;
-        double c = 3.84348;
-        double d = 174.92353;
+        double a = -0.000528455;
+        double b = 0.172961;
+        double c = -15.54991;
+        double d = 753.5306;
 
         double tx = targetGoal.getX(DistanceUnit.INCH);
         double ty = targetGoal.getY(DistanceUnit.INCH);
@@ -124,6 +124,6 @@ public class Flywheel {
         double distance = Math.sqrt(dx * dx + dy * dy);
         double targetVelABCD = ((a * (Math.pow(distance, 3))) + (b * Math.pow(distance, 2)) + ((c * distance) + d));
 
-        setTargetVelocity(targetVelABCD+170);
+        setTargetVelocity(targetVelABCD);
     }
 }

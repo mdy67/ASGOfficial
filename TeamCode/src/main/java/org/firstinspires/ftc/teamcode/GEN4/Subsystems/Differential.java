@@ -16,7 +16,7 @@ public class Differential {
     public static double kP = 0.00012;
     public static double kI = 0.000013;
     public static double kD = 0.00004;
-    public static double kS = 0.1;          // static offset
+    public static double kS = 0.11;          // static offset
     public static double maxPower = 0.5;
     public static double toleranceTicks = 50;
 
@@ -124,6 +124,7 @@ public class Differential {
     // --------------------
     // Update loop
     // --------------------
+    public boolean atTarget;
     public void update() {
         double currL = -encL.getCurrentPosition();
         double currR = encR.getCurrentPosition();
@@ -167,6 +168,7 @@ public class Differential {
         if (Math.abs(errorL) > toleranceTicks) powerL += Math.signum(errorL) * kS;
         if (Math.abs(errorR) > toleranceTicks) powerR += Math.signum(errorR) * kS;
 
+        atTarget = !(Math.abs(errorL) > toleranceTicks) && !(Math.abs(errorR) > toleranceTicks);
         // Clamp
         powerL = Range.clip(powerL, -maxPower, maxPower);
         powerR = Range.clip(powerR, -maxPower, maxPower);
@@ -175,6 +177,9 @@ public class Differential {
         diffyL.setPower(powerL);
         diffyR.setPower(powerR);
     }
+
+
+
 
     // --------------------
     // Utility
