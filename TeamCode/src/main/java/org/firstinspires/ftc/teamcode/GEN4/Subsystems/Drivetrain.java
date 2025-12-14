@@ -104,7 +104,7 @@ public class Drivetrain {
     // GOTOPOINT VARIABLES
     // -------------------------
     public Pose2D robotPose = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
-    public Pose2D adjustedPose = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
+    public Pose2D lastrobotPose = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
     public Pose2D targetPose = new Pose2D(DistanceUnit.INCH, 0.01, 0.01, AngleUnit.DEGREES, 0.01);
     private Pose2D lastTarget = targetPose;
 
@@ -180,6 +180,7 @@ public class Drivetrain {
     // -------------------------
     public void update(){
         pinpoint.update();
+        lastrobotPose = robotPose;
         robotPose = pinpoint.getPosition();
 
         switch (state) {

@@ -36,7 +36,6 @@ public class SampleAutonomous extends LinearOpMode {
     public void runOpMode() {
 
         robot = new Robot(hardwareMap);
-        robot.disableFlywheel();
         robot.startup();
 
         while (opModeInInit()) {

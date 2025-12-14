@@ -21,6 +21,7 @@ public class Robot {
 
     public Pose2D blueGoal = new Pose2D(DistanceUnit.INCH, -62, 65, AngleUnit.DEGREES, 0);
     public Pose2D redGoal  = new Pose2D(DistanceUnit.INCH, 62, 65, AngleUnit.DEGREES, 0);
+    public Pose2D adjustedPose = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
 
     private boolean flywheelEnabled = false;
     public Wait wait = new Wait();
@@ -32,6 +33,8 @@ public class Robot {
     private double lastRelocalizeTime = 0; // seconds
     private static final double RELOCALIZE_INTERVAL = 1.0; // seconds
 
+
+
     public Robot(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
 
@@ -40,9 +43,7 @@ public class Robot {
         colors = new Colors(hardwareMap);
         arms = new Arms(hardwareMap);
         intake = new Intake(hardwareMap);
-
-        // Limelight using our new sliding window logic
-        limelight = new Limelight(hardwareMap, RELOCALIZE_SAMPLE_COUNT);
+        limelight = new Limelight(hardwareMap);
 
         try {
             flywheel = new Flywheel(hardwareMap, hardwareMap.voltageSensor.iterator().hasNext()
@@ -62,22 +63,11 @@ public class Robot {
         drivetrain.update();
         wait.update();
         colors.update();
-        if(flywheel != null) flywheel.update();
+        flywheel.update();
         differential.update();
+        limelight.update();
+        adjustedPose = limelight.newAdjustedPose(adjustedPose, drivetrain.lastrobotPose, drivetrain.robotPose, drivetrain.XVel(), drivetrain.YVel(), drivetrain.TVel());
 
-        // =========================
-        // RELOCALIZATION LOGIC
-        // =========================
-        double currentTime = System.nanoTime() / 1e9; // seconds
-        Pose2d stablePose = limelight.tryRelocalize(currentTime);
-
-        if (stablePose != null) {
-            drivetrain.setPosition(
-                    stablePose.position.x,
-                    stablePose.position.y,
-                    stablePose.heading.real
-            );
-        }
     }
 
     public void goToPoint(Pose2D targetPoint, double maxPower, double xyThreshold, double hThreshold){
@@ -98,8 +88,4 @@ public class Robot {
         }
     }
 
-    public void disableFlywheel() {
-        flywheelEnabled = false;
-        flywheel = null;
-    }
 }

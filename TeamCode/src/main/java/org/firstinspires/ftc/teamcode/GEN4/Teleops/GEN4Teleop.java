@@ -64,7 +64,7 @@ public class GEN4Teleop extends OpMode {
         Pose2D goal = robot.getTargetGoal();
         robot.flywheel.aimToGoal(goal, robot.drivetrain.robotPose,
                 robot.drivetrain.XVel(), robot.drivetrain.YVel());
-        robot.differential.aimToGoal(robot.drivetrain.robotPose, goal);
+        robot.differential.aimToGoal(robot.adjustedPose, goal);
 
         if (robot.differential.atTarget && robot.colors.hasBall) {
             gamepad1.rumble(100);
@@ -79,10 +79,10 @@ public class GEN4Teleop extends OpMode {
                 robot.drivetrain.robotPose.getX(DistanceUnit.INCH),
                 robot.drivetrain.robotPose.getY(DistanceUnit.INCH),
                 robot.drivetrain.robotPose.getHeading(AngleUnit.DEGREES));
-
+        /*
         telemetry.addLine("=== DRIVE STATE ===");
         telemetry.addData("State", robot.drivetrain.state);
-
+         */
         telemetry.addLine("=== INTAKE ===");
         telemetry.addData("Power", "%.2f", intakePower);
         telemetry.addData("Current L/R", "%.2f / %.2f",
@@ -118,10 +118,11 @@ public class GEN4Teleop extends OpMode {
                     robot.limelight.getLimelightPose().heading.toDouble());
         }
 
-        // Show if robot has just relocalized
-        double currentTime = System.nanoTime() / 1e9;
-        Pose2d stablePose = robot.limelight.tryRelocalize(currentTime);
-        telemetry.addData("Relocalized?", stablePose != null ? "YES" : "no");
+        telemetry.addData("Adjusted Pose:", "%.1f / %.1f / %.1f",
+                robot.adjustedPose.getX(DistanceUnit.INCH),
+                robot.adjustedPose.getY(DistanceUnit.INCH),
+                robot.adjustedPose.getHeading(AngleUnit.DEGREES)
+                );
 
         telemetry.update();
     }
