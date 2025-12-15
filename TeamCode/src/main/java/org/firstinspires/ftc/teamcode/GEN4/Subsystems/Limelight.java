@@ -18,7 +18,7 @@ public class Limelight {
     // Thresholds
     private static final double METERS_TO_INCHES = 39.37;
     private static final double LL_WEIGHT = 0.1;
-    private static final double XYThreshold = 2;
+    private static final double XYThreshold = 1;
     private static final double TThreshold = 2;
 
     public Pose2d LimelightPose = new Pose2d(0, 0, 0);
@@ -37,19 +37,36 @@ public class Limelight {
                 && xVel < XYThreshold
                 && yVel < XYThreshold
                 && tVel < TThreshold
-                && (LimelightPose.position.x * LimelightPose.position.y * LimelightPose.heading.toDouble() != 0)
                 && !BadPose() ) {
-            double x, y, x2, y2;
-            x = adjustedPose.getX(DistanceUnit.INCH);
-            y = adjustedPose.getY(DistanceUnit.INCH);
+            if (LimelightPose.position.x * LimelightPose.position.y * LimelightPose.heading.toDouble() != 0) {
+                double x, y, x2, y2;
+                x = adjustedPose.getX(DistanceUnit.INCH);
+                y = adjustedPose.getY(DistanceUnit.INCH);
 
-            x2 = LimelightPose.position.x;
-            y2 = LimelightPose.position.y;
+                x2 = LimelightPose.position.x;
+                y2 = LimelightPose.position.y;
 
-            double LL_WEIGHT_X = LL_WEIGHT * (XYThreshold / xVel);
-            double LL_WEIGHT_Y = LL_WEIGHT * (XYThreshold / yVel);
+                double LL_WEIGHT_X = LL_WEIGHT;
+                double LL_WEIGHT_Y = LL_WEIGHT;
+                if (Math.abs(xVel) > XYThreshold) {
+                    LL_WEIGHT_X = Math.abs(LL_WEIGHT * (XYThreshold / xVel));
+                }
+                if (Math.abs(yVel) > XYThreshold) {
+                    LL_WEIGHT_Y = Math.abs(LL_WEIGHT * (XYThreshold / yVel));
+                }
 
-            return new Pose2D(DistanceUnit.INCH, (x2*LL_WEIGHT_X) + ((1-LL_WEIGHT_X) * x), (y2*LL_WEIGHT_Y) + ((1-LL_WEIGHT_Y) * y), AngleUnit.DEGREES, CurrentPose.getHeading(AngleUnit.DEGREES));
+
+                return new Pose2D(DistanceUnit.INCH, (x2*LL_WEIGHT_X) + ((1-LL_WEIGHT_X) * x), (y2*LL_WEIGHT_Y) + ((1-LL_WEIGHT_Y) * y), AngleUnit.DEGREES, CurrentPose.getHeading(AngleUnit.DEGREES));
+            } else {
+                x = CurrentPose.getX(DistanceUnit.INCH) - lastPose.getX(DistanceUnit.INCH);
+                y = CurrentPose.getY(DistanceUnit.INCH) - lastPose.getY(DistanceUnit.INCH);
+
+                x2 = adjustedPose.getX(DistanceUnit.INCH);
+                y2 = adjustedPose.getY(DistanceUnit.INCH);
+                t2 = adjustedPose.getHeading(AngleUnit.DEGREES);
+                return new Pose2D(DistanceUnit.INCH, x+x2, y+y2, AngleUnit.DEGREES, CurrentPose.getHeading(AngleUnit.DEGREES));
+            }
+
         } else {
             x = CurrentPose.getX(DistanceUnit.INCH) - lastPose.getX(DistanceUnit.INCH);
             y = CurrentPose.getY(DistanceUnit.INCH) - lastPose.getY(DistanceUnit.INCH);
@@ -67,14 +84,15 @@ public class Limelight {
 
     }
 
-    double BadPoseMultiplier = 3;
+    double BadPoseMultiplier = 2;
     public boolean BadPose() {
-        if (LimelightPose.position.x > LastLimelightPose.position.x * BadPoseMultiplier
-                || LimelightPose.position.y > LastLimelightPose.position.y * BadPoseMultiplier) {
-            return true;
+        if (LimelightPose != null) {
+            return LimelightPose.position.x > LastLimelightPose.position.x * BadPoseMultiplier
+                    || LimelightPose.position.y > LastLimelightPose.position.y * BadPoseMultiplier;
         } else {
-            return false;
+            return true;
         }
+
     }
 
 
