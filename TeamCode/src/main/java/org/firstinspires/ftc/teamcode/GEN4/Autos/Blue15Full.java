@@ -6,13 +6,15 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
+import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Robot;
+import org.firstinspires.ftc.teamcode.GEN4.Subsystems.alliance;
 
 @Autonomous(name = "Drivetrain Warmup", group = "GEN4")
-public class SampleAutonomous extends LinearOpMode {
+public class Blue15Full extends LinearOpMode {
 
     private Robot robot;
+
 
     public enum State {
         INITIALIZED,
@@ -30,7 +32,6 @@ public class SampleAutonomous extends LinearOpMode {
     }
 
     private State state = State.START_POSE;
-    private boolean firstArrival = true; // Tracks if we just arrived at a point
 
     @Override
     public void runOpMode() {
@@ -38,13 +39,21 @@ public class SampleAutonomous extends LinearOpMode {
         robot = new Robot(hardwareMap);
         robot.startup();
 
+        // INIT LOOoOP
         while (opModeInInit()) {
             state = State.INITIALIZED;
             robot.update();
+            telemetry.addData("AUTO FSM", state);
+            telemetry.addData("DRIVETRAIN FSM", robot.drivetrain.state);
+            telemetry.addData("Robot X", robot.drivetrain.robotPose.getX(DistanceUnit.INCH));
+            telemetry.addData("Robot Y", robot.drivetrain.robotPose.getY(DistanceUnit.INCH));
+            telemetry.addData("Robot Heading", robot.drivetrain.robotPose.getHeading(AngleUnit.DEGREES));
+
         }
 
         waitForStart();
 
+        state = State.POINT_1; // FIRST POINT AFTER PRESSING "START"
         while (opModeIsActive()) {
             updateSequence();
 
@@ -54,9 +63,6 @@ public class SampleAutonomous extends LinearOpMode {
             telemetry.addData("Robot X", robot.drivetrain.robotPose.getX(DistanceUnit.INCH));
             telemetry.addData("Robot Y", robot.drivetrain.robotPose.getY(DistanceUnit.INCH));
             telemetry.addData("Robot Heading", robot.drivetrain.robotPose.getHeading(AngleUnit.DEGREES));
-            telemetry.addData("xPower", robot.drivetrain.xPower);
-            telemetry.addData("yPower", robot.drivetrain.yPower);
-            telemetry.addData("tPower", robot.drivetrain.tPower);
             telemetry.addData("At Position", robot.drivetrain.DTatTarget());
             telemetry.addData("Wait Active", robot.wait.isActive());
             telemetry.addData("Wait Finished", robot.wait.isFinished());
@@ -64,35 +70,24 @@ public class SampleAutonomous extends LinearOpMode {
         }
     }
 
-    private void nextState() {
-        int next = state.ordinal() + 1;
-        if (next < State.values().length) {
-            state = State.values()[next];
-        }
-    }
-
     boolean atPosition = false;
     private void updateSequence() {
-
 
         switch (state) {
 
             case INITIALIZED:
-                robot.drivetrain.setPosition(-17, -62, 270);
-                nextState();
-                break;
-
-            case START_POSE:
-                nextState();
+                robot.drivetrain.setPosition(-17, -62, 270); // INTAKE FACING DOWN, TURRET SIDE FACING TOWARDS GOAL
                 break;
 
             case POINT_1:
                 robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, 12, AngleUnit.DEGREES, 240),
                         0.4, 1, 2);
-                robot.differential.aimToGoal(robot.drivetrain.robotPose, robot.getTargetGoal());
+                robot.goalLock();
                 robot.update();
+
+
                 atPosition = robot.drivetrain.DTatTarget();
-                if (atPosition) { state = State.POINT_2; }
+                if (atPosition && robot.differential.atTarget && robot.flywheel.atTargetVelocity()) { state = State.POINT_2; }
                 break;
 
             case POINT_2:
@@ -163,3 +158,4 @@ public class SampleAutonomous extends LinearOpMode {
         }
     }
 }
+

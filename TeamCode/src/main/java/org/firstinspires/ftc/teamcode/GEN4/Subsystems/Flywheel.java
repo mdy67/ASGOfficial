@@ -30,6 +30,8 @@ public class Flywheel {
     private double lastTicks = 0.0;
     private double lastTime = 0.0;
 
+    public static final double THRESHOLD = 80; // Threshold Radians Per Second
+
     public Flywheel(HardwareMap hardwareMap, VoltageSensor battery) {
         this.battery = battery;
 
@@ -79,6 +81,14 @@ public class Flywheel {
         lastTime = currentTime;
     }
 
+    public boolean atTargetVelocity() {
+        if (Math.abs(targetVelocity - getVelocityRadPerSec()) <= THRESHOLD) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public double getVelocityRadPerSec() { return smoothedVelocity; }
 
     public double getVelocityRPM() { return smoothedVelocity * 60.0 / (2.0 * Math.PI); }
@@ -106,7 +116,7 @@ public class Flywheel {
     }
 
     public void aimToGoal(Pose2D targetGoal, Pose2D currentPose, double velX, double velY) {
-        double a = -0.000528455;
+        double a = -0.000528455; // TODO: TUNE THESE WITH NEW REGRESSION
         double b = 0.172961;
         double c = -15.54991;
         double d = 753.5306;
@@ -116,8 +126,8 @@ public class Flywheel {
         double x = currentPose.getX(DistanceUnit.INCH);
         double y = currentPose.getY(DistanceUnit.INCH);
 
-        double kVX = 0.2;
-        double kVY = 0.2;
+        double kVX = 0.25; // Drivetrain velocity coefficients
+        double kVY = 0.25;
 
         double dx = tx - (x + (kVX * velX));
         double dy = ty - (y + (kVY * velY));

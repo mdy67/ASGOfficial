@@ -55,6 +55,9 @@ public class Robot {
     }
 
     public void startup() {
+        arms.arm3_flickOFF();
+        arms.arm2_flickOFF();
+        arms.arm1_flickOFF();
         drivetrain.pinpoint.resetPosAndIMU();
         differential.resetEncoders();
     }
@@ -70,16 +73,40 @@ public class Robot {
 
     }
 
+    /**
+     * Move chassis towards a target point on the X/Y/T coordinate plane
+     * @param targetPoint: Target Pose2D
+     * @param maxPower: Max Power (0 -> 1)
+     * @param xyThreshold: "Move-On" Threshold (x/y), both required to be within threshold to move on, inches
+     * @param hThreshold: "Move-On" Threshold (heading), degrees
+     */
     public void goToPoint(Pose2D targetPoint, double maxPower, double xyThreshold, double hThreshold){
         drivetrain.state = Drivetrain.State.GO_TO_POINT;
         drivetrain.goToPoint(targetPoint, maxPower, xyThreshold, hThreshold);
     }
 
+    /**
+     * Aims differential towards the goal, adjusts flywheel velocity based on distance & drivetrain velocity
+     */
+    public void goalLock() {
+        differential.aimToGoal(drivetrain.robotPose, getTargetGoal());
+        flywheel.aimToGoal(getTargetGoal(), drivetrain.robotPose, drivetrain.XVel(), drivetrain.YVel());
+    }
+
+    /**
+     * Similar to GoToPoint, but remains at one position, doesn't move on until further state switching
+     * @param targetPoint
+     * @param maxPower
+     */
     public void holdPoint(Pose2D targetPoint, double maxPower){
         drivetrain.state = Drivetrain.State.HOLD_POINT;
         drivetrain.goToPoint(targetPoint, maxPower, 0, 0);
     }
 
+    /**
+     * Acquire target goal Pose2D based on alliance color
+     * @return
+     */
     public Pose2D getTargetGoal() {
         if (org.firstinspires.ftc.teamcode.GEN4.Subsystems.alliance.isRed()) {
             return redGoal;
