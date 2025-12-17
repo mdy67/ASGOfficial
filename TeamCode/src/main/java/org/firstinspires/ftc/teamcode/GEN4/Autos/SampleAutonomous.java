@@ -1,3 +1,6 @@
+/*
+
+
 package org.firstinspires.ftc.teamcode.GEN4.Autos;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -17,7 +20,7 @@ public class SampleAutonomous extends LinearOpMode {
     public enum State {
         INITIALIZED,
         START_POSE,
-        POINT_1,
+        SHOOTING_POSE_1,
         POINT_2,
         POINT_3,
         POINT_4,
@@ -86,7 +89,7 @@ public class SampleAutonomous extends LinearOpMode {
                 nextState();
                 break;
 
-            case POINT_1:
+            case SHOOTING_POSE_1:
                 robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, 12, AngleUnit.DEGREES, 240),
                         0.4, 1, 2);
                 robot.differential.aimToGoal(robot.drivetrain.robotPose, robot.getTargetGoal());
@@ -163,3 +166,6 @@ public class SampleAutonomous extends LinearOpMode {
         }
     }
 }
+
+
+ */

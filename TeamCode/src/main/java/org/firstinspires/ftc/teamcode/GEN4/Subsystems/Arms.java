@@ -24,6 +24,12 @@ public class Arms {
         arm3.setPosition(arm3_off);
     }
 
+    public void reset() {
+        arm3_flickOFF();
+        arm2_flickOFF();
+        arm1_flickOFF();
+    }
+
     // ===== ARM 1 =====
     public void arm1_flickON()  { arm1.setPosition(arm1_on); }
     public void arm1_flickOFF() { arm1.setPosition(arm1_off); }

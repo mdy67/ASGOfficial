@@ -88,11 +88,31 @@ public class Robot {
     /**
      * Aims differential towards the goal, adjusts flywheel velocity based on distance & drivetrain velocity
      */
-    public void goalLock() {
-        differential.aimToGoal(drivetrain.robotPose, getTargetGoal());
-        flywheel.aimToGoal(getTargetGoal(), drivetrain.robotPose, drivetrain.XVel(), drivetrain.YVel());
+    public void goalLock(Pose2D currentPose) {
+        differential.aimToGoal(currentPose, getTargetGoal());
+        flywheel.aimToGoal(getTargetGoal(), currentPose, drivetrain.XVel(), drivetrain.YVel());
     }
 
+    public void rapidFire() {
+        intake.runRapid();
+        arms.arm3_flickRAPID();
+    }
+
+    public void neutral() {
+        arms.reset();
+        intake.stop();
+    }
+    /**
+     * Boolean for: DT at target, Diffy at target, Flywheel at target
+     * @return
+     */
+    public boolean systemsReady() {
+        if (drivetrain.DTatTarget() && differential.atTarget && flywheel.atTargetVelocity()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     /**
      * Similar to GoToPoint, but remains at one position, doesn't move on until further state switching
      * @param targetPoint

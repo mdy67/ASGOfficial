@@ -68,7 +68,7 @@ public class GEN4Teleop extends OpMode {
 
         robot.flywheel.aimToGoal(
                 goal,
-                robot.drivetrain.robotPose,
+                robot.adjustedPose,
                 robot.drivetrain.XVel(),
                 robot.drivetrain.YVel()
         );

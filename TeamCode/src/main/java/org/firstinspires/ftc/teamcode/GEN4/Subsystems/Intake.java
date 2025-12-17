@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 public class Intake {
 
     private final DcMotorEx intakeL, intakeR;
+    public static final double RAPID_SPEED = -1.0;
 
     public Intake(HardwareMap hardwareMap) {
         intakeL = hardwareMap.get(DcMotorEx.class, "intakeL");
@@ -26,6 +27,16 @@ public class Intake {
     public void runIntake(double power) {
         intakeL.setPower(power);
         intakeR.setPower(power);
+    }
+
+    public void stop() {
+        intakeL.setPower(0);
+        intakeR.setPower(0);
+    }
+
+    public void runRapid () {
+        intakeL.setPower(RAPID_SPEED);
+        intakeR.setPower(RAPID_SPEED);
     }
 
     public void update() {
