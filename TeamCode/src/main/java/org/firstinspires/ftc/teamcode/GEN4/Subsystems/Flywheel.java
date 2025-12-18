@@ -134,6 +134,6 @@ public class Flywheel {
         double distance = Math.sqrt(dx * dx + dy * dy);
         double targetVelABCD = ((a * (Math.pow(distance, 3))) + (b * Math.pow(distance, 2)) + ((c * distance) + d));
 
-        setTargetVelocity(targetVelABCD);
+        setTargetVelocity(targetVelABCD+130);
     }
 }

@@ -21,7 +21,7 @@ public class SampleAutonomous extends LinearOpMode {
         INITIALIZED,
         START_POSE,
         SHOOTING_POSE_1,
-        POINT_2,
+        FIRST_INTAKES,
         POINT_3,
         POINT_4,
         POINT_5,
@@ -95,10 +95,10 @@ public class SampleAutonomous extends LinearOpMode {
                 robot.differential.aimToGoal(robot.drivetrain.robotPose, robot.getTargetGoal());
                 robot.update();
                 atPosition = robot.drivetrain.DTatTarget();
-                if (atPosition) { state = State.POINT_2; }
+                if (atPosition) { state = State.FIRST_INTAKES; }
                 break;
 
-            case POINT_2:
+            case FIRST_INTAKES:
                 robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, 12, AngleUnit.DEGREES, 180),
                         0.25, 4, 5);
                 robot.update();

@@ -57,6 +57,11 @@ public class Differential {
     public double compensatedAngle = 0;
 
     // --------------------
+    // Turret offset
+    // --------------------
+    private static final double TURRET_OFFSET_INCHES = -5.0; // turret is 5 inches backward
+
+    // --------------------
     // Constructor
     // --------------------
     public Differential(HardwareMap hardwareMap) {
@@ -105,15 +110,18 @@ public class Differential {
     }
 
     /**
-     * Aim differential toward goal directly, no velocity compensation.
+     * Aim differential toward goal directly, accounting for turret offset.
      */
     public void aimToGoal(Pose2D currentPose, Pose2D targetGoal) {
-        double dx = targetGoal.getX(DistanceUnit.INCH) - currentPose.getX(DistanceUnit.INCH);
-        double dy = targetGoal.getY(DistanceUnit.INCH) - currentPose.getY(DistanceUnit.INCH);
+        // Compute turret-adjusted position
+        double headingRad = Math.toRadians(currentPose.getHeading(AngleUnit.DEGREES));
+        double turretX = currentPose.getX(DistanceUnit.INCH) + TURRET_OFFSET_INCHES * Math.cos(headingRad);
+        double turretY = currentPose.getY(DistanceUnit.INCH) + TURRET_OFFSET_INCHES * Math.sin(headingRad);
 
-        double desiredAngle =
-                Math.toDegrees(Math.atan2(dy, dx))
-                        - currentPose.getHeading(AngleUnit.DEGREES) - 90;
+        double dx = targetGoal.getX(DistanceUnit.INCH) - turretX;
+        double dy = targetGoal.getY(DistanceUnit.INCH) - turretY;
+
+        double desiredAngle = Math.toDegrees(Math.atan2(dy, dx)) - currentPose.getHeading(AngleUnit.DEGREES) - 90;
 
         while (Math.abs(desiredAngle) > 180) {
             desiredAngle -= 180 * Math.signum(desiredAngle);
@@ -155,21 +163,15 @@ public class Differential {
         lastErrorR = errorR;
 
         // PID + static feedforward
-        double powerL =
-                (errorL * kP) +
-                        (integralL * kI) +
-                        (dL * kD);
-
-        double powerR =
-                (errorR * kP) +
-                        (integralR * kI) +
-                        (dR * kD);
+        double powerL = (errorL * kP) + (integralL * kI) + (dL * kD);
+        double powerR = (errorR * kP) + (integralR * kI) + (dR * kD);
 
         // Add static feedforward when moving
         if (Math.abs(errorL) > toleranceTicks) powerL += Math.signum(errorL) * kS;
         if (Math.abs(errorR) > toleranceTicks) powerR += Math.signum(errorR) * kS;
 
         atTarget = !(Math.abs(errorL) > toleranceTicks) && !(Math.abs(errorR) > toleranceTicks);
+
         // Clamp
         powerL = Range.clip(powerL, -maxPower, maxPower);
         powerR = Range.clip(powerR, -maxPower, maxPower);
@@ -178,9 +180,6 @@ public class Differential {
         diffyL.setPower(powerL);
         diffyR.setPower(powerR);
     }
-
-
-
 
     // --------------------
     // Utility
