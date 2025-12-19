@@ -86,7 +86,7 @@ public class Blue15Full extends LinearOpMode {
 
             case SHOOTING_POSE_1: // SHOOT PRELOADS [NON SORTED]
 
-                robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -55, AngleUnit.DEGREES, 240),
+                robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -55, AngleUnit.DEGREES, 240), // NEEDS TO WAIT AT THIS POSE FOR 2s
                         0.25, 1, 1);
                 robot.update();
               //  robot.goalLock(robot.drivetrain.robotPose);
@@ -110,24 +110,27 @@ public class Blue15Full extends LinearOpMode {
                 } else if (robot.splineCounter == 2) { // DEEP CORNER POS
                     robot.intake.runIntake(-1.0); // INTAKE CORNER BALLS
 
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -60, -58, AngleUnit.DEGREES, 250),
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -60, -58, AngleUnit.DEGREES, 245),
                             1, 3, 8);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 3) {
                     robot.intake.runIntake(-1.0); // INTAKE CORNER BALLS
 
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -60, -65, AngleUnit.DEGREES, 270),
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -60, -66, AngleUnit.DEGREES, 270),
                             1, 3, 3);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 4) {
-                    robot.intake.runIntake(-1.0);
 
                  //   robot.goalLock(robot.drivetrain.robotPose);
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -28, -55, AngleUnit.DEGREES, 260),
-                            1, 7, 80);
+                            1, 10, 20);
+
                     robot.nextSplinePoint();
+                    if (robot.splineCounter == 5) {
+                        robot.intake.runIntake(0);
+                    }
                 } else if (robot.splineCounter == 5) { // SHOOTING BALLS 4, 5, 6 POS
-                    robot.intake.runIntake(0);
+
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, 10, AngleUnit.DEGREES, 260),
                             1, 4, 4);
 
@@ -137,7 +140,7 @@ public class Blue15Full extends LinearOpMode {
                     if (robot.drivetrain.DTatTarget()) {
                         robot.intake.runIntake(1.0);
                     }
-                    if (!robot.colors.hasBall) {
+                    if (robot.colors.numBalls <= 1) {
                         robot.nextSplinePoint(); // SHOOT BALLS POS
                     }
                 }
@@ -160,11 +163,11 @@ public class Blue15Full extends LinearOpMode {
 
                 } else if (robot.splineCounter == 2) {
                     robot.intake.runIntake(-1.0); //
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -48, -6, AngleUnit.DEGREES, 180),
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -48, -12, AngleUnit.DEGREES, 180),
                             1, 2, 10);
                     robot.nextSplinePoint();
 
-                } else if (robot.splineCounter == 3) {
+                } else if (robot.splineCounter == 3) { // GATE RAM POS (NEEDS TO WAIT ONCE IT REACHES THE TARGET POSE FOR 2s)
                     robot.intake.runIntake(0);
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -52, -6, AngleUnit.DEGREES, 180),
                             1, 2, 3);
@@ -183,8 +186,8 @@ public class Blue15Full extends LinearOpMode {
                     if (robot.drivetrain.DTatTarget()) {
                         robot.intake.runIntake(1.0); // TODO: REPLACE WITH SHOOTING ALG
                     }
-                    if (!robot.colors.hasBall) {
-                        robot.nextSplinePoint();
+                    if (robot.colors.numBalls <= 1) {
+                        robot.nextSplinePoint(); // SHOOT BALLS POS
                     }
                 }
 
@@ -200,17 +203,18 @@ public class Blue15Full extends LinearOpMode {
 
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -55, -38, AngleUnit.DEGREES, 180),
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -58, -38, AngleUnit.DEGREES, 180),
                             1, 4, 10);
                     robot.nextSplinePoint();
-                    if (robot.splineCounter == 2) {
-                        robot.intake.runIntake(0);
-                    }
+
 
                 } else if (robot.splineCounter == 2) {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -28, -15, AngleUnit.DEGREES, 260),
                     1, 15, 80);
                     robot.nextSplinePoint();
+                    if (robot.splineCounter == 3) {
+                        robot.intake.runIntake(0);
+                    }
 
                 } else if (robot.splineCounter == 3) {
 
@@ -221,19 +225,19 @@ public class Blue15Full extends LinearOpMode {
                     if (robot.drivetrain.DTatTarget()) {
                         robot.intake.runIntake(1.0); // TODO: REPLACE WITH SHOOTING ALG
                     }
-                    if (!robot.colors.hasBall) {
-                        robot.nextSplinePoint();
+                    if (robot.colors.numBalls <= 1) {
+                        robot.nextSplinePoint(); // SHOOT BALLS POS
                     }
                 }
 
                 if (robot.splineCounter == 4) { robot.resetSplineCounter(); state = State.POINT_5; } break;
 
-            case POINT_5: // INTAKE BOTTOM BALLS
+            case POINT_5: // INTAKE TOP BALLS
 
                 if (robot.splineCounter == 0) { //
 
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -24, 12, AngleUnit.DEGREES, 180),
-                            1, 5, 5);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -19, 12, AngleUnit.DEGREES, 180),
+                            1, 1, 5);
                     robot.nextSplinePoint();
 
                 } else if (robot.splineCounter == 1) {
@@ -243,22 +247,28 @@ public class Blue15Full extends LinearOpMode {
                     robot.nextSplinePoint();
 
                 } else if (robot.splineCounter == 2) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, 10, AngleUnit.DEGREES, 260),
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, 10, AngleUnit.DEGREES, 270),
                             1, 15, 80);
 
                     robot.update();
                     if (robot.drivetrain.DTatTarget()) {
                         robot.intake.runIntake(1.0); // TODO: REPLACE WITH SHOOTING ALG
                     }
-                    if (!robot.colors.hasBall) {
-                        robot.nextSplinePoint();
+                    if (robot.colors.numBalls <= 1) {
+                        robot.nextSplinePoint(); // SHOOT BALLS POS
                     }
+                } else if (robot.splineCounter == 3) {
+                    robot.intake.runIntake(0);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -30, AngleUnit.DEGREES, 120),
+                            1, 3, 3);
+                    robot.nextSplinePoint();
                 }
 
-                if (robot.splineCounter == 3) { robot.resetSplineCounter(); state = State.FINISHED; } break;
+                if (robot.splineCounter == 4) { robot.resetSplineCounter(); state = State.FINISHED; } break;
 
             case FINISHED:
                 // ENDS OPMODE LOOP
+                // TODO: ADD LIMELIGHT RELOCALIZATION
                     break;
         }
     }
