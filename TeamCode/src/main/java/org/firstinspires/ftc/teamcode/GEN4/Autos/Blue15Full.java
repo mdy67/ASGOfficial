@@ -71,6 +71,10 @@ public class Blue15Full extends LinearOpMode {
 
     boolean atPosition = false;
 
+    private void nextSplinePoint() {
+        if (robot.drivetrain.DTatTarget()) { splineCounter ++; };
+    }
+
     private void updateSequence() {
 
         switch (state) {
@@ -96,14 +100,26 @@ public class Blue15Full extends LinearOpMode {
 
                 robot.update();
                 if (splineCounter == 0) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -50, -40, AngleUnit.DEGREES, 220),
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -50, -48, AngleUnit.DEGREES, 260),
                             0.4, 3, 3);
-                    if (robot.drivetrain.DTatTarget()) { splineCounter = 1; };
+                    nextSplinePoint();
                 } else if (splineCounter == 1) {
-                    robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -50, -40, AngleUnit.DEGREES, 220),
+                    robot.intake.runIntake(-1.0); // INTAKE CORNER BALLS
+
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -50, -60, AngleUnit.DEGREES, 260),
                             0.4, 3, 3);
-                    if (robot.drivetrain.DTatTarget()) { splineCounter = 2; };
+                    nextSplinePoint();
+                } else if (splineCounter == 2) {
+                    robot.intake.runIntake(-0.4); // KEEP RUNNING INTAKE TO ENSURE BALLS IN
+                    robot.goalLock(robot.drivetrain.robotPose);
+
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -50, AngleUnit.DEGREES, 270),
+                            0.4, 3, 3);
+                    nextSplinePoint();
+                } else if (splineCounter == 3) {
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -50, AngleUnit.DEGREES, 270),
+                            0.4, 3, 3);
+                    nextSplinePoint();
                 }
 
 
