@@ -37,6 +37,8 @@ public class Colors {
     private BallState state2 = BallState.EMPTY;
     private BallState state3 = BallState.EMPTY;
 
+    public int numBalls = 0;
+
     public Colors(HardwareMap hardwareMap) {
         color1 = hardwareMap.get(ColorSensor.class, "color1");
         color2 = hardwareMap.get(ColorSensor.class, "color2");
@@ -119,11 +121,19 @@ public class Colors {
         applyLED(led2, state2);
         applyLED(led3, state3);
 
+        getNumBalls();
         if (state1 != BallState.EMPTY || state2 != BallState.EMPTY || state3 != BallState.EMPTY) {
             hasBall = true;
         } else {
             hasBall = false;
         }
+    }
+
+    public void getNumBalls() {
+        numBalls = 0;
+        if (state1 != BallState.EMPTY) { numBalls ++; }
+        if (state2 != BallState.EMPTY) { numBalls ++; }
+        if (state3 != BallState.EMPTY) { numBalls ++; }
     }
 
     // =========================

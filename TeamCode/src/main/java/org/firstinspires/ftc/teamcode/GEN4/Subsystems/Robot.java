@@ -26,6 +26,7 @@ public class Robot {
     public Wait wait = new Wait();
 
     public double MotifTagID = 21; // 21 BY DEFAULT
+    public int splineCounter = 0;
 
     // =========================
     // ODOMETRY + LIMELIGHT OFFSET
@@ -139,6 +140,7 @@ public class Robot {
     public void neutral() {
         arms.reset();
         intake.stop();
+        flywheel.stop();
     }
 
     public boolean systemsReady() {
@@ -162,6 +164,15 @@ public class Robot {
         if (limelight.getMotif() != 0) {
             MotifTagID = limelight.getMotif();
         }
+    }
+
+    public void nextSplinePoint() {
+        update();
+        if (drivetrain.DTatTarget()) { splineCounter ++; };
+    }
+
+    public void resetSplineCounter() {
+        splineCounter = 0;
     }
 
     // =========================
