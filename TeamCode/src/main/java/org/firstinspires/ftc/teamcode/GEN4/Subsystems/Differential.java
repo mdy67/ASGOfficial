@@ -14,11 +14,11 @@ public class Differential {
     // --------------------
     // PID / control constants
     // --------------------
-    public static double kP = 0.00012;
-    public static double kI = 0.000013;
+    public static double kP = 0.00016;
+    public static double kI = 0.000012;
     public static double kD = 0.00004;
-    public static double kS = 0.11;          // static offset
-    public static double maxPower = 0.5;
+    public static double kS = 0.12;          // static offset
+    public static double maxPower = 0.8;
     public static double toleranceTicks = 50;
 
     // Integral anti-windup limit
