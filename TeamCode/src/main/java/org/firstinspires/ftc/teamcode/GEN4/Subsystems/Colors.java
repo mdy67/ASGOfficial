@@ -85,7 +85,7 @@ public class Colors {
     private BallState classifySensor(double r, double g, double b, int sensorNumber) {
         switch (sensorNumber) {
             case 1:
-                if (r > 20 || g > 20 || b > 20) return (g > r * 2) ? BallState.GREEN : BallState.PURPLE;
+                if (r > 25 || g > 25 || b > 25) return (g > r * 2) ? BallState.GREEN : BallState.PURPLE;
                 break;
             case 2:
             case 3:

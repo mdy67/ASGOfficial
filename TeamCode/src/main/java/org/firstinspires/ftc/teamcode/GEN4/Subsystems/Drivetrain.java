@@ -50,10 +50,10 @@ public class Drivetrain {
         rightBack.setDirection(DcMotorSimple.Direction.REVERSE);
         rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
         pinpoint.setOffsets(69.19, -154.75, DistanceUnit.MM);
@@ -151,12 +151,12 @@ public class Drivetrain {
         return ((Math.abs(xError) + Math.abs(yError)) <= xyThreshold && Math.abs(tError) < hThreshold);
     }
 
-    public static final double xkP = 0.075;
-    public static final double xkD = 0.007;
-    public static final double ykP = 0.075;
-    public static final double ykD = 0.007;
-    public static final double tkP = 0.075;
-    public static final double tkD = 0.007;
+    public static final double xkP = 0.08;
+    public static final double xkD = 0.008;
+    public static final double ykP = 0.08;
+    public static final double ykD = 0.008;
+    public static final double tkP = 0.08;
+    public static final double tkD = 0.008;
 
     DTPID xPID = new DTPID(xkP,xkD);
     DTPID yPID = new DTPID(ykP, ykD);

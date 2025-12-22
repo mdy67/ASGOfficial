@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
 public class GEN4Teleop extends OpMode {
 
     Robot robot;
-
+ //   double targetVel = 200;
     @Override
     public void init() {
         robot = new Robot(hardwareMap);
@@ -31,9 +31,9 @@ public class GEN4Teleop extends OpMode {
         double turn   = -gamepad1.right_stick_x;
 
         if (gamepad1.right_trigger > 0.01) {
-            drive  *= 0.3;
-            strafe *= 0.3;
-            turn   *= 0.3;
+            drive  *= 0.4;
+            strafe *= 0.4;
+            turn   *= 0.4;
         }
 
         robot.drivetrain.driveTeleOp(strafe, drive, turn);
@@ -64,16 +64,16 @@ public class GEN4Teleop extends OpMode {
         robot.intake.runIntake(intakePower);
 
         // ---------- GOAL TRACKING ----------
-        Pose2D goal = robot.getTargetGoal();
+     //   Pose2D goal = robot.getTargetGoal();
 
-        robot.flywheel.aimToGoal(
-                goal,
-                robot.adjustedPose,
-                robot.drivetrain.XVel(),
-                robot.drivetrain.YVel()
-        );
+    //    if (gamepad1.dpad_left) { targetVel -= 2; }
+    //    if (gamepad1.dpad_right) { targetVel += 2; }
+   //     robot.flywheel.setTargetVelocity(targetVel);
 
-        robot.differential.aimToGoal(robot.adjustedPose, goal);
+        robot.goalLock(robot.adjustedPose);
+
+
+    //    robot.differential.aimToGoal(robot.adjustedPose, goal);
 
         if (robot.differential.atTarget && robot.colors.hasBall) {
             gamepad1.rumble(100);
@@ -113,12 +113,12 @@ public class GEN4Teleop extends OpMode {
         telemetry.addData("Target Angle", "%.1f",
                 robot.differential.compensatedAngle);
 
-        double dx = goal.getX(DistanceUnit.INCH)
-                - robot.drivetrain.robotPose.getX(DistanceUnit.INCH);
-        double dy = goal.getY(DistanceUnit.INCH)
-                - robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
+     //   double dx = goal.getX(DistanceUnit.INCH)
+       //         - robot.drivetrain.robotPose.getX(DistanceUnit.INCH);
+      //  double dy = goal.getY(DistanceUnit.INCH)
+      //          - robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
 
-        telemetry.addData("Distance to Goal", "%.2f", Math.hypot(dx, dy));
+    //    telemetry.addData("Distance to Goal", "%.2f", Math.hypot(dx, dy));
 
         // ---------- LIMELIGHT DEBUG (SAFE) ----------
         telemetry.addLine("=== LIMELIGHT ===");
@@ -131,6 +131,7 @@ public class GEN4Teleop extends OpMode {
                 robot.adjustedPose.getX(DistanceUnit.INCH),
                 robot.adjustedPose.getY(DistanceUnit.INCH),
                 robot.adjustedPose.getHeading(AngleUnit.DEGREES));
+       // telemetry.addData("FLYWHEEL VELOCITY:", targetVel);
 
         telemetry.update();
     }

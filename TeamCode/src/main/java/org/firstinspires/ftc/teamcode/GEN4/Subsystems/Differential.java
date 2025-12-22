@@ -14,12 +14,12 @@ public class Differential {
     // --------------------
     // PID / control constants
     // --------------------
-    public static double kP = 0.00016;
-    public static double kI = 0.000012;
+    public static double kP = 0.00015;
+    public static double kI = 0.000013;
     public static double kD = 0.00004;
-    public static double kS = 0.12;          // static offset
+    public static double kS = 0.13;          // static offset
     public static double maxPower = 0.8;
-    public static double toleranceTicks = 50;
+    public static double toleranceTicks = 80;
 
     // Integral anti-windup limit
     public static double MAX_INTEGRAL = 5000;
@@ -59,7 +59,7 @@ public class Differential {
     // --------------------
     // Turret offset
     // --------------------
-    private static final double TURRET_OFFSET_INCHES = -5.0; // turret is 5 inches backward
+    private double TURRET_OFFSET_INCHES = -5.0; // turret is 5 inches backward in back slot (3)
 
     // --------------------
     // Constructor
@@ -90,10 +90,10 @@ public class Differential {
     // --------------------
     public void goToSlot(int slot) {
         switch (slot) {
-            case 1: currentSlotBase = slot1Pos; break;
-            case 2: currentSlotBase = slot2Pos; break;
+            case 1: currentSlotBase = slot1Pos; TURRET_OFFSET_INCHES = 5.0; break;
+            case 2: currentSlotBase = slot2Pos; TURRET_OFFSET_INCHES = 0; break;
             case 3:
-            default: currentSlotBase = slot3Pos; break;
+            default: currentSlotBase = slot3Pos; TURRET_OFFSET_INCHES = -5.0; break;
         }
         updateTargets();
     }
