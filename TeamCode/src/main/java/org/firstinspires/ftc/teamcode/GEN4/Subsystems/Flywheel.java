@@ -18,10 +18,10 @@ public class Flywheel {
     private final VoltageSensor battery;
 
     private double targetVelocity = 0.0;
-    private double kP = 0.005;
-    private double kV = 0.00163;
-    private double kS = 0.09765;
-    private double tunedVoltage = 13.0283;
+    private double kP = 0.004;
+    private double kV = 0.0017;
+    private double kS = 0.08765;
+    private double tunedVoltage = 12.583;
 
     private final Deque<Double> velBuffer = new ArrayDeque<>();
     private final int BUFFER_SIZE = 18;
@@ -116,9 +116,9 @@ public class Flywheel {
     }
 
     public void aimToGoal(Pose2D targetGoal, Pose2D currentPose, double velX, double velY) {
-        double a = 3.92579 * Math.pow(10, -8); // TODO: TUNE THESE WITH NEW REGRESSION
-        double b = 1.43101;
-        double c = 216.48882;
+        double a = -1.45846 * Math.pow(10, -8); // TODO: TUNE THESE WITH NEW REGRESSION
+        double b = 1.68069;
+        double c = 207.40686;
 
 
         double tx = targetGoal.getX(DistanceUnit.INCH);
@@ -126,8 +126,8 @@ public class Flywheel {
         double x = currentPose.getX(DistanceUnit.INCH);
         double y = currentPose.getY(DistanceUnit.INCH);
 
-        double kVX = 0.25; // Drivetrain velocity coefficients
-        double kVY = 0.25;
+        double kVX = 0.08; // Drivetrain velocity coefficients
+        double kVY = 0.08;
 
         double dx = tx - (x + (kVX * velX));
         double dy = ty - (y + (kVY * velY));

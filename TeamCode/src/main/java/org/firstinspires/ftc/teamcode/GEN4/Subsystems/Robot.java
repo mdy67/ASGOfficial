@@ -108,14 +108,24 @@ public class Robot {
         drivetrain.goToPoint(targetPoint, maxPower, xyThreshold, hThreshold);
     }
 
+    public void goToPoint2(Pose2D targetPoint, double maxPower, double xyThreshold, double hThreshold, double xyMult, double hMult) {
+        drivetrain.state = Drivetrain.State.GO_TO_POINT;
+        drivetrain.goToPoint2(targetPoint, maxPower, xyThreshold, hThreshold, xyMult, hMult);
+    }
+
     public void goalLock(Pose2D currentPose) {
         differential.aimToGoal(currentPose, getTargetGoal());
         flywheel.aimToGoal(getTargetGoal(), currentPose, drivetrain.XVel(), drivetrain.YVel());
     }
 
     public void autoIdle() {
-        differential.setTargetAngle(120);
-        flywheel.setTargetVelocity(200);
+        if (alliance.isBlue()) {
+            differential.setTargetAngle(140);
+        } else {
+            differential.setTargetAngle(40);
+        }
+
+        flywheel.setTargetVelocity(300);
         intake.stop();
         arms.reset();
     }
@@ -133,12 +143,6 @@ public class Robot {
 
     public boolean systemsReady() {
         return drivetrain.DTatTarget() && differential.atTarget && flywheel.atTargetVelocity();
-    }
-
-    public void DTIdleAtPoint() {
-        if (drivetrain.DTatTarget()) {
-            drivetrain.state = Drivetrain.State.IDLE;
-        }
     }
 
     public void holdPoint(Pose2D targetPoint, double maxPower){
@@ -168,6 +172,7 @@ public class Robot {
     public void resetSplineCounter() {
         splineCounter = 0;
     }
+
 
     public double getOffsetX() { return odomOffset.getX(DistanceUnit.INCH); }
     public double getOffsetY() { return odomOffset.getY(DistanceUnit.INCH); }

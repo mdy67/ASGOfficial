@@ -21,6 +21,7 @@ public class FlywheelFeedforwardTuner extends LinearOpMode {
     @Override
     public void runOpMode() {
         DcMotorEx flywheel = hardwareMap.get(DcMotorEx.class, "shooterL");
+        DcMotorEx flywheel2 = hardwareMap.get(DcMotorEx.class, "shooterR");
         VoltageSensor battery = hardwareMap.voltageSensor.iterator().next();
 
         flywheel.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
@@ -40,11 +41,12 @@ public class FlywheelFeedforwardTuner extends LinearOpMode {
         // Sweep through power steps
         for (double power : POWER_STEPS) {
             flywheel.setPower(power);
+            flywheel2.setPower(-power);
             sleep((long)(WAIT_TIME * 1000));
 
-            double velTicks = flywheel.getVelocity();
-            double velRad = velTicks * 2 * Math.PI / 28.0;
-            double velRPM = velRad * 60 / (2 * Math.PI);
+            double velTicks = -flywheel2.getVelocity();
+            double velRad = -velTicks * 2 * Math.PI / 28.0;
+            double velRPM = -velRad * 60 / (2 * Math.PI);
 
             powers.add(power);
             velocitiesRad.add(velRad);
@@ -58,7 +60,7 @@ public class FlywheelFeedforwardTuner extends LinearOpMode {
         }
 
         flywheel.setPower(0);
-
+        flywheel2.setPower(0);
         // Linear regression: power = kV*ω + kS
         double meanVel = velocitiesRad.stream().mapToDouble(Double::doubleValue).average().orElse(0);
         double meanPower = powers.stream().mapToDouble(Double::doubleValue).average().orElse(0);
