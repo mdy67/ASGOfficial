@@ -43,7 +43,7 @@ public class GEN4Teleop extends OpMode {
 
         if (gamepad1.right_bumper) {
             robot.arms.arm3_flickRAPID();
-            intakePower = -1.0; // RAPID FIRE
+            intakePower = -0.7; // RAPID FIRE
         }
         else if (gamepad1.left_bumper) {
             intakePower = -1.0; // INTAKE

@@ -30,7 +30,7 @@ public class Flywheel {
     private double lastTicks = 0.0;
     private double lastTime = 0.0;
 
-    public static final double THRESHOLD = 80; // Threshold Radians Per Second
+    public static final double THRESHOLD = 20; // Threshold Radians Per Second
 
     public Flywheel(HardwareMap hardwareMap, VoltageSensor battery) {
         this.battery = battery;

@@ -159,8 +159,8 @@ public class Drivetrain {
         xError = globalXerror * Math.cos(heading) + globalYerror * Math.sin(heading);
         yError = globalYerror * Math.cos(heading) - globalXerror * Math.sin(heading);
 
-        atX = (Math.abs(xError) <= xyThreshold);
-        atY = (Math.abs(xError) <= xyThreshold);
+        atX = (Math.abs(xError) <= xyThreshold / 2);
+        atY = (Math.abs(xError) <= xyThreshold / 2);
         atT = (Math.abs(tError) <= hThreshold);
     }
 
@@ -195,13 +195,17 @@ public class Drivetrain {
         yPower = yPID.newPDPower(yError, maxPower);
         tPower = tPID.newPDPower(tError, maxPower);
 
-        if (xShutoff && Math.abs(xError) > xyThreshold * xONmult) { xShutoff = false; }
-        if (yShutoff && Math.abs(yError) > xyThreshold * yONmult) { yShutoff = false; }
-        if (tShutoff && Math.abs(tError) > hThreshold * tONmult) { tShutoff = false; }
+     //   if (xShutoff && Math.abs(xError) > xyThreshold * xONmult) { xShutoff = false; }
+      //  if (yShutoff && Math.abs(yError) > xyThreshold * yONmult) { yShutoff = false; }
+      //  if (tShutoff && Math.abs(tError) > hThreshold * tONmult) { tShutoff = false; }
 
-        if (atX) { xShutoff = true; xPower = 0; }
-        if (atY) { yShutoff = true; yPower = 0; }
-        if (atT) { tShutoff = true; tPower = 0; }
+      //  if (atX) { xShutoff = true; xPower = 0; }
+      //  if (atY) { yShutoff = true; yPower = 0; }
+     //   if (atT) { tShutoff = true; tPower = 0; }
+
+        if (atX) { xPower *= 0.2; }
+        if (atY) { yPower *= 0.2; }
+        if (atT) { tPower *= 0.2; }
 
         setWeightedMotorPowers(yPower, xPower, tPower);
     }
