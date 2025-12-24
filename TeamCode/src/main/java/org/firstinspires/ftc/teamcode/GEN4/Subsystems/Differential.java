@@ -1,22 +1,26 @@
 package org.firstinspires.ftc.teamcode.GEN4.Subsystems;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
+
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
+@Config
 public class Differential {
 
     // --------------------
-    // PID / control constants
+    // PID / control constants (FTC DASHBOARD TUNABLE)
     // --------------------
     public static double kP = 0.00015;
     public static double kI = 0.000013;
     public static double kD = 0.00005;
     public static double kS = 0.13;
+
     public static double maxPower = 0.8;
     public static double toleranceTicks = 80;
     public static double MAX_INTEGRAL = 5000;
