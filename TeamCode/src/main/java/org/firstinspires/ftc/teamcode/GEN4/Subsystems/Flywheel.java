@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.GEN4.Subsystems;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.Range;
 
@@ -15,7 +16,11 @@ import java.util.Deque;
 public class Flywheel {
 
     private final DcMotorEx shooterL, shooterR;
+    private final Servo hood;
     private final VoltageSensor battery;
+
+    private static final double HOOD_TOP = 0.0;
+    private static final double HOOD_BOTTOM = 0.76;
 
     private double targetVelocity = 0.0;
     private double kP = 0.004;
@@ -35,6 +40,7 @@ public class Flywheel {
     public Flywheel(HardwareMap hardwareMap, VoltageSensor battery) {
         this.battery = battery;
 
+        hood = hardwareMap.get(Servo.class, "hood");
         shooterL = hardwareMap.get(DcMotorEx.class, "shooterL");
         shooterR = hardwareMap.get(DcMotorEx.class, "shooterR");
 
@@ -58,6 +64,9 @@ public class Flywheel {
     }
 
     public void setKP(double kP) { this.kP = kP; }
+
+    public void setHoodAngle(double servoPos) { hood.setPosition(servoPos);}
+    public double getHoodAngle() { return hood.getPosition(); }
 
     public void setTargetVelocity(double radPerSec) { this.targetVelocity = radPerSec; }
 
@@ -116,9 +125,9 @@ public class Flywheel {
     }
 
     public void aimToGoal(Pose2D targetGoal, Pose2D currentPose, double velX, double velY) {
-        double a = -1.45846 * Math.pow(10, -8); // TODO: TUNE THESE WITH NEW REGRESSION
-        double b = 1.68069;
-        double c = 207.40686;
+        double a = 1.52872 * Math.pow(10, -8); // TODO: TUNE THESE WITH NEW REGRESSION
+        double b = 1.77413;
+        double c = 259.12373;
 
 
         double tx = targetGoal.getX(DistanceUnit.INCH);
@@ -134,8 +143,21 @@ public class Flywheel {
         double distance = Math.sqrt(dx * dx + dy * dy);
 
         // ax^4 + bx^1 + c
-         double targetVelABCD = ((a * (Math.pow(distance, 4))) + (b * Math.pow(distance, 1)) + c);
+        double targetVelABCD = ((a * (Math.pow(distance, 4))) + (b * Math.pow(distance, 1)) + c);
 
         setTargetVelocity(targetVelABCD);
+        angleHood(getVelocityRadPerSec());
+    }
+
+    private void angleHood(double currentVelocity) {
+        // - (a * b) x^3 + cx^2 - dx + e
+        double a = 0;
+        double b = 0;
+        double c = 0;
+        double d = 0;
+        double e = 0;
+        double targetHoodAngle = - ((a * b) * Math.pow(currentVelocity, 3)) + (c * Math.pow(currentVelocity, 2)) - (d * currentVelocity) + e;
+
+        setHoodAngle(targetHoodAngle);
     }
 }

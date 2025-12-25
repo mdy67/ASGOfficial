@@ -21,7 +21,9 @@ public class GEN4Teleop extends OpMode {
         robot.drivetrain.state = Drivetrain.State.TELEOP;
 
     }
-
+    double targetVel = 200;
+    double hoodAngle = 0.4;
+    private boolean TUNING_MODE = false;
     @Override
     public void loop() {
 
@@ -43,7 +45,7 @@ public class GEN4Teleop extends OpMode {
 
         if (gamepad1.right_bumper) {
             robot.arms.arm3_flickRAPID();
-            intakePower = -0.7; // RAPID FIRE
+            intakePower = -0.8; // RAPID FIRE
         }
         else if (gamepad1.left_bumper) {
             intakePower = -1.0; // INTAKE
@@ -53,7 +55,7 @@ public class GEN4Teleop extends OpMode {
         }
         else if (gamepad1.a) {
             robot.arms.arm3_flickON();
-            intakePower = -1.0; // STANDARD FIRE
+            intakePower = -0.8; // STANDARD FIRE
         }
         else {
             robot.arms.arm1_flickOFF();
@@ -64,20 +66,26 @@ public class GEN4Teleop extends OpMode {
         robot.intake.runIntake(intakePower);
 
         // ---------- GOAL TRACKING ----------
-     //   Pose2D goal = robot.getTargetGoal();
+        Pose2D goal = robot.getTargetGoal();
 
-    //    if (gamepad1.dpad_left) { targetVel -= 2; }
-    //    if (gamepad1.dpad_right) { targetVel += 2; }
-   //     robot.flywheel.setTargetVelocity(targetVel);
+        if (TUNING_MODE) {
+            if (gamepad1.dpad_left) { targetVel -= 2; }
+            if (gamepad1.dpad_right) { targetVel += 2; }
+            robot.flywheel.setTargetVelocity(targetVel);
 
-        robot.goalLock(robot.adjustedPose);
+            if (gamepad1.x) { hoodAngle += 0.01; }
+            if (gamepad1.y) { hoodAngle -= 0.01; }
+            robot.flywheel.setHoodAngle(hoodAngle);
+        } else {
+            robot.goalLock(robot.adjustedPose);
+        }
 
 
-    //    robot.differential.aimToGoal(robot.adjustedPose, goal);
 
         if (robot.differential.atTarget && robot.colors.hasBall) {
             gamepad1.rumble(100);
         }
+
 
         // ---------- UPDATE ----------
         robot.update();
@@ -113,12 +121,12 @@ public class GEN4Teleop extends OpMode {
         telemetry.addData("Target Angle", "%.1f",
                 robot.differential.compensatedAngle);
 
-     //   double dx = goal.getX(DistanceUnit.INCH)
-       //         - robot.drivetrain.robotPose.getX(DistanceUnit.INCH);
-      //  double dy = goal.getY(DistanceUnit.INCH)
-      //          - robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
+        double dx = goal.getX(DistanceUnit.INCH)
+                - robot.drivetrain.robotPose.getX(DistanceUnit.INCH);
+        double dy = goal.getY(DistanceUnit.INCH)
+                - robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
 
-    //    telemetry.addData("Distance to Goal", "%.2f", Math.hypot(dx, dy));
+
 
         // ---------- LIMELIGHT DEBUG (SAFE) ----------
         telemetry.addLine("=== LIMELIGHT ===");
@@ -131,8 +139,10 @@ public class GEN4Teleop extends OpMode {
                 robot.adjustedPose.getX(DistanceUnit.INCH),
                 robot.adjustedPose.getY(DistanceUnit.INCH),
                 robot.adjustedPose.getHeading(AngleUnit.DEGREES));
-       // telemetry.addData("FLYWHEEL VELOCITY:", targetVel);
-
+        telemetry.addLine();
+        telemetry.addData("FLYWHEEL VELOCITY:", targetVel);
+        telemetry.addData("HOOD ANGLE:", robot.flywheel.getHoodAngle());
+        telemetry.addData("Distance to Goal", "%.2f", Math.hypot(dx, dy));
         telemetry.update();
     }
 }
