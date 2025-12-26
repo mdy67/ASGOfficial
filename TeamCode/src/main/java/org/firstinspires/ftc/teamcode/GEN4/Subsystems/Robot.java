@@ -120,12 +120,12 @@ public class Robot {
 
     public void autoIdle() {
         if (alliance.isBlue()) {
-            differential.setTargetAngle(140);
+            differential.setTargetAngle(150);
         } else {
-            differential.setTargetAngle(40);
+            differential.setTargetAngle(30);
         }
 
-        flywheel.setTargetVelocity(300);
+        flywheel.setTargetVelocity(350);
         intake.stop();
         arms.reset();
     }

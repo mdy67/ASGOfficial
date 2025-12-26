@@ -16,14 +16,14 @@ public class Differential {
     // --------------------
     // PID / control constants (FTC DASHBOARD TUNABLE)
     // --------------------
-    public static double kP = 0.00015;
-    public static double kI = 0.000013;
-    public static double kD = 0.00005;
-    public static double kS = 0.13;
+    public static double kP = 0.00012;
+    public static double kI = 0.000001;
+    public static double kD = 0.0003;
+    public static double kS = 0.11;
     public double ANGLE_ADJUST = 0;
 
-    public static double maxPower = 0.8;
-    public static double toleranceTicks = 80;
+    public static double maxPower = 1;
+    public static double toleranceTicks = 70;
     public static double MAX_INTEGRAL = 5000;
 
     // --------------------
@@ -100,7 +100,7 @@ public class Differential {
     }
 
     public void setTargetAngle(double angle) {
-        compensatedAngle = Range.clip(angle, MIN_ANGLE, MAX_ANGLE) + ANGLE_ADJUST;
+        compensatedAngle = Range.clip(angle  + ANGLE_ADJUST, MIN_ANGLE, MAX_ANGLE);
         updateTargets();
     }
 
@@ -185,7 +185,7 @@ public class Differential {
         if (Math.abs(errorL) > toleranceTicks) powerL += Math.signum(errorL) * kS;
         if (Math.abs(errorR) > toleranceTicks) powerR += Math.signum(errorR) * kS;
 
-        atTarget = Math.abs(errorL) <= toleranceTicks && Math.abs(errorR) <= toleranceTicks;
+        atTarget = Math.abs(errorL) <= toleranceTicks && Math.abs(errorR) <= toleranceTicks && Math.abs(powerL) + Math.abs(powerR) < 0.4;
 
         diffyL.setPower(Range.clip(powerL, -maxPower, maxPower));
         diffyR.setPower(Range.clip(powerR, -maxPower, maxPower));
