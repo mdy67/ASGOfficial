@@ -63,6 +63,12 @@ public class GEN4Teleop extends OpMode {
             robot.arms.arm3_flickOFF();
         }
 
+        if (gamepad1.dpad_right) {
+            robot.differential.ANGLE_ADJUST --;
+        } else if (gamepad1.dpad_left) {
+            robot.differential.ANGLE_ADJUST ++;
+        }
+
         robot.intake.runIntake(intakePower);
 
         // ---------- GOAL TRACKING ----------

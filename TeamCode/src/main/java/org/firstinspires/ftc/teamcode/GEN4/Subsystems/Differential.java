@@ -20,6 +20,7 @@ public class Differential {
     public static double kI = 0.000013;
     public static double kD = 0.00005;
     public static double kS = 0.13;
+    public double ANGLE_ADJUST = 0;
 
     public static double maxPower = 0.8;
     public static double toleranceTicks = 80;
@@ -99,7 +100,7 @@ public class Differential {
     }
 
     public void setTargetAngle(double angle) {
-        compensatedAngle = Range.clip(angle, MIN_ANGLE, MAX_ANGLE);
+        compensatedAngle = Range.clip(angle, MIN_ANGLE, MAX_ANGLE) + ANGLE_ADJUST;
         updateTargets();
     }
 

@@ -146,18 +146,19 @@ public class Flywheel {
         double targetVelABCD = ((a * (Math.pow(distance, 4))) + (b * Math.pow(distance, 1)) + c);
 
         setTargetVelocity(targetVelABCD);
-        angleHood(getVelocityRadPerSec());
+        angleHood(targetVelABCD);
     }
 
     private void angleHood(double currentVelocity) {
         // - (a * b) x^3 + cx^2 - dx + e
-        double a = 0;
-        double b = 0;
-        double c = 0;
-        double d = 0;
-        double e = 0;
+        double a = 8.48022;
+        double b = Math.pow(10, -7);
+        double c = 0.00115801;
+        double d = 0.526599;
+        double e = 80.04987;
         double targetHoodAngle = - ((a * b) * Math.pow(currentVelocity, 3)) + (c * Math.pow(currentVelocity, 2)) - (d * currentVelocity) + e;
 
+        targetHoodAngle = Range.clip(targetHoodAngle, HOOD_TOP, HOOD_BOTTOM);
         setHoodAngle(targetHoodAngle);
     }
 }
