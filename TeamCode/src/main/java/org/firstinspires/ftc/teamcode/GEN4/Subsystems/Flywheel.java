@@ -68,7 +68,7 @@ public class Flywheel {
     public void setHoodAngle(double servoPos) { hood.setPosition(servoPos);}
     public double getHoodAngle() { return hood.getPosition(); }
 
-    public void setTargetVelocity(double radPerSec) { this.targetVelocity = radPerSec; }
+    public void setTargetVelocity(double radPerSec) { this.targetVelocity = radPerSec; stoppage = false; }
 
     public double getTargetVelocity() { return targetVelocity; }
 
@@ -115,16 +115,21 @@ public class Flywheel {
 
         power = Range.clip(power, 0.0, 1.0);
 
-        shooterL.setPower(-power);
-        shooterR.setPower(-power);
-    }
+        if (!stoppage) {
+            shooterL.setPower(-power);
+            shooterR.setPower(-power);
+        }
 
+    }
+    boolean stoppage = false;
     public void stop() {
+        stoppage = true;
         shooterL.setPower(0.0);
         shooterR.setPower(0.0);
     }
 
     public void aimToGoal(Pose2D targetGoal, Pose2D currentPose, double velX, double velY) {
+        stoppage = false;
         double a = 1.52872 * Math.pow(10, -8); // TODO: TUNE THESE WITH NEW REGRESSION
         double b = 1.77413;
         double c = 259.12373;

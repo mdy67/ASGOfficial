@@ -193,9 +193,11 @@ public class Robot {
 
     public int counter = 0;
     private ElapsedTime sortingTimer = new ElapsedTime();
-    public void shoot_133(){
+    public void shoot_133(double targetAngle){
         if (counter == 0) {
-            differential.goToSlot(1);
+            differential.goToSlot(2);
+            differential.setTargetAngle(90);
+            flywheel.aimToGoal(getTargetGoal(), drivetrain.robotPose, drivetrain.XVel(), drivetrain.YVel());
             if (systemsReady()) {
                 sortingTimer.reset();
                 arms.arm1_flickON();

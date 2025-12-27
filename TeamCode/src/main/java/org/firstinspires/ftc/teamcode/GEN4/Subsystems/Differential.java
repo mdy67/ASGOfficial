@@ -19,7 +19,7 @@ public class Differential {
     public static double kP = 0.00012;
     public static double kI = 0.000001;
     public static double kD = 0.00034;
-    public static double kS = 0.11;
+    public static double kS = 0.12;
     public double ANGLE_ADJUST = 0;
 
     public static double maxPower = 1;

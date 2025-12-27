@@ -21,18 +21,25 @@ import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
 
     @TeleOp(name = "Gantry Tuner TeleOp", group = "GEN4")
     public class GantryTunerTeleop extends OpMode {
-
-        Differential differential;
+        Robot robot;
+      //  Differential differential;
         //   double targetVel = 200;
         @Override
         public void init() {
+            robot = new Robot(hardwareMap);
+            robot.startup();
+            /*
             differential = new Differential(hardwareMap);
             differential.resetEncoders();
+
+             */
 
         }
         private boolean TUNING_MODE = false;
         @Override
         public void loop() {
+            robot.update();
+            /*
             differential.update();
             // ---------- DRIVING ----------
             if (gamepad1.dpad_right) {
@@ -42,16 +49,22 @@ import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
             } else if (gamepad1.dpad_left) {
                 differential.goToSlot(1);
             }
+            */
+
+            if (gamepad1.a) {
+                robot.shoot_133(140);
+            }
+
 
             telemetry.addLine("=== DIFFERENTIAL ===");
             telemetry.addData("Encoders L/R", "%d / %d",
-                    differential.encL.getCurrentPosition(),
-                    differential.encR.getCurrentPosition());
+                    robot.differential.encL.getCurrentPosition(),
+                    robot.differential.encR.getCurrentPosition());
             telemetry.addData("Target L/R", "%.1f / %.1f",
-                    differential.targetL,
-                    differential.targetR);
+                    robot.differential.targetL,
+                    robot.differential.targetR);
             telemetry.addData("Target Angle", "%.1f",
-                    differential.compensatedAngle);
+                    robot.differential.compensatedAngle);
 
             telemetry.update();
         }
