@@ -34,8 +34,8 @@ public class Differential {
     public static final double MIN_ANGLE = 0;
     public static final double MAX_ANGLE = 180;
 
-    public static double slot1Pos = -5300;
-    public static double slot2Pos = -2300;
+    public static double slot1Pos = 6300;
+    public static double slot2Pos = 3150;
     public static double slot3Pos = 0;
     public static double angleScale = 38.76;
 
@@ -100,11 +100,18 @@ public class Differential {
             case 3:
             default: currentSlotBase = slot3Pos; TURRET_OFFSET_INCHES = -5.0; break;
         }
+
+        // RESET PID STATE ON LARGE STEP CHANGES
+        integralL = 0;
+        integralR = 0;
+        lastErrorL = 0;
+        lastErrorR = 0;
+
         updateTargets();
     }
 
     public void setTargetAngle(double angle) {
-        compensatedAngle = Range.clip(angle  + ANGLE_ADJUST, MIN_ANGLE, MAX_ANGLE);
+        compensatedAngle = Range.clip(angle + ANGLE_ADJUST, MIN_ANGLE, MAX_ANGLE);
         updateTargets();
     }
 
@@ -124,7 +131,7 @@ public class Differential {
     }
 
     // --------------------
-    // Aim to goal (FIXED)
+    // Aim to goal
     // --------------------
     public void aimToGoal(Pose2D currentPose, Pose2D targetGoal) {
 
@@ -142,10 +149,9 @@ public class Differential {
         double robotHeading = currentPose.getHeading(AngleUnit.DEGREES);
 
         double desiredAngle = fieldAngle - robotHeading - 90.0;
-
         desiredAngle = normalizeDeg(desiredAngle);
 
-        // Convert [-180,180] → [0,180] safely
+        // Convert [-180,180] → [0,180]
         if (desiredAngle < -90) {
             desiredAngle = 180;
         } else if (desiredAngle < 0) {
@@ -160,7 +166,8 @@ public class Differential {
     // --------------------
     public void update() {
 
-        double currL = -encL.getCurrentPosition();
+        // FIX: NO encoder inversion on left
+        double currL = encL.getCurrentPosition();
         double currR = encR.getCurrentPosition();
 
         double errorL = targetL - currL;
@@ -190,11 +197,16 @@ public class Differential {
         if (Math.abs(errorR) > toleranceTicksClose) powerR += Math.signum(errorR) * kS;
 
         if (!farZone) {
-            atTarget = Math.abs(errorL) <= toleranceTicksClose && Math.abs(errorR) <= toleranceTicksClose && Math.abs(powerL) + Math.abs(powerR) < JITTER_SUM;
+            atTarget =
+                    Math.abs(errorL) <= toleranceTicksClose &&
+                            Math.abs(errorR) <= toleranceTicksClose &&
+                            Math.abs(powerL) + Math.abs(powerR) < JITTER_SUM;
         } else {
-            atTarget = Math.abs(errorL) <= toleranceTicksFar && Math.abs(errorR) <= toleranceTicksFar && Math.abs(powerL) + Math.abs(powerR) < JITTER_SUM;
+            atTarget =
+                    Math.abs(errorL) <= toleranceTicksFar &&
+                            Math.abs(errorR) <= toleranceTicksFar &&
+                            Math.abs(powerL) + Math.abs(powerR) < JITTER_SUM;
         }
-
 
         diffyL.setPower(Range.clip(powerL, -maxPower, maxPower));
         diffyR.setPower(Range.clip(powerR, -maxPower, maxPower));

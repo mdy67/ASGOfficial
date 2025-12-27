@@ -101,6 +101,7 @@ public class Blue15Full extends LinearOpMode {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -55, AngleUnit.DEGREES, 240), 1, 3, 0.2);
                 }
 
+
                 if (robot.systemsReady() && !rapidFireActive) {
                     rapidFireTimer.reset();
                     rapidFireDuration = 1000;
@@ -121,6 +122,8 @@ public class Blue15Full extends LinearOpMode {
                         trigger = false;
                     }
                 }
+
+
 
                 robot.update();
                 if (robot.drivetrain.DTatTarget()) {
@@ -210,13 +213,25 @@ public class Blue15Full extends LinearOpMode {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -53, 1, AngleUnit.DEGREES, 180), 1, 2, 3);
                     robot.nextSplinePoint();
                     trigger = false;
+
+                    robot.counter = 0;
                 } else if (robot.splineCounter == 4) {
-                    robot.goalLock(robot.drivetrain.robotPose);
+
 
                     if (!trigger) {
                         robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, 1, AngleUnit.DEGREES, 260), 1, 3, 0.2);
+                        robot.goalLock(robot.drivetrain.robotPose);
                     }
 
+                    robot.shoot_133();
+                    if (robot.counter == 3) {
+                        rapidFireActive = false;
+                        robot.resetSplineCounter();
+                        robot.update();
+                        trigger = false;
+                        state = State.POINT_4;
+                    }
+                    /*
                     if (robot.systemsReady() && !rapidFireActive) {
                         rapidFireTimer.reset();
                         rapidFireDuration = 1000;
@@ -235,6 +250,7 @@ public class Blue15Full extends LinearOpMode {
                             state = State.POINT_4;
                         }
                     }
+                    */
 
                     robot.update();
                     if (robot.drivetrain.DTatTarget()) {

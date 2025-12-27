@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.GEN4.Subsystems;
 
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -188,5 +190,44 @@ public class Robot {
     public double getOffsetX() { return odomOffset.getX(DistanceUnit.INCH); }
     public double getOffsetY() { return odomOffset.getY(DistanceUnit.INCH); }
     public boolean isLimelightActive() { return limelight.tagDetected; }
+
+    public int counter = 0;
+    private ElapsedTime sortingTimer = new ElapsedTime();
+    public void shoot_133(){
+        if (counter == 0) {
+            differential.goToSlot(1);
+            if (systemsReady()) {
+                sortingTimer.reset();
+                arms.arm1_flickON();
+                intake.runIntake(-0.5);
+                counter = 1;
+            }
+        } else if (counter == 1 && sortingTimer.milliseconds() > 200) {
+            differential.goToSlot(3);
+            if (systemsReady()) {
+                sortingTimer.reset();
+                rapidFire();
+                counter = 2;
+            }
+        } else if (counter == 2 && sortingTimer.milliseconds() > 400) {
+            counter = 3;
+            autoIdle();
+        }
+    }
+
+    public void shoot_223(){
+
+    }
+
+    public void shoot_233(){
+
+    }
+
+    /*
+    public void shoot_333() {
+       ALREADY EXISTS WITHIN AUTO CLASS AS "RAPID FIRE"
+    }
+
+     */
 
 }
