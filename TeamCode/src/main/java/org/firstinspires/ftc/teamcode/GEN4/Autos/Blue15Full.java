@@ -96,9 +96,9 @@ public class Blue15Full extends LinearOpMode {
             // ----------------------------
             case SHOOTING_POSE_1:
                 robot.goalLock(robot.drivetrain.robotPose);
-
+                robot.differential.farZone = true;
                 if (!trigger) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -55, AngleUnit.DEGREES, 260), 1, 3, 0.2);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -55, AngleUnit.DEGREES, 240), 1, 3, 0.2);
                 }
 
                 if (robot.systemsReady() && !rapidFireActive) {
@@ -117,6 +117,7 @@ public class Blue15Full extends LinearOpMode {
                         robot.resetSplineCounter();
                         robot.update();
                         state = State.FIRST_INTAKES;
+                        robot.differential.farZone = false;
                         trigger = false;
                     }
                 }
@@ -133,6 +134,7 @@ public class Blue15Full extends LinearOpMode {
             // FIRST INTAKES + SHOOTING
             // ----------------------------
             case FIRST_INTAKES:
+
                 if (robot.splineCounter == 0) {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -30, -53, AngleUnit.DEGREES, 210), 1, 6, 30);
                     robot.nextSplinePoint();
@@ -188,7 +190,7 @@ public class Blue15Full extends LinearOpMode {
                 break;
 
             // ----------------------------
-            // POINT_3
+            // POINT_3 [FIRST SORTING OCCURRANCE]
             // ----------------------------
             case POINT_3:
                 if (robot.splineCounter == 0) {
@@ -311,7 +313,7 @@ public class Blue15Full extends LinearOpMode {
                     robot.goalLock(robot.drivetrain.robotPose);
 
                     if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, 1, AngleUnit.DEGREES, 260), 1, 3, 0.2);
+                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -16, 12, AngleUnit.DEGREES, 310), 1, 3, 0.2);
                     }
 
                     if (robot.systemsReady() && !rapidFireActive) {

@@ -18,13 +18,15 @@ public class Differential {
     // --------------------
     public static double kP = 0.00012;
     public static double kI = 0.000001;
-    public static double kD = 0.0003;
+    public static double kD = 0.00034;
     public static double kS = 0.11;
     public double ANGLE_ADJUST = 0;
 
     public static double maxPower = 1;
-    public static double toleranceTicks = 70;
+    public static double toleranceTicksClose = 120;
+    public static double toleranceTicksFar = 60;
     public static double MAX_INTEGRAL = 5000;
+    public static double JITTER_SUM = 0.45; // COMBINED POWER OF SERVOS THAT IS NOT OSCILLATING
 
     // --------------------
     // Physical angle limits
@@ -62,6 +64,8 @@ public class Differential {
 
     // Turret offset
     private double TURRET_OFFSET_INCHES = -5.0;
+
+    public boolean farZone = false;
 
     // --------------------
     // Constructor
@@ -162,7 +166,7 @@ public class Differential {
         double errorL = targetL - currL;
         double errorR = targetR - currR;
 
-        if (Math.abs(errorL) + Math.abs(errorR) <= toleranceTicks) {
+        if (Math.abs(errorL) + Math.abs(errorR) <= toleranceTicksClose) {
             integralL = 0;
             integralR = 0;
         }
@@ -182,10 +186,15 @@ public class Differential {
         double powerL = errorL * kP + integralL * kI + dL * kD;
         double powerR = errorR * kP + integralR * kI + dR * kD;
 
-        if (Math.abs(errorL) > toleranceTicks) powerL += Math.signum(errorL) * kS;
-        if (Math.abs(errorR) > toleranceTicks) powerR += Math.signum(errorR) * kS;
+        if (Math.abs(errorL) > toleranceTicksClose) powerL += Math.signum(errorL) * kS;
+        if (Math.abs(errorR) > toleranceTicksClose) powerR += Math.signum(errorR) * kS;
 
-        atTarget = Math.abs(errorL) <= toleranceTicks && Math.abs(errorR) <= toleranceTicks && Math.abs(powerL) + Math.abs(powerR) < 0.4;
+        if (!farZone) {
+            atTarget = Math.abs(errorL) <= toleranceTicksClose && Math.abs(errorR) <= toleranceTicksClose && Math.abs(powerL) + Math.abs(powerR) < JITTER_SUM;
+        } else {
+            atTarget = Math.abs(errorL) <= toleranceTicksFar && Math.abs(errorR) <= toleranceTicksFar && Math.abs(powerL) + Math.abs(powerR) < JITTER_SUM;
+        }
+
 
         diffyL.setPower(Range.clip(powerL, -maxPower, maxPower));
         diffyR.setPower(Range.clip(powerR, -maxPower, maxPower));

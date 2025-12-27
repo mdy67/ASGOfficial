@@ -172,8 +172,8 @@ public class Drivetrain {
     public static final double xkD = 0.01;
     public static final double ykP = 0.07;
     public static final double ykD = 0.01;
-    public static final double tkP = 0.08;
-    public static final double tkD = 0.01;
+    public static final double tkP = 0.14;
+    public static final double tkD = 0.03;
 
     DTPID xPID = new DTPID(xkP,xkD);
     DTPID yPID = new DTPID(ykP, ykD);
@@ -203,9 +203,9 @@ public class Drivetrain {
       //  if (atY) { yShutoff = true; yPower = 0; }
      //   if (atT) { tShutoff = true; tPower = 0; }
 
-        if (atX) { xPower *= 0.9; }
-        if (atY) { yPower *= 0.9; }
-        if (atT) { tPower *= 0.9; }
+        if (atX) { xPower *= 0.8; }
+        if (atY) { yPower *= 0.8; }
+        if (atT) { tPower *= 0.8; }
 
         setWeightedMotorPowers(yPower, xPower, tPower);
     }

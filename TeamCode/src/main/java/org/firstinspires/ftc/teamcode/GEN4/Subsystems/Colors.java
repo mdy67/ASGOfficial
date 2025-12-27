@@ -129,6 +129,12 @@ public class Colors {
         }
     }
 
+    public void updateTESTING(boolean DTAtTarget, boolean FLYWHEELatTarget, boolean DIFFYatTarget) {
+        if (DTAtTarget) { applyLED(led3, BallState.GREEN); } else { applyLED(led3, BallState.PURPLE); }
+        if (FLYWHEELatTarget) { applyLED(led2, BallState.GREEN); } else { applyLED(led2, BallState.PURPLE); }
+        if (DIFFYatTarget) { applyLED(led1, BallState.GREEN); } else { applyLED(led1, BallState.PURPLE); }
+    }
+
     public void getNumBalls() {
         numBalls = 0;
         if (state1 != BallState.EMPTY) { numBalls ++; }

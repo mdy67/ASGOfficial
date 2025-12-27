@@ -135,8 +135,8 @@ public class Flywheel {
         double x = currentPose.getX(DistanceUnit.INCH);
         double y = currentPose.getY(DistanceUnit.INCH);
 
-        double kVX = 0.08; // Drivetrain velocity coefficients
-        double kVY = 0.08;
+        double kVX = 0.2; // Drivetrain velocity coefficients
+        double kVY = 0.2;
 
         double dx = tx - (x + (kVX * velX));
         double dy = ty - (y + (kVY * velY));

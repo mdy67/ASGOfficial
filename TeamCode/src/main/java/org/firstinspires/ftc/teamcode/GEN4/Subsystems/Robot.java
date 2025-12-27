@@ -30,6 +30,8 @@ public class Robot {
     private Pose2D odomOffset = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
     private boolean offsetInitialized = false;
 
+    private boolean AUTO_TESTING_MODE = true;
+
     public Robot(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
 
@@ -56,13 +58,22 @@ public class Robot {
         differential.resetEncoders();
     }
 
+
+
     public void update() {
         drivetrain.update();
         wait.update();
-        colors.update();
+
         flywheel.update();
         differential.update();
         limelight.update();
+        if (AUTO_TESTING_MODE) {
+            colors.updateTESTING(drivetrain.DTatTarget(), flywheel.atTargetVelocity(), differential.atTarget);
+        } else {
+            colors.update();
+        }
+
+
 
         Pose2D odomPose = drivetrain.robotPose;
 
