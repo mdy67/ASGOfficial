@@ -31,8 +31,8 @@ public class Differential {
     public static final double MIN_ANGLE = 0;
     public static final double MAX_ANGLE = 180;
 
-    public static double slot1Pos = -5300;
-    public static double slot2Pos = -2300;
+    public static double slot1Pos = 5300;
+    public static double slot2Pos = 2300;
     public static double slot3Pos = 0;
     public static double angleScale = 38.76;
 
@@ -56,12 +56,13 @@ public class Differential {
     private double integralL = 0;
     private double integralR = 0;
 
+    public boolean farZone = false;
     public boolean atTarget = false;
     public double compensatedAngle = 0;
-    public boolean farZone = false;
-    public int ANGLE_ADJUST = 0;
 
+    // --------------------
     // Turret offset
+    // --------------------
     private double TURRET_OFFSET_INCHES = -5.0;
 
     // --------------------
@@ -75,7 +76,7 @@ public class Differential {
         encR = hardwareMap.get(DcMotorEx.class, "intakeL");
 
         diffyL.setDirection(CRServo.Direction.FORWARD);
-        diffyR.setDirection(CRServo.Direction.FORWARD);
+        diffyR.setDirection(CRServo.Direction.REVERSE); // invert for physical match
 
         resetEncoders();
     }
@@ -107,12 +108,9 @@ public class Differential {
 
     private void updateTargets() {
         targetL = currentSlotBase - (compensatedAngle * angleScale);
-        targetR = -(currentSlotBase + (compensatedAngle * angleScale));
+        targetR = currentSlotBase + (compensatedAngle * angleScale); // R reversed physically
     }
 
-    // --------------------
-    // Proper angle normalization
-    // --------------------
     private double normalizeDeg(double angle) {
         angle %= 360.0;
         if (angle > 180) angle -= 360;
@@ -124,13 +122,10 @@ public class Differential {
     // Aim to goal
     // --------------------
     public void aimToGoal(Pose2D currentPose, Pose2D targetGoal) {
-
         double headingRad = Math.toRadians(currentPose.getHeading(AngleUnit.DEGREES));
 
-        double turretX = currentPose.getX(DistanceUnit.INCH)
-                + TURRET_OFFSET_INCHES * Math.cos(headingRad);
-        double turretY = currentPose.getY(DistanceUnit.INCH)
-                + TURRET_OFFSET_INCHES * Math.sin(headingRad);
+        double turretX = currentPose.getX(DistanceUnit.INCH) + TURRET_OFFSET_INCHES * Math.cos(headingRad);
+        double turretY = currentPose.getY(DistanceUnit.INCH) + TURRET_OFFSET_INCHES * Math.sin(headingRad);
 
         double dx = targetGoal.getX(DistanceUnit.INCH) - turretX;
         double dy = targetGoal.getY(DistanceUnit.INCH) - turretY;
@@ -138,25 +133,16 @@ public class Differential {
         double fieldAngle = Math.toDegrees(Math.atan2(dy, dx));
         double robotHeading = currentPose.getHeading(AngleUnit.DEGREES);
 
-        double desiredAngle = fieldAngle - robotHeading - 90.0;
+        double desiredAngle = normalizeDeg(fieldAngle - robotHeading - 90.0);
 
-        desiredAngle = normalizeDeg(desiredAngle);
-
-        // Adjust for Blue15Full tuning
-        desiredAngle += ANGLE_ADJUST;
-
-        // Convert [-180,180] → [0,180] safely
-        if (desiredAngle < -90) {
-            desiredAngle = 180;
-        } else if (desiredAngle < 0) {
-            desiredAngle = 0;
-        }
+        if (desiredAngle < -90) desiredAngle = 0;
+        if (desiredAngle > 90) desiredAngle = 180;
 
         setTargetAngle(desiredAngle);
     }
 
     // --------------------
-    // Update loop (PID + kS)
+    // Update loop
     // --------------------
     public void update() {
 
@@ -186,7 +172,6 @@ public class Differential {
         double powerL = errorL * kP + integralL * kI + dL * kD;
         double powerR = errorR * kP + integralR * kI + dR * kD;
 
-        // Add feedforward if far from target
         if (Math.abs(errorL) > toleranceTicks) powerL += Math.signum(errorL) * kS;
         if (Math.abs(errorR) > toleranceTicks) powerR += Math.signum(errorR) * kS;
 
@@ -194,11 +179,12 @@ public class Differential {
 
         diffyL.setPower(Range.clip(powerL, -maxPower, maxPower));
         diffyR.setPower(Range.clip(powerR, -maxPower, maxPower));
+
+        // --- Debug telemetry ---
+        System.out.printf("SlotBase: %.1f | CompAngle: %.2f | tL: %.1f tR: %.1f | eL: %.1f eR: %.1f | pL: %.2f pR: %.2f | atTarget: %b\n",
+                currentSlotBase, compensatedAngle, targetL, targetR, errorL, errorR, powerL, powerR, atTarget);
     }
 
-    // --------------------
-    // Utilities
-    // --------------------
     public int getEncoderL() { return encL.getCurrentPosition(); }
     public int getEncoderR() { return encR.getCurrentPosition(); }
 }
