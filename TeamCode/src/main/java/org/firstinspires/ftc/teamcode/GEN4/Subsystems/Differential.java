@@ -22,20 +22,16 @@ public class Differential {
     public static double kS = 0.13;
 
     public static double maxPower = 0.8;
-    public static double toleranceTicks = 80;
+    public static double toleranceTicksClose = 40;  // tighter near goal
+    public static double toleranceTicksFar = 80;    // default
     public static double MAX_INTEGRAL = 5000;
 
-    // --------------------
-    // Physical angle limits
-    // --------------------
-    public static final double MIN_ANGLE = 0;
-    public static final double MAX_ANGLE = 180;
-
-    public static double slot1Pos = 5300;
+    public static double slot1Pos = 5300;   // positive offsets
     public static double slot2Pos = 2300;
-    public static double slot3Pos = 0;
+    public static double slot3Pos = 0;      // default starting slot
     public static double angleScale = 38.76;
 
+    public boolean farZone = true;           // for tuning tolerances
     private double currentSlotBase = 0;
 
     // --------------------
@@ -56,13 +52,10 @@ public class Differential {
     private double integralL = 0;
     private double integralR = 0;
 
-    public boolean farZone = false;
     public boolean atTarget = false;
     public double compensatedAngle = 0;
 
-    // --------------------
-    // Turret offset
-    // --------------------
+    // Turret offset for aim calculations
     private double TURRET_OFFSET_INCHES = -5.0;
 
     // --------------------
@@ -76,9 +69,19 @@ public class Differential {
         encR = hardwareMap.get(DcMotorEx.class, "intakeL");
 
         diffyL.setDirection(CRServo.Direction.FORWARD);
-        diffyR.setDirection(CRServo.Direction.REVERSE); // invert for physical match
+        diffyR.setDirection(CRServo.Direction.FORWARD);
 
+        resetToSlot3();
+    }
+
+    public void resetToSlot3() {
+        currentSlotBase = slot3Pos;
+        compensatedAngle = 0;
+        targetL = 0;
+        targetR = 0;
         resetEncoders();
+        diffyL.setPower(0);
+        diffyR.setPower(0);
     }
 
     public void resetEncoders() {
@@ -89,28 +92,32 @@ public class Differential {
     }
 
     // --------------------
-    // Slot control
+    // Slot / Angle control
     // --------------------
     public void goToSlot(int slot) {
         switch (slot) {
-            case 1: currentSlotBase = slot1Pos; TURRET_OFFSET_INCHES = 5.0; break;
-            case 2: currentSlotBase = slot2Pos; TURRET_OFFSET_INCHES = 0.0; break;
+            case 1: currentSlotBase = slot1Pos; break;
+            case 2: currentSlotBase = slot2Pos; break;
             case 3:
-            default: currentSlotBase = slot3Pos; TURRET_OFFSET_INCHES = -5.0; break;
+            default: currentSlotBase = slot3Pos; break;
         }
         updateTargets();
     }
 
     public void setTargetAngle(double angle) {
-        compensatedAngle = Range.clip(angle, MIN_ANGLE, MAX_ANGLE);
+        compensatedAngle = angle;
         updateTargets();
     }
 
     private void updateTargets() {
-        targetL = currentSlotBase - (compensatedAngle * angleScale);
-        targetR = currentSlotBase + (compensatedAngle * angleScale); // R reversed physically
+        // Fixed: rotate turret without moving gantry
+        targetL = currentSlotBase + (compensatedAngle * angleScale);
+        targetR = currentSlotBase - (compensatedAngle * angleScale); // flip angle only
     }
 
+    // --------------------
+    // Proper angle normalization
+    // --------------------
     private double normalizeDeg(double angle) {
         angle %= 360.0;
         if (angle > 180) angle -= 360;
@@ -123,9 +130,10 @@ public class Differential {
     // --------------------
     public void aimToGoal(Pose2D currentPose, Pose2D targetGoal) {
         double headingRad = Math.toRadians(currentPose.getHeading(AngleUnit.DEGREES));
-
-        double turretX = currentPose.getX(DistanceUnit.INCH) + TURRET_OFFSET_INCHES * Math.cos(headingRad);
-        double turretY = currentPose.getY(DistanceUnit.INCH) + TURRET_OFFSET_INCHES * Math.sin(headingRad);
+        double turretX = currentPose.getX(DistanceUnit.INCH)
+                + TURRET_OFFSET_INCHES * Math.cos(headingRad);
+        double turretY = currentPose.getY(DistanceUnit.INCH)
+                + TURRET_OFFSET_INCHES * Math.sin(headingRad);
 
         double dx = targetGoal.getX(DistanceUnit.INCH) - turretX;
         double dy = targetGoal.getY(DistanceUnit.INCH) - turretY;
@@ -133,10 +141,15 @@ public class Differential {
         double fieldAngle = Math.toDegrees(Math.atan2(dy, dx));
         double robotHeading = currentPose.getHeading(AngleUnit.DEGREES);
 
-        double desiredAngle = normalizeDeg(fieldAngle - robotHeading - 90.0);
+        double desiredAngle = fieldAngle - robotHeading - 90.0;
+        desiredAngle = normalizeDeg(desiredAngle);
 
-        if (desiredAngle < -90) desiredAngle = 0;
-        if (desiredAngle > 90) desiredAngle = 180;
+        // Convert [-180,180] → [0,180] safely
+        if (desiredAngle < -90) {
+            desiredAngle = 180;
+        } else if (desiredAngle < 0) {
+            desiredAngle = 0;
+        }
 
         setTargetAngle(desiredAngle);
     }
@@ -145,14 +158,16 @@ public class Differential {
     // Update loop
     // --------------------
     public void update() {
-
-        double currL = -encL.getCurrentPosition();
+        double currL = encL.getCurrentPosition();
         double currR = encR.getCurrentPosition();
 
         double errorL = targetL - currL;
         double errorR = targetR - currR;
 
-        if (Math.abs(errorL) + Math.abs(errorR) <= toleranceTicks) {
+        // Select tolerance
+        double tolerance = farZone ? toleranceTicksFar : toleranceTicksClose;
+
+        if (Math.abs(errorL) + Math.abs(errorR) <= tolerance) {
             integralL = 0;
             integralR = 0;
         }
@@ -172,19 +187,20 @@ public class Differential {
         double powerL = errorL * kP + integralL * kI + dL * kD;
         double powerR = errorR * kP + integralR * kI + dR * kD;
 
-        if (Math.abs(errorL) > toleranceTicks) powerL += Math.signum(errorL) * kS;
-        if (Math.abs(errorR) > toleranceTicks) powerR += Math.signum(errorR) * kS;
+        // Feedforward for large errors
+        if (Math.abs(errorL) > tolerance) powerL += Math.signum(errorL) * kS;
+        if (Math.abs(errorR) > tolerance) powerR += Math.signum(errorR) * kS;
 
-        atTarget = Math.abs(errorL) <= toleranceTicks && Math.abs(errorR) <= toleranceTicks;
+        atTarget = Math.abs(errorL) <= tolerance && Math.abs(errorR) <= tolerance;
 
+        // Apply mirrored power
         diffyL.setPower(Range.clip(powerL, -maxPower, maxPower));
-        diffyR.setPower(Range.clip(powerR, -maxPower, maxPower));
-
-        // --- Debug telemetry ---
-        System.out.printf("SlotBase: %.1f | CompAngle: %.2f | tL: %.1f tR: %.1f | eL: %.1f eR: %.1f | pL: %.2f pR: %.2f | atTarget: %b\n",
-                currentSlotBase, compensatedAngle, targetL, targetR, errorL, errorR, powerL, powerR, atTarget);
+        diffyR.setPower(Range.clip(powerR, -maxPower, maxPower)); // now both correctly oriented
     }
 
+    // --------------------
+    // Utilities
+    // --------------------
     public int getEncoderL() { return encL.getCurrentPosition(); }
     public int getEncoderR() { return encR.getCurrentPosition(); }
 }
