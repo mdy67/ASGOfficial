@@ -26,13 +26,13 @@ public class Differential {
     public static double toleranceTicksFar = 80;    // default
     public static double MAX_INTEGRAL = 5000;
 
-    public static double slot1Pos = -5300;   // negative offsets for L, positive for R
+    public static double slot1Pos = -5300;   // gantry slots
     public static double slot2Pos = -2300;
     public static double slot3Pos = 0;       // default starting slot
-    public static double angleScale = 38.76;
+    public static double angleScale = 38.76; // turret rotation scaling
 
     public boolean farZone = true;           // for tuning tolerances
-    private double currentSlotBase = 0;
+    private double currentSlotBase = 0;      // gantry position base
 
     // --------------------
     // Hardware
@@ -53,9 +53,8 @@ public class Differential {
     private double integralR = 0;
 
     public boolean atTarget = false;
-    public double compensatedAngle = 0;
+    public double compensatedAngle = 0; // turret angle offset only
 
-    // Turret offset for aim calculations
     private double TURRET_OFFSET_INCHES = -5.0;
 
     // --------------------
@@ -92,7 +91,7 @@ public class Differential {
     }
 
     // --------------------
-    // Slot / Angle control
+    // Gantry Slot Control
     // --------------------
     public void goToSlot(int slot) {
         switch (slot) {
@@ -104,23 +103,19 @@ public class Differential {
         updateTargets();
     }
 
+    // --------------------
+    // Turret Rotation Control
+    // --------------------
     public void setTargetAngle(double angle) {
-        compensatedAngle = angle;
+        compensatedAngle = -angle;
         updateTargets();
     }
 
     private void updateTargets() {
-        // -----------------------
-        // Correct logic:
-        // Slot offsets (gantry) -> L/R opposite
-        // Angle offsets (rotation) -> L/R same
-        // -----------------------
-        double slotL = -currentSlotBase;
-        double slotR = currentSlotBase;
-        double angleOffset = compensatedAngle * angleScale;
-
-        targetL = slotL + angleOffset;
-        targetR = slotR + angleOffset;
+        // Slot affects gantry: move L/R together
+        // Angle affects turret: move L/R opposite for rotation
+        targetL = -currentSlotBase + (-compensatedAngle * angleScale);
+        targetR = currentSlotBase + (-compensatedAngle * angleScale);
     }
 
     // --------------------
@@ -152,12 +147,12 @@ public class Differential {
         double desiredAngle = fieldAngle - robotHeading - 90.0;
         desiredAngle = normalizeDeg(desiredAngle);
 
-        // Clamp angle to [0,180] safely
-        if (desiredAngle < -90) {
-            desiredAngle = 180;
-        } else if (desiredAngle < 0) {
-            desiredAngle = 0;
-        }
+        // Map negative left → positive left rotation
+        desiredAngle = -desiredAngle;
+
+        // Clamp to [0,180] safe range
+        if (desiredAngle < -90) desiredAngle = 180;
+        else if (desiredAngle < 0) desiredAngle = 0;
 
         setTargetAngle(desiredAngle);
     }
