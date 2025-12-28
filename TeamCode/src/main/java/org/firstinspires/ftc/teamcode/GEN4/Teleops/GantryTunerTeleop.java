@@ -51,9 +51,9 @@ import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
             }
             */
 
-            if (gamepad1.a) {
-                robot.shoot_133(140);
-            }
+         //   if (gamepad1.a) {
+          //      robot.shoot_133(140);
+          //  }
 
 
             telemetry.addLine("=== DIFFERENTIAL ===");

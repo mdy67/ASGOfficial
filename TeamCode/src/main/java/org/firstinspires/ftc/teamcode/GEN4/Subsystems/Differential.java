@@ -20,7 +20,6 @@ public class Differential {
     public static double kI = 0.000013;
     public static double kD = 0.00005;
     public static double kS = 0.13;
-    public double ANGLE_ADJUST = 0;
 
     public static double maxPower = 0.8;
     public static double toleranceTicks = 80;
@@ -60,6 +59,7 @@ public class Differential {
     public boolean atTarget = false;
     public double compensatedAngle = 0;
     public boolean farZone = false;
+    public int ANGLE_ADJUST = 0;
 
     // Turret offset
     private double TURRET_OFFSET_INCHES = -5.0;
@@ -101,8 +101,7 @@ public class Differential {
     }
 
     public void setTargetAngle(double angle) {
-    //    compensatedAngle = Range.clip(angle, MIN_ANGLE, MAX_ANGLE);
-        compensatedAngle = Range.clip(angle, MIN_ANGLE, MAX_ANGLE) + ANGLE_ADJUST;
+        compensatedAngle = Range.clip(angle, MIN_ANGLE, MAX_ANGLE);
         updateTargets();
     }
 
@@ -122,7 +121,7 @@ public class Differential {
     }
 
     // --------------------
-    // Aim to goal (FIXED)
+    // Aim to goal
     // --------------------
     public void aimToGoal(Pose2D currentPose, Pose2D targetGoal) {
 
@@ -143,6 +142,9 @@ public class Differential {
 
         desiredAngle = normalizeDeg(desiredAngle);
 
+        // Adjust for Blue15Full tuning
+        desiredAngle += ANGLE_ADJUST;
+
         // Convert [-180,180] → [0,180] safely
         if (desiredAngle < -90) {
             desiredAngle = 180;
@@ -154,7 +156,7 @@ public class Differential {
     }
 
     // --------------------
-    // Update loop
+    // Update loop (PID + kS)
     // --------------------
     public void update() {
 
@@ -184,6 +186,7 @@ public class Differential {
         double powerL = errorL * kP + integralL * kI + dL * kD;
         double powerR = errorR * kP + integralR * kI + dR * kD;
 
+        // Add feedforward if far from target
         if (Math.abs(errorL) > toleranceTicks) powerL += Math.signum(errorL) * kS;
         if (Math.abs(errorR) > toleranceTicks) powerR += Math.signum(errorR) * kS;
 

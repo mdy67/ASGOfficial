@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.GEN4.Subsystems;
 
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -19,20 +17,19 @@ public class Robot {
     public Colors colors;
     public Arms arms;
     public Limelight limelight;
+    public Wait wait = new Wait();
 
     public Pose2D blueGoal = new Pose2D(DistanceUnit.INCH, -60, 62, AngleUnit.DEGREES, 0);
     public Pose2D redGoal  = new Pose2D(DistanceUnit.INCH, 62, 65, AngleUnit.DEGREES, 0);
 
     public Pose2D adjustedPose = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
-    public Wait wait = new Wait();
 
     public double MotifTagID = 21; // 21 BY DEFAULT
     public int splineCounter = 0;
+    public int counter = 0; // FIXED: for shoot_133
 
     private Pose2D odomOffset = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
     private boolean offsetInitialized = false;
-
-    private boolean AUTO_TESTING_MODE = true;
 
     public Robot(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
@@ -60,22 +57,13 @@ public class Robot {
         differential.resetEncoders();
     }
 
-
-
     public void update() {
         drivetrain.update();
         wait.update();
-
+        colors.update();
         flywheel.update();
         differential.update();
         limelight.update();
-        if (AUTO_TESTING_MODE) {
-            colors.updateTESTING(drivetrain.DTatTarget(), flywheel.atTargetVelocity(), differential.atTarget);
-        } else {
-            colors.update();
-        }
-
-
 
         Pose2D odomPose = drivetrain.robotPose;
 
@@ -121,11 +109,6 @@ public class Robot {
         drivetrain.goToPoint(targetPoint, maxPower, xyThreshold, hThreshold);
     }
 
-    public void goToPoint2(Pose2D targetPoint, double maxPower, double xyThreshold, double hThreshold, double xyMult, double hMult) {
-        drivetrain.state = Drivetrain.State.GO_TO_POINT;
-        drivetrain.goToPoint2(targetPoint, maxPower, xyThreshold, hThreshold, xyMult, hMult);
-    }
-
     public void goalLock(Pose2D currentPose) {
         differential.aimToGoal(currentPose, getTargetGoal());
         flywheel.aimToGoal(getTargetGoal(), currentPose, drivetrain.XVel(), drivetrain.YVel());
@@ -133,12 +116,12 @@ public class Robot {
 
     public void autoIdle() {
         if (alliance.isBlue()) {
-            differential.setTargetAngle(150);
+            differential.setTargetAngle(140);
         } else {
-            differential.setTargetAngle(30);
+            differential.setTargetAngle(40);
         }
 
-        flywheel.setTargetVelocity(350);
+        flywheel.setTargetVelocity(300);
         intake.stop();
         arms.reset();
     }
@@ -156,11 +139,6 @@ public class Robot {
 
     public boolean systemsReady() {
         return drivetrain.DTatTarget() && differential.atTarget && flywheel.atTargetVelocity();
-    }
-
-    public void holdPoint(Pose2D targetPoint, double maxPower){
-        drivetrain.state = Drivetrain.State.HOLD_POINT;
-        drivetrain.goToPoint(targetPoint, maxPower, 0, 0);
     }
 
     public Pose2D getTargetGoal() {
@@ -186,50 +164,12 @@ public class Robot {
         splineCounter = 0;
     }
 
+    public void shoot_133() {
+
+    }
 
     public double getOffsetX() { return odomOffset.getX(DistanceUnit.INCH); }
     public double getOffsetY() { return odomOffset.getY(DistanceUnit.INCH); }
     public boolean isLimelightActive() { return limelight.tagDetected; }
-
-    public int counter = 0;
-    private ElapsedTime sortingTimer = new ElapsedTime();
-    public void shoot_133(double targetAngle){
-        if (counter == 0) {
-            differential.goToSlot(2);
-            differential.setTargetAngle(90);
-            flywheel.aimToGoal(getTargetGoal(), drivetrain.robotPose, drivetrain.XVel(), drivetrain.YVel());
-            if (systemsReady()) {
-                sortingTimer.reset();
-                arms.arm1_flickON();
-                intake.runIntake(-0.5);
-                counter = 1;
-            }
-        } else if (counter == 1 && sortingTimer.milliseconds() > 200) {
-            differential.goToSlot(3);
-            if (systemsReady()) {
-                sortingTimer.reset();
-                rapidFire();
-                counter = 2;
-            }
-        } else if (counter == 2 && sortingTimer.milliseconds() > 400) {
-            counter = 3;
-            autoIdle();
-        }
-    }
-
-    public void shoot_223(){
-
-    }
-
-    public void shoot_233(){
-
-    }
-
-    /*
-    public void shoot_333() {
-       ALREADY EXISTS WITHIN AUTO CLASS AS "RAPID FIRE"
-    }
-
-     */
 
 }

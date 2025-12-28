@@ -223,7 +223,7 @@ public class Blue15Full extends LinearOpMode {
                         robot.goalLock(robot.drivetrain.robotPose);
                     }
 
-                    robot.shoot_133(90);
+                    robot.shoot_133();
                     if (robot.counter == 3) {
                         rapidFireActive = false;
                         robot.resetSplineCounter();
