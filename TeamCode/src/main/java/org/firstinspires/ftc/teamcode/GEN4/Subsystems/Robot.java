@@ -21,39 +21,71 @@ public class Robot {
     public Limelight limelight;
     public Wait wait = new Wait();
 
+    /* =========================
+       FIELD CONSTANTS
+       ========================= */
     public Pose2D blueGoal = new Pose2D(DistanceUnit.INCH, -60, 62, AngleUnit.DEGREES, 0);
-    public Pose2D redGoal  = new Pose2D(DistanceUnit.INCH, 62, 65, AngleUnit.DEGREES, 0);
+    public Pose2D redGoal  = new Pose2D(DistanceUnit.INCH,  62, 65, AngleUnit.DEGREES, 0);
 
     public Pose2D adjustedPose = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
 
-    public double MotifTagID = 21; // 21 BY DEFAULT
+    /* =========================
+       AUTO / STATE VARIABLES
+       ========================= */
+    public double MotifTagID = 21;
     public int splineCounter = 0;
-    public int counter = 0; // FIXED: for shoot_133
+
+    // legacy counter used by auto logic
+    public int counter = 0;
 
     private Pose2D odomOffset = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
     private boolean offsetInitialized = false;
-    ElapsedTime sortTimer;
 
+    private boolean AUTO_TESTING_MODE = true;
 
+    /* =========================
+       SHOOT 133 STATE MACHINE
+       ========================= */
+    private enum ShootState {
+        IDLE,
+        GO_SLOT_1,
+        FLICK_AND_INTAKE,
+        GO_SLOT_3,
+        RAPID_FIRE,
+        DONE
+    }
+
+    private ShootState shootState = ShootState.IDLE;
+    private final ElapsedTime shootTimer = new ElapsedTime();
+
+    /* =========================
+       CONSTRUCTOR
+       ========================= */
     public Robot(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
 
-        drivetrain = new Drivetrain(hardwareMap);
+        drivetrain   = new Drivetrain(hardwareMap);
         differential = new Differential(hardwareMap);
-        colors = new Colors(hardwareMap);
-        arms = new Arms(hardwareMap);
-        intake = new Intake(hardwareMap);
-        limelight = new Limelight(hardwareMap);
+        colors       = new Colors(hardwareMap);
+        arms         = new Arms(hardwareMap);
+        intake       = new Intake(hardwareMap);
+        limelight    = new Limelight(hardwareMap);
 
         try {
-            flywheel = new Flywheel(hardwareMap, hardwareMap.voltageSensor.iterator().hasNext()
-                    ? hardwareMap.voltageSensor.iterator().next() : null);
+            flywheel = new Flywheel(
+                    hardwareMap,
+                    hardwareMap.voltageSensor.iterator().hasNext()
+                            ? hardwareMap.voltageSensor.iterator().next()
+                            : null
+            );
         } catch (Exception e) {
             flywheel = null;
         }
-        sortTimer = new ElapsedTime();
     }
 
+    /* =========================
+       STARTUP
+       ========================= */
     public void startup() {
         arms.arm3_flickOFF();
         arms.arm2_flickOFF();
@@ -62,41 +94,66 @@ public class Robot {
         differential.resetEncoders();
     }
 
+    /* =========================
+       UPDATE LOOP
+       ========================= */
     public void update() {
         drivetrain.update();
         wait.update();
-        colors.update();
         flywheel.update();
         differential.update();
         limelight.update();
 
+        if (AUTO_TESTING_MODE) {
+            colors.updateTESTING(
+                    drivetrain.DTatTarget(),
+                    flywheel.atTargetVelocity(),
+                    differential.atTarget
+            );
+        } else {
+            colors.update();
+        }
+
         Pose2D odomPose = drivetrain.robotPose;
 
-        boolean hasValidTag = limelight.LimelightPose != null
-                && limelight.LimelightPose.position.x != 0.0
-                && limelight.LimelightPose.position.y != 0.0
-                && limelight.tagDetected;
+        boolean hasValidTag =
+                limelight.LimelightPose != null &&
+                        limelight.LimelightPose.position.x != 0.0 &&
+                        limelight.LimelightPose.position.y != 0.0 &&
+                        limelight.tagDetected;
 
-        boolean canFuse = hasValidTag
-                && drivetrain.XVel() < 1.0
-                && drivetrain.YVel() < 1.0
-                && drivetrain.TVel() < 2.0;
+        boolean canFuse =
+                hasValidTag &&
+                        drivetrain.XVel() < 1.0 &&
+                        drivetrain.YVel() < 1.0 &&
+                        drivetrain.TVel() < 2.0;
 
         if (canFuse) {
             if (!offsetInitialized) {
-                odomOffset = new Pose2D(DistanceUnit.INCH,
+                odomOffset = new Pose2D(
+                        DistanceUnit.INCH,
                         limelight.LimelightPose.position.x - odomPose.getX(DistanceUnit.INCH),
                         limelight.LimelightPose.position.y - odomPose.getY(DistanceUnit.INCH),
                         AngleUnit.DEGREES,
-                        0);
+                        0
+                );
                 offsetInitialized = true;
             } else {
-                double newOffsetX = odomOffset.getX(DistanceUnit.INCH) * (1 - 0.1)
-                        + (limelight.LimelightPose.position.x - odomPose.getX(DistanceUnit.INCH)) * 0.1;
-                double newOffsetY = odomOffset.getY(DistanceUnit.INCH) * (1 - 0.1)
-                        + (limelight.LimelightPose.position.y - odomPose.getY(DistanceUnit.INCH)) * 0.1;
+                double newOffsetX =
+                        odomOffset.getX(DistanceUnit.INCH) * 0.9 +
+                                (limelight.LimelightPose.position.x - odomPose.getX(DistanceUnit.INCH)) * 0.1;
 
-                odomOffset = new Pose2D(DistanceUnit.INCH, newOffsetX, newOffsetY, AngleUnit.DEGREES, 0);
+                double newOffsetY =
+                        odomOffset.getY(DistanceUnit.INCH) * 0.9 +
+                                (limelight.LimelightPose.position.y - odomPose.getY(DistanceUnit.INCH)) * 0.1;
+
+                odomOffset = new Pose2D(
+                        DistanceUnit.INCH,
+                        newOffsetX,
+                        newOffsetY,
+                        AngleUnit.DEGREES,
+                        0
+                );
             }
         }
 
@@ -109,11 +166,34 @@ public class Robot {
         );
     }
 
-    public void goToPoint(Pose2D targetPoint, double maxPower, double xyThreshold, double hThreshold){
+    /* =========================
+       DRIVETRAIN HELPERS
+       ========================= */
+    public void goToPoint(Pose2D targetPoint, double maxPower, double xyThreshold, double hThreshold) {
         drivetrain.state = Drivetrain.State.GO_TO_POINT;
         drivetrain.goToPoint(targetPoint, maxPower, xyThreshold, hThreshold);
     }
 
+    public void goToPoint2(
+            Pose2D targetPoint,
+            double maxPower,
+            double xyThreshold,
+            double hThreshold,
+            double xyMult,
+            double hMult
+    ) {
+        drivetrain.state = Drivetrain.State.GO_TO_POINT;
+        drivetrain.goToPoint2(targetPoint, maxPower, xyThreshold, hThreshold, xyMult, hMult);
+    }
+
+    public void holdPoint(Pose2D targetPoint, double maxPower) {
+        drivetrain.state = Drivetrain.State.HOLD_POINT;
+        drivetrain.goToPoint(targetPoint, maxPower, 0, 0);
+    }
+
+    /* =========================
+       GOAL / SHOOTING HELPERS
+       ========================= */
     public void goalLock(Pose2D currentPose) {
         differential.aimToGoal(currentPose, getTargetGoal());
         flywheel.aimToGoal(getTargetGoal(), currentPose, drivetrain.XVel(), drivetrain.YVel());
@@ -121,12 +201,12 @@ public class Robot {
 
     public void autoIdle() {
         if (alliance.isBlue()) {
-            differential.setTargetAngle(140);
+            differential.setTargetAngle(150);
         } else {
-            differential.setTargetAngle(40);
+            differential.setTargetAngle(30);
         }
 
-        flywheel.setTargetVelocity(300);
+        flywheel.setTargetVelocity(350);
         intake.stop();
         arms.reset();
     }
@@ -143,18 +223,75 @@ public class Robot {
     }
 
     public boolean systemsReady() {
-        return drivetrain.DTatTarget() && differential.atTarget && flywheel.atTargetVelocity();
+        return drivetrain.DTatTarget()
+                && differential.atTarget
+                && flywheel.atTargetVelocity();
     }
 
-    public Pose2D getTargetGoal() {
-        if (alliance.isRed()) {
-            return redGoal;
-        } else {
-            return blueGoal;
+    /* =========================
+       SHOOT 133 (NON-BLOCKING)
+       CALL EVERY LOOP
+       ========================= */
+    public boolean shoot_133(boolean goYet) {
+
+        switch (shootState) {
+
+            case IDLE:
+                if (goYet) {
+                    differential.goToSlot(1);
+                    shootState = ShootState.GO_SLOT_1;
+                }
+                break;
+
+            case GO_SLOT_1:
+                if (differential.atTarget) {
+                    shootTimer.reset();
+                    intake.runIntake(-0.5);
+                    arms.arm1_flickON();
+                    shootState = ShootState.FLICK_AND_INTAKE;
+                }
+                break;
+
+            case FLICK_AND_INTAKE:
+                if (shootTimer.seconds() >= 0.5) {
+                    intake.stop();
+                    arms.arm1_flickOFF();
+                    differential.goToSlot(3);
+                    shootState = ShootState.GO_SLOT_3;
+                }
+                break;
+
+            case GO_SLOT_3:
+                if (differential.atTarget) {
+                    shootTimer.reset();
+                    rapidFire();
+                    shootState = ShootState.RAPID_FIRE;
+                }
+                break;
+
+            case RAPID_FIRE:
+                if (shootTimer.seconds() >= 0.5) {
+                    neutral();
+                    shootState = ShootState.DONE;
+                }
+                break;
+
+            case DONE:
+                shootState = ShootState.IDLE;
+                return true;
         }
+
+        return false;
     }
 
-    public void readMotifTag(){
+    /* =========================
+       AUTO UTILITIES
+       ========================= */
+    public Pose2D getTargetGoal() {
+        return alliance.isRed() ? redGoal : blueGoal;
+    }
+
+    public void readMotifTag() {
         if (limelight.getMotif() != 0) {
             MotifTagID = limelight.getMotif();
         }
@@ -162,33 +299,14 @@ public class Robot {
 
     public void nextSplinePoint() {
         update();
-        if (drivetrain.DTatTarget()) { splineCounter ++; };
+        if (drivetrain.DTatTarget()) splineCounter++;
     }
 
     public void resetSplineCounter() {
         splineCounter = 0;
     }
 
-
-    public void shoot_133() {
-        if (counter == 0) {
-            differential.goToSlot(1);
-            if (differential.atTarget) {
-                sortTimer.reset();
-                intake.runIntake(-0.5);
-                arms.arm1_flickON();
-                counter = 1;
-            }
-        }
-        if (counter == 1 && sortTimer.milliseconds() > 0.5) {
-            differential.goToSlot(3);
-        }
-
-
-    }
-
     public double getOffsetX() { return odomOffset.getX(DistanceUnit.INCH); }
     public double getOffsetY() { return odomOffset.getY(DistanceUnit.INCH); }
     public boolean isLimelightActive() { return limelight.tagDetected; }
-
 }
