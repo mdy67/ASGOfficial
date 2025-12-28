@@ -110,10 +110,11 @@ public class Differential {
     }
 
     private void updateTargets() {
-        // ---- FIXED: for turret rotation, both move in same relative direction ----
-        // Slot offset is added to both, compensatedAngle drives rotation
-        targetL = currentSlotBase + (compensatedAngle * angleScale);
-        targetR = currentSlotBase + (compensatedAngle * angleScale);
+        // --- FIXED LOGIC ---
+        // For rotation: angle moves L/R opposite
+        // For gantry translation: slot offset moves L/R opposite
+        targetL = -currentSlotBase - (compensatedAngle * angleScale);  // negative slot offset
+        targetR = currentSlotBase - (compensatedAngle * angleScale);   // positive slot offset
     }
 
     // --------------------
@@ -194,9 +195,9 @@ public class Differential {
 
         atTarget = Math.abs(errorL) <= tolerance && Math.abs(errorR) <= tolerance;
 
-        // Apply mirrored power only for servo physical orientation
+        // Apply mirrored power
         diffyL.setPower(Range.clip(powerL, -maxPower, maxPower));
-        diffyR.setPower(Range.clip(powerR, -maxPower, maxPower));
+        diffyR.setPower(Range.clip(powerR, -maxPower, maxPower)); // no negative here: targets already handled
     }
 
     // --------------------
