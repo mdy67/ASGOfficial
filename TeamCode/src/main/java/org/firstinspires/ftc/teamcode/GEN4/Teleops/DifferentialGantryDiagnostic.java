@@ -50,10 +50,10 @@ public class DifferentialGantryDiagnostic extends LinearOpMode {
             // Angle adjustment
             // -------------------------
             if (gamepad1.left_bumper) {
-                targetAngle -= 0.1; // small step
+                targetAngle -= 0.5; // small step
                 differential.setTargetAngle(targetAngle);
             } else if (gamepad1.right_bumper) {
-                targetAngle += 0.1;
+                targetAngle += 0.5;
                 differential.setTargetAngle(targetAngle);
             }
 

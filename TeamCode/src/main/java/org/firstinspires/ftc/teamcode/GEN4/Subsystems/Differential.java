@@ -16,19 +16,19 @@ public class Differential {
     // --------------------
     // PID / control constants (FTC DASHBOARD TUNABLE)
     // --------------------
-    public static double kP = 0.00015;
+    public static double kP = 0.00012;
     public static double kI = 0.000013;
     public static double kD = 0.00005;
-    public static double kS = 0.13;
+    public static double kS = 0.11;
 
     public static double maxPower = 0.8;
     public static double toleranceTicksClose = 40;  // tighter near goal
     public static double toleranceTicksFar = 80;    // default
     public static double MAX_INTEGRAL = 5000;
 
-    public static double slot1Pos = 5300;   // positive offsets
-    public static double slot2Pos = 2300;
-    public static double slot3Pos = 0;      // default starting slot
+    public static double slot1Pos = -5300;   // negative offsets for L, positive for R
+    public static double slot2Pos = -2300;
+    public static double slot3Pos = 0;       // default starting slot
     public static double angleScale = 38.76;
 
     public boolean farZone = true;           // for tuning tolerances
@@ -110,11 +110,17 @@ public class Differential {
     }
 
     private void updateTargets() {
-        // --- FIXED LOGIC ---
-        // For rotation: angle moves L/R opposite
-        // For gantry translation: slot offset moves L/R opposite
-        targetL = -currentSlotBase - (compensatedAngle * angleScale);  // negative slot offset
-        targetR = currentSlotBase - (compensatedAngle * angleScale);   // positive slot offset
+        // -----------------------
+        // Correct logic:
+        // Slot offsets (gantry) -> L/R opposite
+        // Angle offsets (rotation) -> L/R same
+        // -----------------------
+        double slotL = -currentSlotBase;
+        double slotR = currentSlotBase;
+        double angleOffset = compensatedAngle * angleScale;
+
+        targetL = slotL + angleOffset;
+        targetR = slotR + angleOffset;
     }
 
     // --------------------
@@ -146,7 +152,7 @@ public class Differential {
         double desiredAngle = fieldAngle - robotHeading - 90.0;
         desiredAngle = normalizeDeg(desiredAngle);
 
-        // Convert [-180,180] → [0,180] safely
+        // Clamp angle to [0,180] safely
         if (desiredAngle < -90) {
             desiredAngle = 180;
         } else if (desiredAngle < 0) {
@@ -195,9 +201,9 @@ public class Differential {
 
         atTarget = Math.abs(errorL) <= tolerance && Math.abs(errorR) <= tolerance;
 
-        // Apply mirrored power
+        // Apply power to servos
         diffyL.setPower(Range.clip(powerL, -maxPower, maxPower));
-        diffyR.setPower(Range.clip(powerR, -maxPower, maxPower)); // no negative here: targets already handled
+        diffyR.setPower(Range.clip(powerR, -maxPower, maxPower));
     }
 
     // --------------------
