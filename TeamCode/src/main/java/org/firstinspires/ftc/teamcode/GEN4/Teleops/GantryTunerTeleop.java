@@ -36,6 +36,7 @@ import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
 
         }
         private boolean TUNING_MODE = false;
+        boolean thing = false;
         @Override
         public void loop() {
             robot.update();
@@ -51,11 +52,21 @@ import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
             }
             */
 
-         //   if (gamepad1.a) {
-          //      robot.shoot_133(140);
-          //  }
 
 
+            if (gamepad1.a) {
+                if (!thing) {
+                    robot.shoot_133();
+                    thing = true;
+                }
+
+
+            } else {
+                thing = false;
+            }
+
+
+            robot.shoot_133();
             telemetry.addLine("=== DIFFERENTIAL ===");
             telemetry.addData("Encoders L/R", "%d / %d",
                     robot.differential.encL.getCurrentPosition(),

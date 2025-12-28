@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.GEN4.Subsystems;
 
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -30,6 +32,8 @@ public class Robot {
 
     private Pose2D odomOffset = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
     private boolean offsetInitialized = false;
+    ElapsedTime sortTimer;
+
 
     public Robot(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
@@ -47,6 +51,7 @@ public class Robot {
         } catch (Exception e) {
             flywheel = null;
         }
+        sortTimer = new ElapsedTime();
     }
 
     public void startup() {
@@ -164,7 +169,21 @@ public class Robot {
         splineCounter = 0;
     }
 
+
     public void shoot_133() {
+        if (counter == 0) {
+            differential.goToSlot(1);
+            if (differential.atTarget) {
+                sortTimer.reset();
+                intake.runIntake(-0.5);
+                arms.arm1_flickON();
+                counter = 1;
+            }
+        }
+        if (counter == 1 && sortTimer.milliseconds() > 0.5) {
+            differential.goToSlot(3);
+        }
+
 
     }
 
