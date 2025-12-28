@@ -114,8 +114,8 @@ public class Differential {
     private void updateTargets() {
         // Slot affects gantry: move L/R together
         // Angle affects turret: move L/R opposite for rotation
-        targetL = -currentSlotBase + (-compensatedAngle * angleScale);
-        targetR = currentSlotBase + (-compensatedAngle * angleScale);
+        targetL = -currentSlotBase + (compensatedAngle * angleScale);
+        targetR = currentSlotBase + (compensatedAngle * angleScale);
     }
 
     // --------------------
