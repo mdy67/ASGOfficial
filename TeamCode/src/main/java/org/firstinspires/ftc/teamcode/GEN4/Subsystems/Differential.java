@@ -110,9 +110,10 @@ public class Differential {
     }
 
     private void updateTargets() {
-        // Fixed: rotate turret without moving gantry
+        // ---- FIXED: for turret rotation, both move in same relative direction ----
+        // Slot offset is added to both, compensatedAngle drives rotation
         targetL = currentSlotBase + (compensatedAngle * angleScale);
-        targetR = currentSlotBase - (compensatedAngle * angleScale); // flip angle only
+        targetR = currentSlotBase + (compensatedAngle * angleScale);
     }
 
     // --------------------
@@ -193,9 +194,9 @@ public class Differential {
 
         atTarget = Math.abs(errorL) <= tolerance && Math.abs(errorR) <= tolerance;
 
-        // Apply mirrored power
+        // Apply mirrored power only for servo physical orientation
         diffyL.setPower(Range.clip(powerL, -maxPower, maxPower));
-        diffyR.setPower(Range.clip(powerR, -maxPower, maxPower)); // now both correctly oriented
+        diffyR.setPower(Range.clip(powerR, -maxPower, maxPower));
     }
 
     // --------------------
