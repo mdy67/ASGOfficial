@@ -5,24 +5,24 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Differential;
+import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
 
 @TeleOp(name = "Differential Gantry Diagnostic", group = "TEST")
 public class DifferentialGantryDiagnostic extends LinearOpMode {
 
     private Differential differential;
     private ElapsedTime timer = new ElapsedTime();
-
+    private Drivetrain drivetrain;
     @Override
     public void runOpMode() throws InterruptedException {
 
         // Initialize differential
         differential = new Differential(hardwareMap);
-
+        drivetrain = new Drivetrain(hardwareMap);
         telemetry.addLine("Differential initialized. Waiting for start...");
         telemetry.update();
-
+        drivetrain.state = Drivetrain.State.IDLE;
         waitForStart();
-
         int currentSlot = 3;      // Start at slot 3
         double targetAngle = 0;   // Start angle
         timer.reset();
@@ -45,7 +45,6 @@ public class DifferentialGantryDiagnostic extends LinearOpMode {
                 differential.goToSlot(currentSlot);
                 timer.reset();
             }
-
             // -------------------------
             // Angle adjustment
             // -------------------------
@@ -79,4 +78,5 @@ public class DifferentialGantryDiagnostic extends LinearOpMode {
             telemetry.update();
         }
     }
+
 }

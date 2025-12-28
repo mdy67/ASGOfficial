@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.GEN4.Subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
@@ -17,14 +18,12 @@ public class Differential {
     // PID / control constants (FTC DASHBOARD TUNABLE)
     // --------------------
     public static double kP = 0.00012;
-    public static double kI = 0.000013;
     public static double kD = 0.00005;
-    public static double kS = 0.11;
+    public static double kS = 0.13;
 
     public static double maxPower = 0.8;
     public static double toleranceTicksClose = 40;  // tighter near goal
     public static double toleranceTicksFar = 80;    // default
-    public static double MAX_INTEGRAL = 5000;
 
     public static double slot1Pos = -5300;   // gantry slots
     public static double slot2Pos = -2300;
@@ -49,9 +48,7 @@ public class Differential {
     private double lastErrorL = 0;
     private double lastErrorR = 0;
 
-    private double integralL = 0;
-    private double integralR = 0;
-
+    public double desiredAngle = 0;
     public boolean atTarget = false;
     public double compensatedAngle = 0; // turret angle offset only
 
@@ -65,9 +62,10 @@ public class Differential {
         diffyR = hardwareMap.get(CRServo.class, "diffyR");
 
         encL = hardwareMap.get(DcMotorEx.class, "rightFront");
+        encL.setDirection(DcMotorEx.Direction.REVERSE);
         encR = hardwareMap.get(DcMotorEx.class, "intakeL");
 
-        diffyL.setDirection(CRServo.Direction.FORWARD);
+        diffyL.setDirection(CRServo.Direction.REVERSE);
         diffyR.setDirection(CRServo.Direction.FORWARD);
 
         resetToSlot3();
@@ -78,6 +76,8 @@ public class Differential {
         compensatedAngle = 0;
         targetL = 0;
         targetR = 0;
+        lastErrorL = 0;
+        lastErrorR = 0;
         resetEncoders();
         diffyL.setPower(0);
         diffyR.setPower(0);
@@ -107,14 +107,15 @@ public class Differential {
     // Turret Rotation Control
     // --------------------
     public void setTargetAngle(double angle) {
-        compensatedAngle = -angle;
+        lastErrorL = 0;
+        lastErrorR = 0;
+
+        compensatedAngle = -angle; // COMPENSATED ANGLE IS NEGATIVE
         updateTargets();
     }
 
     private void updateTargets() {
-        // Slot affects gantry: move L/R together
-        // Angle affects turret: move L/R opposite for rotation
-        targetL = -currentSlotBase + (compensatedAngle * angleScale);
+        targetL = -(currentSlotBase - (compensatedAngle * angleScale));
         targetR = currentSlotBase + (compensatedAngle * angleScale);
     }
 
@@ -133,6 +134,7 @@ public class Differential {
     // --------------------
     public void aimToGoal(Pose2D currentPose, Pose2D targetGoal) {
         double headingRad = Math.toRadians(currentPose.getHeading(AngleUnit.DEGREES));
+
         double turretX = currentPose.getX(DistanceUnit.INCH)
                 + TURRET_OFFSET_INCHES * Math.cos(headingRad);
         double turretY = currentPose.getY(DistanceUnit.INCH)
@@ -144,13 +146,9 @@ public class Differential {
         double fieldAngle = Math.toDegrees(Math.atan2(dy, dx));
         double robotHeading = currentPose.getHeading(AngleUnit.DEGREES);
 
-        double desiredAngle = fieldAngle - robotHeading - 90.0;
+        desiredAngle = fieldAngle - robotHeading - 90.0;
         desiredAngle = normalizeDeg(desiredAngle);
 
-        // Map negative left → positive left rotation
-        desiredAngle = -desiredAngle;
-
-        // Clamp to [0,180] safe range
         if (desiredAngle < -90) desiredAngle = 180;
         else if (desiredAngle < 0) desiredAngle = 0;
 
@@ -158,28 +156,16 @@ public class Differential {
     }
 
     // --------------------
-    // Update loop
+    // Update loop (PID without integral)
     // --------------------
     public void update() {
-        double currL = encL.getCurrentPosition();
+        double currL = -encL.getCurrentPosition();
         double currR = encR.getCurrentPosition();
 
         double errorL = targetL - currL;
         double errorR = targetR - currR;
 
-        // Select tolerance
         double tolerance = farZone ? toleranceTicksFar : toleranceTicksClose;
-
-        if (Math.abs(errorL) + Math.abs(errorR) <= tolerance) {
-            integralL = 0;
-            integralR = 0;
-        }
-
-        integralL += errorL;
-        integralR += errorR;
-
-        integralL = Range.clip(integralL, -MAX_INTEGRAL, MAX_INTEGRAL);
-        integralR = Range.clip(integralR, -MAX_INTEGRAL, MAX_INTEGRAL);
 
         double dL = errorL - lastErrorL;
         double dR = errorR - lastErrorR;
@@ -187,8 +173,8 @@ public class Differential {
         lastErrorL = errorL;
         lastErrorR = errorR;
 
-        double powerL = errorL * kP + integralL * kI + dL * kD;
-        double powerR = errorR * kP + integralR * kI + dR * kD;
+        double powerL = errorL * kP + dL * kD;
+        double powerR = errorR * kP + dR * kD;
 
         // Feedforward for large errors
         if (Math.abs(errorL) > tolerance) powerL += Math.signum(errorL) * kS;
@@ -197,7 +183,7 @@ public class Differential {
         atTarget = Math.abs(errorL) <= tolerance && Math.abs(errorR) <= tolerance;
 
         // Apply power to servos
-        diffyL.setPower(Range.clip(powerL, -maxPower, maxPower));
+        diffyL.setPower(Range.clip(-powerL, -maxPower, maxPower));
         diffyR.setPower(Range.clip(powerR, -maxPower, maxPower));
     }
 
