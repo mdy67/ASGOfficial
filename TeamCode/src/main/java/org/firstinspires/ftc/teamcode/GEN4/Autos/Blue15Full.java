@@ -39,6 +39,9 @@ public class Blue15Full extends LinearOpMode {
     private boolean rapidFireActive = false;
     private long rapidFireDuration = 0;
 
+    // New generalized shoot trigger
+    private boolean shootStarted = false;
+
     @Override
     public void runOpMode() {
 
@@ -69,6 +72,7 @@ public class Blue15Full extends LinearOpMode {
             telemetry.addData("Robot Y", robot.drivetrain.robotPose.getY(DistanceUnit.INCH));
             telemetry.addData("Robot Heading", robot.drivetrain.robotPose.getHeading(AngleUnit.DEGREES));
             telemetry.addData("RapidFire Active", rapidFireActive);
+            telemetry.addData("Shoot Started", shootStarted);
 
             telemetry.addData("Flywheel Target rad/s", robot.flywheel.getTargetVelocity());
             telemetry.addData("Flywheel Actual rad/s", robot.flywheel.getVelocityRadPerSec());
@@ -101,8 +105,9 @@ public class Blue15Full extends LinearOpMode {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -55, AngleUnit.DEGREES, 240), 1, 3, 0.2);
                 }
 
-
-                if (robot.systemsReady() && !rapidFireActive) {
+                // Generalized shooting trigger
+                if (robot.systemsReady() && !shootStarted) {
+                    shootStarted = true;
                     rapidFireTimer.reset();
                     rapidFireDuration = 1000;
                     rapidFireActive = true;
@@ -114,6 +119,7 @@ public class Blue15Full extends LinearOpMode {
 
                     if (rapidFireTimer.milliseconds() >= rapidFireDuration) {
                         rapidFireActive = false;
+                        shootStarted = false;
                         robot.autoIdle();
                         robot.resetSplineCounter();
                         robot.update();
@@ -122,8 +128,6 @@ public class Blue15Full extends LinearOpMode {
                         trigger = false;
                     }
                 }
-
-
 
                 robot.update();
                 if (robot.drivetrain.DTatTarget()) {
@@ -165,7 +169,9 @@ public class Blue15Full extends LinearOpMode {
                         robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, 1, AngleUnit.DEGREES, 260), 1, 3, 0.2);
                     }
 
-                    if (robot.systemsReady() && !rapidFireActive) {
+                    // Generalized shooting trigger
+                    if (robot.systemsReady() && !shootStarted) {
+                        shootStarted = true;
                         rapidFireTimer.reset();
                         rapidFireDuration = 1000;
                         rapidFireActive = true;
@@ -176,6 +182,7 @@ public class Blue15Full extends LinearOpMode {
                         robot.rapidFire();
                         if (rapidFireTimer.milliseconds() >= rapidFireDuration) {
                             rapidFireActive = false;
+                            shootStarted = false;
                             robot.autoIdle();
                             robot.resetSplineCounter();
                             robot.update();
@@ -216,41 +223,27 @@ public class Blue15Full extends LinearOpMode {
 
                     robot.counter = 0;
                 } else if (robot.splineCounter == 4) {
-
+                    robot.goalLock(robot.drivetrain.robotPose);
 
                     if (!trigger) {
                         robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, 1, AngleUnit.DEGREES, 260), 1, 3, 0.2);
-                        robot.goalLock(robot.drivetrain.robotPose);
+
                     }
 
-                 //   robot.shoot_133();
+                    // Generalized shooting for any pattern
+                    if (robot.systemsReady() && !shootStarted) {
+                        shootStarted = true;
+                        robot.shoot_133(true);
+                    }
+
                     if (robot.counter == 3) {
+                        shootStarted = false;
                         rapidFireActive = false;
                         robot.resetSplineCounter();
                         robot.update();
                         trigger = false;
                         state = State.POINT_4;
                     }
-                    /*
-                    if (robot.systemsReady() && !rapidFireActive) {
-                        rapidFireTimer.reset();
-                        rapidFireDuration = 1000;
-                        rapidFireActive = true;
-                    }
-
-                    if (rapidFireActive) {
-                        robot.goalLock(robot.drivetrain.robotPose);
-                        robot.rapidFire();
-                        if (rapidFireTimer.milliseconds() >= rapidFireDuration) {
-                            rapidFireActive = false;
-                            robot.autoIdle();
-                            robot.resetSplineCounter();
-                            robot.update();
-                            trigger = false;
-                            state = State.POINT_4;
-                        }
-                    }
-                    */
 
                     robot.update();
                     if (robot.drivetrain.DTatTarget()) {
@@ -281,7 +274,9 @@ public class Blue15Full extends LinearOpMode {
                         robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, 1, AngleUnit.DEGREES, 260), 1, 3, 0.2);
                     }
 
-                    if (robot.systemsReady() && !rapidFireActive) {
+                    // Generalized shooting trigger
+                    if (robot.systemsReady() && !shootStarted) {
+                        shootStarted = true;
                         rapidFireTimer.reset();
                         rapidFireDuration = 1000;
                         rapidFireActive = true;
@@ -292,6 +287,7 @@ public class Blue15Full extends LinearOpMode {
                         robot.rapidFire();
                         if (rapidFireTimer.milliseconds() >= rapidFireDuration) {
                             rapidFireActive = false;
+                            shootStarted = false;
                             robot.autoIdle();
                             robot.resetSplineCounter();
                             robot.update();
@@ -332,7 +328,9 @@ public class Blue15Full extends LinearOpMode {
                         robot.goToPoint(new Pose2D(DistanceUnit.INCH, -16, 12, AngleUnit.DEGREES, 310), 1, 3, 0.2);
                     }
 
-                    if (robot.systemsReady() && !rapidFireActive) {
+                    // Generalized shooting trigger
+                    if (robot.systemsReady() && !shootStarted) {
+                        shootStarted = true;
                         rapidFireTimer.reset();
                         rapidFireDuration = 1000;
                         rapidFireActive = true;
@@ -343,6 +341,7 @@ public class Blue15Full extends LinearOpMode {
                         robot.rapidFire();
                         if (rapidFireTimer.milliseconds() >= rapidFireDuration) {
                             rapidFireActive = false;
+                            shootStarted = false;
                             robot.autoIdle();
                             robot.resetSplineCounter();
                             robot.update();
