@@ -22,11 +22,11 @@ public class Differential {
     public static double kS = 0.13;
 
     public static double maxPower = 0.8;
-    public static double toleranceTicksClose = 120;  // tighter near goal
-    public static double toleranceTicksFar = 75;    // default
+    public static double toleranceTicksClose = 90;
+    public static double toleranceTicksFar = 60;
 
-    public static double slot1Pos = -5300;   // gantry slots
-    public static double slot2Pos = -2300;
+    public static double slot1Pos = -6400;   // gantry slots
+    public static double slot2Pos = -2800;
     public static double slot3Pos = 0;       // default starting slot
     public static double angleScale = 38.76; // turret rotation scaling
 

@@ -32,7 +32,7 @@ public class Colors {
     private final Deque<Integer> bBuf3 = new ArrayDeque<>();
     private double sumR3 = 0, sumG3 = 0, sumB3 = 0;
 
-    public enum BallState { EMPTY, GREEN, PURPLE }
+    public enum BallState { EMPTY, GREEN, PURPLE, RED }
     private BallState state1 = BallState.EMPTY;
     private BallState state2 = BallState.EMPTY;
     private BallState state3 = BallState.EMPTY;
@@ -100,6 +100,7 @@ public class Colors {
             case EMPTY: led.setPosition(0); break;
             case GREEN: led.setPosition(0.47); break;
             case PURPLE: led.setPosition(0.722); break;
+            case RED: led.setPosition(0.277); break;
         }
     }
 
@@ -130,9 +131,9 @@ public class Colors {
     }
 
     public void updateTESTING(boolean DTAtTarget, boolean FLYWHEELatTarget, boolean DIFFYatTarget) {
-        if (DTAtTarget) { applyLED(led3, BallState.GREEN); } else { applyLED(led3, BallState.PURPLE); }
-        if (FLYWHEELatTarget) { applyLED(led2, BallState.GREEN); } else { applyLED(led2, BallState.PURPLE); }
-        if (DIFFYatTarget) { applyLED(led1, BallState.GREEN); } else { applyLED(led1, BallState.PURPLE); }
+        if (DTAtTarget) { applyLED(led3, BallState.GREEN); } else { applyLED(led3, BallState.RED); }
+        if (FLYWHEELatTarget) { applyLED(led2, BallState.GREEN); } else { applyLED(led2, BallState.RED); }
+        if (DIFFYatTarget) { applyLED(led1, BallState.GREEN); } else { applyLED(led1, BallState.RED); }
     }
 
     public void getNumBalls() {

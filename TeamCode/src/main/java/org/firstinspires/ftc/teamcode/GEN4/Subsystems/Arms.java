@@ -8,8 +8,8 @@ public class Arms {
     public Servo arm1, arm2, arm3;
 
     // Saved positions — tune these with the test TeleOp
-    public double arm1_off = 0.54, arm1_on = 0.35;
-    public double arm2_off = 0.815, arm2_on = 0.622;
+    public double arm1_off = 0.54, arm1_on = 0.26;
+    public double arm2_off = 0.815, arm2_on = 0.54;
     public double arm3_off = 0.62, arm3_on = 0.31;
     public double arm3_rapid = 0.56;
 

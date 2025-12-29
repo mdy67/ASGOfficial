@@ -7,17 +7,17 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp(name = "Arm3_SimpleServoControl")
 public class ArmsTunerTeleop extends OpMode {
 
-    private Servo arm3;
+    private Servo arm1;
     private double position = 0.5;   // start centered
 
     //
 
     @Override
     public void init() {
-        arm3 = hardwareMap.get(Servo.class, "arm3");
+        arm1 = hardwareMap.get(Servo.class, "arm1");
 
         position = 0.5;
-        arm3.setPosition(position);
+        arm1.setPosition(position);
 
         telemetry.addLine("Arm3 Simple Servo Control Ready");
     }
@@ -35,7 +35,7 @@ public class ArmsTunerTeleop extends OpMode {
         position = Math.max(0.0, Math.min(1.0, position));
 
         // Apply to servo
-        arm3.setPosition(position);
+        arm1.setPosition(position);
 
         telemetry.addData("Arm3 Position", position);
         telemetry.addData("Joystick", stick);

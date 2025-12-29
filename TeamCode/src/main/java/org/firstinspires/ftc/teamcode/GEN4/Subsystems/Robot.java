@@ -24,7 +24,7 @@ public class Robot {
     /* =========================
        FIELD CONSTANTS
        ========================= */
-    public Pose2D blueGoal = new Pose2D(DistanceUnit.INCH, -60, 62, AngleUnit.DEGREES, 0);
+    public Pose2D blueGoal = new Pose2D(DistanceUnit.INCH, -64, 62, AngleUnit.DEGREES, 0);
     public Pose2D redGoal  = new Pose2D(DistanceUnit.INCH,  62, 65, AngleUnit.DEGREES, 0);
 
     public Pose2D adjustedPose = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
@@ -220,6 +220,11 @@ public class Robot {
         arms.arm3_flickRAPID();
     }
 
+    public void rapidFire2(double power) {
+        intake.runIntake(power);
+        arms.arm3_flickRAPID();
+    }
+
     public void neutral() {
         arms.reset();
         intake.stop();
@@ -244,15 +249,20 @@ public class Robot {
                 if (goYet) {
                     differential.goToSlot(1);
                     shootState = ShootState.GO_SLOT_1;
+                    intake.runIntake(-0.8);
+                    shootTimer.reset();
                 }
                 break;
 
             case GO_SLOT_1:
                 if (differential.atTarget) {
-                    shootTimer.reset();
-                    intake.runIntake(-0.5);
-                    arms.arm1_flickON();
-                    shootState = ShootState.FLICK_AND_INTAKE;
+                    if (shootTimer.seconds() >= 0.2) {
+                        shootTimer.reset();
+                        arms.arm1_flickON();
+                        shootState = ShootState.FLICK_AND_INTAKE;
+                    }
+
+
                 }
                 break;
 
@@ -268,13 +278,13 @@ public class Robot {
             case GO_SLOT_3:
                 if (differential.atTarget) {
                     shootTimer.reset();
-                    rapidFire();
+                    rapidFire2(-0.8);
                     shootState = ShootState.RAPID_FIRE;
                 }
                 break;
 
             case RAPID_FIRE:
-                if (shootTimer.seconds() >= 0.5) {
+                if (shootTimer.seconds() >= 0.6) {
                     neutral();
                     shootState = ShootState.DONE;
                 }
@@ -370,7 +380,7 @@ public class Robot {
                 break;
 
             case FLICK_AND_INTAKE:
-                if (shootTimer.seconds() >= 0.5) {
+                if (shootTimer.seconds() >= 0.3) {
                     intake.stop();
                     arms.arm2_flickOFF();
                     differential.goToSlot(3);
@@ -381,7 +391,7 @@ public class Robot {
             case GO_SLOT_3:
                 if (differential.atTarget) {
                     shootTimer.reset();
-                    rapidFire();
+                    rapidFire2(-0.8);
                     shootState = ShootState.RAPID_FIRE;
                 }
                 break;
@@ -415,13 +425,12 @@ public class Robot {
             case GO_SLOT_3:
                 if (differential.atTarget) {
                     shootTimer.reset();
-                    intake.runIntake(-1);
-                    arms.arm3_flickRAPID();
                     shootState = ShootState.RAPID_FIRE;
                 }
                 break;
 
             case RAPID_FIRE:
+                rapidFire2(-0.8);
                 if (shootTimer.seconds() >= 0.85) {
                     neutral();
                     shootState = ShootState.DONE;
