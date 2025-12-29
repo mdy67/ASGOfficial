@@ -22,8 +22,8 @@ public class Differential {
     public static double kS = 0.13;
 
     public static double maxPower = 0.8;
-    public static double toleranceTicksClose = 40;  // tighter near goal
-    public static double toleranceTicksFar = 80;    // default
+    public static double toleranceTicksClose = 120;  // tighter near goal
+    public static double toleranceTicksFar = 75;    // default
 
     public static double slot1Pos = -5300;   // gantry slots
     public static double slot2Pos = -2300;
@@ -52,7 +52,7 @@ public class Differential {
     public boolean atTarget = false;
     public double compensatedAngle = 0; // turret angle offset only
 
-    private double TURRET_OFFSET_INCHES = -5.0;
+    private double TURRET_OFFSET_INCHES = -4.5;
 
     // --------------------
     // Constructor
@@ -95,10 +95,10 @@ public class Differential {
     // --------------------
     public void goToSlot(int slot) {
         switch (slot) {
-            case 1: currentSlotBase = slot1Pos; break;
-            case 2: currentSlotBase = slot2Pos; break;
+            case 1: currentSlotBase = slot1Pos; TURRET_OFFSET_INCHES = 4.5; break;
+            case 2: currentSlotBase = slot2Pos; TURRET_OFFSET_INCHES = 0.0; break;
             case 3:
-            default: currentSlotBase = slot3Pos; break;
+            default: currentSlotBase = slot3Pos; TURRET_OFFSET_INCHES = -4.5; break;
         }
         updateTargets();
     }

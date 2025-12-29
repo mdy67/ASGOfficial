@@ -28,7 +28,7 @@ public class Robot {
     public Pose2D redGoal  = new Pose2D(DistanceUnit.INCH,  62, 65, AngleUnit.DEGREES, 0);
 
     public Pose2D adjustedPose = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
-
+    public Pose2D finalAutoPose = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
     /* =========================
        AUTO / STATE VARIABLES
        ========================= */
@@ -49,8 +49,11 @@ public class Robot {
     private enum ShootState {
         IDLE,
         GO_SLOT_1,
-        FLICK_AND_INTAKE,
+        GO_SLOT_2,
         GO_SLOT_3,
+        FLICK_AND_INTAKE,
+        FLICK_AND_INTAKE_2,
+        INTAKE,
         RAPID_FIRE,
         DONE
     }
@@ -92,6 +95,7 @@ public class Robot {
         arms.arm1_flickOFF();
         drivetrain.pinpoint.resetPosAndIMU();
         differential.resetEncoders();
+        differential.resetToSlot3();
     }
 
     /* =========================
@@ -219,7 +223,7 @@ public class Robot {
     public void neutral() {
         arms.reset();
         intake.stop();
-        flywheel.stop();
+      //  flywheel.stop();
     }
 
     public boolean systemsReady() {
@@ -283,6 +287,158 @@ public class Robot {
 
         return false;
     }
+
+    public boolean shoot_223(boolean goYet) {
+
+        switch (shootState) {
+
+            case IDLE:
+                if (goYet) {
+                    differential.goToSlot(2);
+                    shootState = ShootState.GO_SLOT_2;
+                }
+                break;
+
+            case GO_SLOT_2:
+                if (differential.atTarget) {
+                    shootTimer.reset();
+                    intake.runIntake(-0.8);
+                    arms.arm2_flickON();
+                    shootState = ShootState.FLICK_AND_INTAKE;
+                }
+                break;
+
+            case FLICK_AND_INTAKE:
+                if (shootTimer.seconds() >= 0.3) {
+                    // intake.stop();
+                    arms.arm2_flickOFF();
+
+
+                    if (shootTimer.seconds() >= 0.7) {
+                        arms.arm2_flickON();
+                        shootTimer.reset();
+                        differential.goToSlot(3);
+                        shootState = ShootState.GO_SLOT_3;
+                    }
+
+                }
+                break;
+
+            case GO_SLOT_3:
+
+                if (differential.atTarget) {
+                    shootTimer.reset();
+                    intake.runIntake(-1.0);
+                    arms.arm3_flickON();
+                    shootState = ShootState.RAPID_FIRE;
+                }
+                break;
+
+            case RAPID_FIRE:
+                if (shootTimer.seconds() >= 0.3) {
+                    neutral();
+                    shootState = ShootState.DONE;
+                }
+                break;
+
+            case DONE:
+                shootState = ShootState.IDLE;
+                return true;
+        }
+
+        return false;
+    }
+
+    public boolean shoot_233(boolean goYet) {
+
+        switch (shootState) {
+
+            case IDLE:
+                if (goYet) {
+                    differential.goToSlot(2);
+                    shootState = ShootState.GO_SLOT_2;
+                }
+                break;
+
+            case GO_SLOT_2:
+                if (differential.atTarget) {
+                    shootTimer.reset();
+                    intake.runIntake(-0.5);
+                    arms.arm2_flickON();
+                    shootState = ShootState.FLICK_AND_INTAKE;
+                }
+                break;
+
+            case FLICK_AND_INTAKE:
+                if (shootTimer.seconds() >= 0.5) {
+                    intake.stop();
+                    arms.arm2_flickOFF();
+                    differential.goToSlot(3);
+                    shootState = ShootState.GO_SLOT_3;
+                }
+                break;
+
+            case GO_SLOT_3:
+                if (differential.atTarget) {
+                    shootTimer.reset();
+                    rapidFire();
+                    shootState = ShootState.RAPID_FIRE;
+                }
+                break;
+
+            case RAPID_FIRE:
+                if (shootTimer.seconds() >= 0.85) {
+                    neutral();
+                    shootState = ShootState.DONE;
+                }
+                break;
+
+            case DONE:
+                shootState = ShootState.IDLE;
+                return true;
+        }
+
+        return false;
+    }
+
+    public boolean shoot_333(boolean goYet) {
+
+        switch (shootState) {
+
+            case IDLE:
+                if (goYet) {
+                    differential.goToSlot(3);
+                    shootState = ShootState.GO_SLOT_3;
+                }
+                break;
+
+            case GO_SLOT_3:
+                if (differential.atTarget) {
+                    shootTimer.reset();
+                    intake.runIntake(-1);
+                    arms.arm3_flickRAPID();
+                    shootState = ShootState.RAPID_FIRE;
+                }
+                break;
+
+            case RAPID_FIRE:
+                if (shootTimer.seconds() >= 0.85) {
+                    neutral();
+                    shootState = ShootState.DONE;
+                }
+                break;
+
+            case DONE:
+                shootState = ShootState.IDLE;
+                return true;
+        }
+
+        return false;
+    }
+
+
+
+
 
     /* =========================
        AUTO UTILITIES
