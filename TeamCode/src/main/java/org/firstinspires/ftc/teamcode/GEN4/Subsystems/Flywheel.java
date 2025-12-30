@@ -35,7 +35,9 @@ public class Flywheel {
     private double lastTicks = 0.0;
     private double lastTime = 0.0;
 
-    public static final double THRESHOLD = 20; // Threshold Radians Per Second
+    public double velocityModifier = 0.0;
+
+    public static final double THRESHOLD = 15; // Threshold Radians Per Second
 
     public Flywheel(HardwareMap hardwareMap, VoltageSensor battery) {
         this.battery = battery;
@@ -149,7 +151,7 @@ public class Flywheel {
 
         // ax^4 + bx^1 + c
         double targetVelABCD = ((a * (Math.pow(distance, 4))) + (b * Math.pow(distance, 1)) + c);
-
+        targetVelABCD += velocityModifier;
         setTargetVelocity(targetVelABCD);
         angleHood(targetVelABCD);
     }

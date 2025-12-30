@@ -26,9 +26,15 @@ public class Differential {
     public static double toleranceTicksFar = 60;
 
     public static double slot1Pos = -6400;   // gantry slots
-    public static double slot2Pos = -2800;
+    public static double slot2Pos = -2900;
     public static double slot3Pos = 0;       // default starting slot
     public static double angleScale = 38.76; // turret rotation scaling
+
+    public double encLOffset = 0;
+    public double encROffset = 0;
+
+    public double currL = 0;
+    public double currR = 0;
 
     public boolean farZone = true;           // for tuning tolerances
     private double currentSlotBase = 0;      // gantry position base
@@ -159,8 +165,8 @@ public class Differential {
     // Update loop (PID without integral)
     // --------------------
     public void update() {
-        double currL = -encL.getCurrentPosition();
-        double currR = encR.getCurrentPosition();
+        currL = -encL.getCurrentPosition() + encLOffset;
+        currR = encR.getCurrentPosition() + encROffset;
 
         double errorL = targetL - currL;
         double errorR = targetR - currR;

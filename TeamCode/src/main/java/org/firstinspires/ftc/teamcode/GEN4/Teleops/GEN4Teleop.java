@@ -7,6 +7,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.GEN4.Autos.Blue15Full;
+import org.firstinspires.ftc.teamcode.GEN4.Subsystems.AutoToTeleop;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Differential;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
@@ -21,12 +22,14 @@ public class GEN4Teleop extends OpMode {
 
     @Override
     public void init() {
-        robot = new Robot(hardwareMap);
-        robot.startup();
-        robot.drivetrain.state = Drivetrain.State.TELEOP;
 
-        // Set starting pose from autonomous if available
-        robot.drivetrain.robotPose = robot.finalAutoPose;
+        robot = new Robot(hardwareMap);
+        robot.arms.reset();
+        robot.drivetrain.state = Drivetrain.State.TELEOP;
+        robot.importAutoPose(AutoToTeleop.storedPose.getX(DistanceUnit.INCH), AutoToTeleop.storedPose.getY(DistanceUnit.INCH), AutoToTeleop.storedPose.getHeading(AngleUnit.DEGREES));
+        robot.importAutoDiffy(AutoToTeleop.encLOffset, AutoToTeleop.encROffset);
+        robot.flywheel.stop();
+
         telemetry.addLine("Robot initialized. Waiting for start...");
         telemetry.update();
     }

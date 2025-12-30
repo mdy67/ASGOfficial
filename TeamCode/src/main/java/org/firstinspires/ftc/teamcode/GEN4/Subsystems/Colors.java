@@ -100,7 +100,7 @@ public class Colors {
             case EMPTY: led.setPosition(0); break;
             case GREEN: led.setPosition(0.47); break;
             case PURPLE: led.setPosition(0.722); break;
-            case RED: led.setPosition(0.277); break;
+            case RED: led.setPosition(0.29); break;
         }
     }
 

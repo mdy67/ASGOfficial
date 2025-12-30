@@ -24,7 +24,7 @@ public class Robot {
     /* =========================
        FIELD CONSTANTS
        ========================= */
-    public Pose2D blueGoal = new Pose2D(DistanceUnit.INCH, -64, 62, AngleUnit.DEGREES, 0);
+    public Pose2D blueGoal = new Pose2D(DistanceUnit.INCH, -62, 64, AngleUnit.DEGREES, 0);
     public Pose2D redGoal  = new Pose2D(DistanceUnit.INCH,  62, 65, AngleUnit.DEGREES, 0);
 
     public Pose2D adjustedPose = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
@@ -95,7 +95,18 @@ public class Robot {
         arms.arm1_flickOFF();
         drivetrain.pinpoint.resetPosAndIMU();
         differential.resetEncoders();
+     //   differential.encROffset = 0;
+     //   differential.encLOffset = 0;
         differential.resetToSlot3();
+    }
+
+    public void importAutoPose(double x, double y, double heading) {
+        drivetrain.setPosition(x, y, heading);
+    }
+
+    public void importAutoDiffy(double encLOffset, double encROffset) {
+        differential.encLOffset = encLOffset;
+        differential.encROffset = encROffset;
     }
 
     /* =========================
@@ -256,7 +267,7 @@ public class Robot {
 
             case GO_SLOT_1:
                 if (differential.atTarget) {
-                    if (shootTimer.seconds() >= 0.2) {
+                    if (shootTimer.seconds() >= 0.1) {
                         shootTimer.reset();
                         arms.arm1_flickON();
                         shootState = ShootState.FLICK_AND_INTAKE;
