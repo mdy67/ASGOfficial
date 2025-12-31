@@ -28,6 +28,7 @@ public class Differential {
     public static double slot1Pos = -6400;   // gantry slots
     public static double slot2Pos = -2900;
     public static double slot3Pos = 0;       // default starting slot
+    public double slotOffset = 0;
     public static double angleScale = 38.76; // turret rotation scaling
 
     public double encLOffset = 0;
@@ -57,6 +58,7 @@ public class Differential {
     public double desiredAngle = 0;
     public boolean atTarget = false;
     public double compensatedAngle = 0; // turret angle offset only
+    public double ANGLE_ADJUST = 0;
 
     private double TURRET_OFFSET_INCHES = -4.5;
 
@@ -101,10 +103,10 @@ public class Differential {
     // --------------------
     public void goToSlot(int slot) {
         switch (slot) {
-            case 1: currentSlotBase = slot1Pos; TURRET_OFFSET_INCHES = 4.5; break;
-            case 2: currentSlotBase = slot2Pos; TURRET_OFFSET_INCHES = 0.0; break;
+            case 1: currentSlotBase = slot1Pos + slotOffset; TURRET_OFFSET_INCHES = 4.5; break;
+            case 2: currentSlotBase = slot2Pos + slotOffset; TURRET_OFFSET_INCHES = 0.0; break;
             case 3:
-            default: currentSlotBase = slot3Pos; TURRET_OFFSET_INCHES = -4.5; break;
+            default: currentSlotBase = slot3Pos + slotOffset; TURRET_OFFSET_INCHES = -4.5; break;
         }
         updateTargets();
     }
@@ -154,6 +156,8 @@ public class Differential {
 
         desiredAngle = fieldAngle - robotHeading - 90.0;
         desiredAngle = normalizeDeg(desiredAngle);
+        desiredAngle += ANGLE_ADJUST;
+
 
         if (desiredAngle < -90) desiredAngle = 180;
         else if (desiredAngle < 0) desiredAngle = 0;

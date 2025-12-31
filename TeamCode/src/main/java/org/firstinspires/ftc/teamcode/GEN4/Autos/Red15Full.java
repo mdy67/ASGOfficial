@@ -14,8 +14,8 @@ import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.alliance;
 
-@Autonomous(name = "Blue 15 Ball", group = "GEN4")
-public class Blue15Full extends LinearOpMode {
+@Autonomous(name = "Red 15 Full", group = "GEN4")
+public class Red15Full extends LinearOpMode {
 
     private Robot robot;
 
@@ -57,8 +57,7 @@ public class Blue15Full extends LinearOpMode {
                 telemetry,
                 FtcDashboard.getInstance().getTelemetry()
         );
-
-        alliance.set(alliance.Color.BLUE);
+        alliance.set(alliance.Color.RED);
         // INIT LOOP
         while (opModeInInit()) {
             state = State.INITIALIZED;
@@ -98,13 +97,13 @@ public class Blue15Full extends LinearOpMode {
 
 
         // Store the final pose for teleop
-    //    robot.finalAutoPose = robot.drivetrain.robotPose;
+        //    robot.finalAutoPose = robot.drivetrain.robotPose;
 
         AutoToTeleop.storedPose = robot.drivetrain.robotPose;
         AutoToTeleop.encLOffset = robot.differential.currL;
         AutoToTeleop.encROffset = robot.differential.currR;
-    //    robot.differential.encLOffset = robot.differential.currL;
-    //    robot.differential.encROffset = robot.differential.currR;
+        //    robot.differential.encLOffset = robot.differential.currL;
+        //    robot.differential.encROffset = robot.differential.currR;
         robot.update();
     }
     private void updateSequence() {
@@ -112,7 +111,7 @@ public class Blue15Full extends LinearOpMode {
 
             case INITIALIZED:
                 robot.update();
-                robot.drivetrain.setPosition(-16, -66, 90);
+                robot.drivetrain.setPosition(16, -66, 90);
                 robot.neutral();
                 robot.readMotifTag();
                 telemetry.addData("INITIALIZED -- MOTIF:", robot.MotifTagID);
@@ -123,7 +122,7 @@ public class Blue15Full extends LinearOpMode {
                 robot.goalLock(robot.drivetrain.robotPose);
                 robot.differential.farZone = true;
                 if (!trigger) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -57, AngleUnit.DEGREES, 240), 1, 3, 0.2);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -57, AngleUnit.DEGREES, 300), 1, 3, 0.2);
                 }
 
                 if (robot.systemsReady() && !shootStarted) {
@@ -153,28 +152,28 @@ public class Blue15Full extends LinearOpMode {
                 if (robot.drivetrain.DTatTarget()) {
                     trigger = true;
                     robot.drivetrain.state = Drivetrain.State.IDLE;
-                    robot.flywheel.velocityModifier = -55.0; // VELOCITY OFFSET MODIFIER SET TODO: TUNE AT COMP
+                    robot.flywheel.velocityModifier = -40.0; // VELOCITY OFFSET MODIFIER SET TODO: TUNE AT COMP
                 }
                 break;
 
             case FIRST_INTAKES: // INTAKE BALLS FROM CORNER
                 if (robot.splineCounter == 0) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -30, -53, AngleUnit.DEGREES, 210), 1, 6, 30);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 30, -53, AngleUnit.DEGREES, 330), 1, 6, 30);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -60, -50, AngleUnit.DEGREES, 250), 1, 4, 8);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 60, -50, AngleUnit.DEGREES, 290), 1, 4, 8);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 2) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -61, -58, AngleUnit.DEGREES, 255), 0.5, 3, 8);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 61, -58, AngleUnit.DEGREES, 285), 0.5, 3, 8);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 3) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -61, -66, AngleUnit.DEGREES, 270), 0.5, 3, 3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 61, -66, AngleUnit.DEGREES, 270), 0.5, 3, 3);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 4) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -28, -55, AngleUnit.DEGREES, 260), 1, 5, 20);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 28, -55, AngleUnit.DEGREES, 280), 1, 5, 20);
                     robot.nextSplinePoint();
                     if (robot.splineCounter == 5) robot.intake.runIntake(0);
                     trigger = false;
@@ -182,7 +181,7 @@ public class Blue15Full extends LinearOpMode {
                     robot.goalLock(robot.drivetrain.robotPose);
 
                     if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -10, -8, AngleUnit.DEGREES, 260), 1, 3, 0.2);
+                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, 10, -8, AngleUnit.DEGREES, 280), 1, 3, 0.2);
                     }
 
                     if (robot.systemsReady() && !shootStarted) {
@@ -216,23 +215,23 @@ public class Blue15Full extends LinearOpMode {
 
             case POINT_3:
                 if (robot.splineCounter == 0) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -24, 10, AngleUnit.DEGREES, 180), 1, 4, Math.toRadians(20));
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 24, 10, AngleUnit.DEGREES, 0), 1, 4, Math.toRadians(20));
                     robot.nextSplinePoint();
                     prepareGantryForShooting(0);
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -53, 10, AngleUnit.DEGREES, 180), 1, 2, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 53, 10, AngleUnit.DEGREES, 0), 1, 2, 10);
                     robot.nextSplinePoint();
                     prepareGantryForShooting(0);
                 } else if (robot.splineCounter == 2) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -48, 4, AngleUnit.DEGREES, 180), 1, 2, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 48, 4, AngleUnit.DEGREES, 0), 1, 2, 10);
                     robot.nextSplinePoint();
                     prepareGantryForShooting(0);
                 } else if (robot.splineCounter == 3) {
                     robot.goalLock(robot.drivetrain.robotPose);
                     robot.intake.runIntake(0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -55, 1, AngleUnit.DEGREES, 180), 1, 2, 3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 55, 1, AngleUnit.DEGREES, 0), 1, 2, 3);
                     // WAIT 1s at GATE RAM POS
                     robot.update();
                     if (robot.drivetrain.DTatTarget() && !robot.wait.isFinished() && !robot.wait.isActive()) {
@@ -248,7 +247,7 @@ public class Blue15Full extends LinearOpMode {
                 } else if (robot.splineCounter == 4) {
                     robot.goalLock(robot.drivetrain.robotPose);
                     if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, 1, AngleUnit.DEGREES, 260), 1, 3, 0.2);
+                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, 1, AngleUnit.DEGREES, 280), 1, 3, 0.2);
                         trigger = true;
                     }
                     robot.update();
@@ -288,12 +287,12 @@ public class Blue15Full extends LinearOpMode {
 
             case POINT_4:
                 if (robot.splineCounter == 0) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -19, -15, AngleUnit.DEGREES, 180), 1, 5, 0.3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 19, -15, AngleUnit.DEGREES, 0), 1, 5, 0.3);
                     robot.nextSplinePoint();
                     prepareGantryForShooting(1);
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -53, -15, AngleUnit.DEGREES, 180), 1, 4, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 53, -15, AngleUnit.DEGREES, 0), 1, 4, 10);
                     robot.goalLock(robot.drivetrain.robotPose);
                     robot.nextSplinePoint();
                     if (robot.splineCounter == 2) robot.intake.runIntake(0);
@@ -302,7 +301,7 @@ public class Blue15Full extends LinearOpMode {
                 } else if (robot.splineCounter == 2) {
                     robot.goalLock(robot.drivetrain.robotPose);
                     if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -10, -8, AngleUnit.DEGREES, 260), 1, 3, 0.2);
+                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, 10, -8, AngleUnit.DEGREES, 280), 1, 3, 0.2);
                         trigger = true;
                     }
                     robot.update();
@@ -342,16 +341,16 @@ public class Blue15Full extends LinearOpMode {
 
             case POINT_5: // SHOOT "BOTTOM" 3 balls
                 if (robot.splineCounter == 0) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -24, -36, AngleUnit.DEGREES, 180), 1, 3, 0.3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 24, -36, AngleUnit.DEGREES, 0), 1, 3, 0.3);
                     robot.nextSplinePoint();
                     prepareGantryForShooting(2);
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -64, -36, AngleUnit.DEGREES, 180), 1, 4, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -64, -36, AngleUnit.DEGREES, 0), 1, 4, 10);
                     robot.nextSplinePoint();
                     prepareGantryForShooting(2);
                 } else if (robot.splineCounter == 2) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -28, -15, AngleUnit.DEGREES, 260), 1, 15, 80);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 28, -15, AngleUnit.DEGREES, 280), 1, 15, 80);
                     robot.nextSplinePoint();
                     robot.goalLock(robot.drivetrain.robotPose);
                     if (robot.splineCounter == 3) robot.intake.runIntake(0);
@@ -360,7 +359,7 @@ public class Blue15Full extends LinearOpMode {
                 } else if (robot.splineCounter == 3) {
                     robot.goalLock(robot.drivetrain.robotPose);
                     if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -10, -8, AngleUnit.DEGREES, 260), 1, 3, 0.2);
+                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, 10, -8, AngleUnit.DEGREES, 280), 1, 3, 0.2);
                         trigger = true;
                     }
                     robot.update();
@@ -399,13 +398,13 @@ public class Blue15Full extends LinearOpMode {
                 break;
 
             case POINT_6: // MOVE OFF LINE
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -24, -36, AngleUnit.DEGREES, 100), 1, 3, 0.3);
-                    robot.update();
+                robot.goToPoint(new Pose2D(DistanceUnit.INCH, 24, -36, AngleUnit.DEGREES, 80), 1, 3, 0.3);
+                robot.update();
 
-                    if (robot.drivetrain.DTatTarget()) {
-                        robot.drivetrain.state = Drivetrain.State.IDLE;
-                        state = State.FINISHED;
-                    }
+                if (robot.drivetrain.DTatTarget()) {
+                    robot.drivetrain.state = Drivetrain.State.IDLE;
+                    state = State.FINISHED;
+                }
                 break;
             case POINT_7:
             case POINT_8:

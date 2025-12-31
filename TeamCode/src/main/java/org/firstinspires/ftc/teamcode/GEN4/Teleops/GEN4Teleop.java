@@ -17,7 +17,7 @@ public class GEN4Teleop extends OpMode {
 
     private Robot robot;
     private boolean TUNING_MODE = false;
-    private double targetVel = 200;
+    private double targetVel = 350;
     private double hoodAngle = 0.4;
 
     @Override
@@ -69,16 +69,36 @@ public class GEN4Teleop extends OpMode {
 
         // Turret / Goal Tracking
         Pose2D goal = robot.getTargetGoal();
-        robot.goalLock(robot.drivetrain.robotPose);
+
 
         if (TUNING_MODE) {
-            if (gamepad1.dpad_left)  targetVel -= 2;
-            if (gamepad1.dpad_right) targetVel += 2;
+         //   if (gamepad1.dpad_left)  targetVel -= 2;
+         //   if (gamepad1.dpad_right) targetVel += 2;
             robot.flywheel.setTargetVelocity(targetVel);
+            robot.flywheel.angleHood(targetVel);
+            robot.differential.setTargetAngle(90);
 
-            if (gamepad1.x) hoodAngle += 0.01;
-            if (gamepad1.y) hoodAngle -= 0.01;
-            robot.flywheel.setHoodAngle(hoodAngle);
+          //  if (gamepad1.x) hoodAngle += 0.01;
+          //  if (gamepad1.y) hoodAngle -= 0.01;
+         //   robot.flywheel.setHoodAngle(hoodAngle);
+        } else {
+            robot.goalLock(robot.drivetrain.robotPose);
+        }
+
+        if (gamepad1.dpad_right) {
+            robot.differential.ANGLE_ADJUST -= 1;
+        } else if (gamepad1.dpad_left) {
+            robot.differential.ANGLE_ADJUST += 1;
+        }
+
+        if (gamepad1.x) {
+            robot.differential.slotOffset += 5;
+        } else if (gamepad1.start) {
+            robot.differential.slotOffset -= 5;
+        }
+
+        if (gamepad1.options) {
+            TUNING_MODE = true;
         }
 
         robot.update();
@@ -88,20 +108,30 @@ public class GEN4Teleop extends OpMode {
                 robot.drivetrain.robotPose.getX(DistanceUnit.INCH),
                 robot.drivetrain.robotPose.getY(DistanceUnit.INCH),
                 robot.drivetrain.robotPose.getHeading(AngleUnit.DEGREES));
+        telemetry.addLine("=== ADJ POSE ===");
+        telemetry.addData("X / Y / Heading", "%.1f / %.1f / %.1f",
+                robot.adjustedPose.getX(DistanceUnit.INCH),
+                robot.adjustedPose.getY(DistanceUnit.INCH),
+                robot.adjustedPose.getHeading(AngleUnit.DEGREES));
+        telemetry.addLine("=== LL POSE ===");
+        telemetry.addData("X / Y / Heading", "%.1f / %.1f / %.1f",
+                robot.limelight.LimelightPose.position.x,
+                robot.limelight.LimelightPose.position.y,
+                robot.adjustedPose.getHeading(AngleUnit.DEGREES));
 
-        telemetry.addLine("=== DIFFERENTIAL ===");
-        telemetry.addData("Encoders L/R", "%d / %d",
-                robot.differential.getEncoderL(),
-                robot.differential.getEncoderR());
-        telemetry.addData("Target L/R", "%.1f / %.1f",
-                -robot.differential.targetL,
-                robot.differential.targetR);
-        telemetry.addData("Target Angle", "%.1f", robot.differential.compensatedAngle);
-        telemetry.addData("Desired Angle", "%.1f", robot.differential.desiredAngle);
+      //  telemetry.addLine("=== DIFFERENTIAL ===");
+     //   telemetry.addData("Encoders L/R", "%d / %d",
+         //       robot.differential.getEncoderL(),
+        //        robot.differential.getEncoderR());
+      //  telemetry.addData("Target L/R", "%.1f / %.1f",
+         //       -robot.differential.targetL,
+           //     robot.differential.targetR);
+      //  telemetry.addData("Target Angle", "%.1f", robot.differential.compensatedAngle);
+      //  telemetry.addData("Desired Angle", "%.1f", robot.differential.desiredAngle);
 
         double dx = goal.getX(DistanceUnit.INCH) - robot.drivetrain.robotPose.getX(DistanceUnit.INCH);
         double dy = goal.getY(DistanceUnit.INCH) - robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
-        telemetry.addData("Distance to Goal", "%.2f", Math.hypot(dx, dy));
+      //  telemetry.addData("Distance to Goal", "%.2f", Math.hypot(dx, dy));
 
         telemetry.update();
     }

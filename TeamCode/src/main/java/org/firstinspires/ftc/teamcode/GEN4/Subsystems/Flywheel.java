@@ -156,7 +156,7 @@ public class Flywheel {
         angleHood(targetVelABCD);
     }
 
-    private void angleHood(double currentVelocity) {
+    public void angleHood(double currentVelocity) {
         // - (a * b) x^3 + cx^2 - dx + e
         double a = 8.48022;
         double b = Math.pow(10, -7);
