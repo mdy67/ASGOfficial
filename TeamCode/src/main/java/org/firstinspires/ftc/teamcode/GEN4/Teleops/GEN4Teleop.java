@@ -101,6 +101,14 @@ public class GEN4Teleop extends OpMode {
             TUNING_MODE = true;
         }
 
+        if (robot.drivetrain.robotPose.getY(DistanceUnit.INCH) >= -30) {
+            robot.differential.farZone = false;
+            robot.flywheel.velocityModifier = -53.0;
+        } else {
+            robot.differential.farZone = true;
+            robot.flywheel.velocityModifier = 30.0;
+        }
+
         robot.update();
 
         telemetry.addLine("=== ROBOT POSE ===");

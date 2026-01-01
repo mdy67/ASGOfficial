@@ -25,7 +25,7 @@ public class Robot {
        FIELD CONSTANTS
        ========================= */
     public Pose2D blueGoal = new Pose2D(DistanceUnit.INCH, -64, 64, AngleUnit.DEGREES, 0);
-    public Pose2D redGoal  = new Pose2D(DistanceUnit.INCH,  62, 65, AngleUnit.DEGREES, 0);
+    public Pose2D redGoal  = new Pose2D(DistanceUnit.INCH,  67, 58, AngleUnit.DEGREES, 0);
 
     public Pose2D adjustedPose = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
     public Pose2D finalAutoPose = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);

@@ -78,6 +78,7 @@ public class Red15Full extends LinearOpMode {
         state = State.SHOOTING_POSE_1;
 
         while (opModeIsActive() && !state.equals(State.FINISHED)) {
+            alliance.set(alliance.Color.RED);
             updateSequence();
 
             telemetry.addData("AUTO FSM", state);
@@ -93,9 +94,12 @@ public class Red15Full extends LinearOpMode {
 
             telemetry.update();
             robot.finalAutoPose = robot.drivetrain.robotPose;
+            AutoToTeleop.storedPose = robot.drivetrain.robotPose;
+            AutoToTeleop.encLOffset = robot.differential.currL;
+            AutoToTeleop.encROffset = robot.differential.currR;
         }
 
-
+        alliance.set(alliance.Color.RED);
         // Store the final pose for teleop
         //    robot.finalAutoPose = robot.drivetrain.robotPose;
 
@@ -247,7 +251,7 @@ public class Red15Full extends LinearOpMode {
                 } else if (robot.splineCounter == 4) {
                     robot.goalLock(robot.drivetrain.robotPose);
                     if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, 1, AngleUnit.DEGREES, 280), 1, 3, 0.2);
+                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, 8, AngleUnit.DEGREES, 280), 1, 3, 0.2);
                         trigger = true;
                     }
                     robot.update();
@@ -346,7 +350,7 @@ public class Red15Full extends LinearOpMode {
                     prepareGantryForShooting(2);
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -64, -36, AngleUnit.DEGREES, 0), 1, 4, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 64, -36, AngleUnit.DEGREES, 0), 1, 4, 10);
                     robot.nextSplinePoint();
                     prepareGantryForShooting(2);
                 } else if (robot.splineCounter == 2) {

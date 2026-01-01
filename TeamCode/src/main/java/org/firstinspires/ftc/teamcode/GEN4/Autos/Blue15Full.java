@@ -79,6 +79,7 @@ public class Blue15Full extends LinearOpMode {
         state = State.SHOOTING_POSE_1;
 
         while (opModeIsActive() && !state.equals(State.FINISHED)) {
+            alliance.set(alliance.Color.BLUE);
             updateSequence();
 
             telemetry.addData("AUTO FSM", state);
@@ -93,10 +94,13 @@ public class Blue15Full extends LinearOpMode {
             telemetry.addData("Flywheel Actual rad/s", robot.flywheel.getVelocityRadPerSec());
 
             telemetry.update();
-            robot.finalAutoPose = robot.drivetrain.robotPose;
+       //     robot.finalAutoPose = robot.drivetrain.robotPose;
+            AutoToTeleop.storedPose = robot.drivetrain.robotPose;
+            AutoToTeleop.encLOffset = robot.differential.currL;
+            AutoToTeleop.encROffset = robot.differential.currR;
         }
 
-
+        alliance.set(alliance.Color.BLUE);
         // Store the final pose for teleop
     //    robot.finalAutoPose = robot.drivetrain.robotPose;
 
@@ -153,7 +157,7 @@ public class Blue15Full extends LinearOpMode {
                 if (robot.drivetrain.DTatTarget()) {
                     trigger = true;
                     robot.drivetrain.state = Drivetrain.State.IDLE;
-                    robot.flywheel.velocityModifier = -55.0; // VELOCITY OFFSET MODIFIER SET TODO: TUNE AT COMP
+                    robot.flywheel.velocityModifier = -60.0; // VELOCITY OFFSET MODIFIER SET TODO: TUNE AT COMP
                 }
                 break;
 
@@ -248,7 +252,7 @@ public class Blue15Full extends LinearOpMode {
                 } else if (robot.splineCounter == 4) {
                     robot.goalLock(robot.drivetrain.robotPose);
                     if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, 1, AngleUnit.DEGREES, 260), 1, 3, 0.2);
+                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, 8, AngleUnit.DEGREES, 260), 1, 3, 0.2);
                         trigger = true;
                     }
                     robot.update();
