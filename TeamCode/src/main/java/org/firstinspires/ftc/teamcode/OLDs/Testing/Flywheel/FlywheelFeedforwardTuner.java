@@ -38,7 +38,7 @@ public class FlywheelFeedforwardTuner extends LinearOpMode {
         List<Double> velocitiesRad = new ArrayList<>();
         List<Double> velocitiesRPM = new ArrayList<>();
 
-        // Sweep through power steps
+        // Sweep through power stepse
         for (double power : POWER_STEPS) {
             flywheel.setPower(power);
             flywheel2.setPower(-power);
