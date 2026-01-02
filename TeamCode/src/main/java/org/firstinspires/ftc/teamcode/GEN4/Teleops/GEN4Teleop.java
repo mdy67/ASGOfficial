@@ -93,11 +93,11 @@ public class GEN4Teleop extends OpMode {
 
         if (gamepad1.x) {
             robot.differential.slotOffset += 5;
-        } else if (gamepad1.start) {
+        } else if (gamepad1.options) {
             robot.differential.slotOffset -= 5;
         }
 
-        if (gamepad1.options) {
+        if (gamepad1.start) {
             TUNING_MODE = true;
         }
 

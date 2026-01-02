@@ -345,12 +345,12 @@ public class Red15Full extends LinearOpMode {
 
             case POINT_5: // SHOOT "BOTTOM" 3 balls
                 if (robot.splineCounter == 0) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 24, -36, AngleUnit.DEGREES, 0), 1, 3, 0.3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 24, -38, AngleUnit.DEGREES, 0), 1, 3, 0.3);
                     robot.nextSplinePoint();
                     prepareGantryForShooting(2);
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 64, -36, AngleUnit.DEGREES, 0), 1, 4, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 64, -38, AngleUnit.DEGREES, 0), 1, 4, 10);
                     robot.nextSplinePoint();
                     prepareGantryForShooting(2);
                 } else if (robot.splineCounter == 2) {
