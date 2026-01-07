@@ -96,11 +96,18 @@ public class Blue15Full extends LinearOpMode {
             telemetry.update();
        //     robot.finalAutoPose = robot.drivetrain.robotPose;
             AutoToTeleop.storedPose = robot.drivetrain.robotPose;
-            AutoToTeleop.encLOffset = robot.differential.currL;
-            AutoToTeleop.encROffset = robot.differential.currR;
+
+            if (AutoToTeleop.encROffset != robot.differential.currR) {
+                AutoToTeleop.encROffset = robot.differential.currR;
+            }
+            alliance.set(alliance.Color.BLUE);
+            if (AutoToTeleop.encLOffset != robot.differential.currL) {
+                AutoToTeleop.encLOffset = robot.differential.currL;
+            }
+
         }
 
-        alliance.set(alliance.Color.BLUE);
+
         // Store the final pose for teleop
     //    robot.finalAutoPose = robot.drivetrain.robotPose;
 
@@ -136,7 +143,7 @@ public class Blue15Full extends LinearOpMode {
                     rapidFireDuration = 1000;
                     rapidFireActive = true;
                 }
-
+                robot.flywheel.velocityModifier = 0.0; // VELOCITY OFFSETSET TODO: TUNE AT COMP
                 if (rapidFireActive) {
                     robot.goalLock(robot.drivetrain.robotPose);
                     robot.rapidFire();
@@ -148,6 +155,7 @@ public class Blue15Full extends LinearOpMode {
                         robot.resetSplineCounter();
                         robot.update();
                         state = State.FIRST_INTAKES;
+                        robot.flywheel.velocityModifier = -53.0; // VELOCITY OFFSETSET TODO: TUNE AT COMP
                         robot.differential.farZone = false;
                         trigger = false;
                     }
@@ -157,7 +165,7 @@ public class Blue15Full extends LinearOpMode {
                 if (robot.drivetrain.DTatTarget()) {
                     trigger = true;
                     robot.drivetrain.state = Drivetrain.State.IDLE;
-                    robot.flywheel.velocityModifier = -60.0; // VELOCITY OFFSET MODIFIER SET TODO: TUNE AT COMP
+
                 }
                 break;
 
@@ -230,13 +238,13 @@ public class Blue15Full extends LinearOpMode {
                     prepareGantryForShooting(0);
                 } else if (robot.splineCounter == 2) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -48, 4, AngleUnit.DEGREES, 180), 1, 2, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -46, 4, AngleUnit.DEGREES, 180), 1, 2, 10);
                     robot.nextSplinePoint();
                     prepareGantryForShooting(0);
                 } else if (robot.splineCounter == 3) {
                     robot.goalLock(robot.drivetrain.robotPose);
                     robot.intake.runIntake(0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -55, 1, AngleUnit.DEGREES, 180), 1, 2, 3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -55, 0, AngleUnit.DEGREES, 180), 1, 2, 3);
                     // WAIT 1s at GATE RAM POS
                     robot.update();
                     if (robot.drivetrain.DTatTarget() && !robot.wait.isFinished() && !robot.wait.isActive()) {

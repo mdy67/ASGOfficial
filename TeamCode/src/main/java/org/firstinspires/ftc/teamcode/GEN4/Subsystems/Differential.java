@@ -31,8 +31,8 @@ public class Differential {
     public double slotOffset = 0;
     public static double angleScale = 38.76; // turret rotation scaling
 
-    public double encLOffset = 0;
-    public double encROffset = 0;
+    public double encLOffset;
+    public double encROffset;
 
     public double currL = 0;
     public double currR = 0;

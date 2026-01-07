@@ -3,11 +3,13 @@ package org.firstinspires.ftc.teamcode.GEN4.Subsystems;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
+@TeleOp (name = "LIMELIGHT TEST", group = "GEN4")
 public class AprilTagLimelightTest extends OpMode {
     private Limelight3A limelight;
     Robot robot;
@@ -34,13 +36,9 @@ public class AprilTagLimelightTest extends OpMode {
     @Override
     public void loop() {
         robot.update();
-        limelight.updateRobotOrientation(robot.drivetrain.robotPose.getHeading(AngleUnit.DEGREES));
-        LLResult llResult = limelight.getLatestResult();
-        if (llResult != null && llResult.isValid()) {
-            Pose3D botPoseFromTag = llResult.getBotpose_MT2();
-            telemetry.addData("Tx", llResult.getTx());
-            telemetry.addData("Ty", llResult.getTy());
-            telemetry.addData("Ta", llResult.getTa());
-        }
+        robot.readMotifTag();
+        telemetry.addData("TAG ID:", robot.MotifTagID);
+        telemetry.update();
+
     }
 }

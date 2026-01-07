@@ -317,31 +317,36 @@ public class Robot {
                 if (goYet) {
                     differential.goToSlot(2);
                     shootState = ShootState.GO_SLOT_2;
+                    intake.runIntake(-1.0);
                 }
                 break;
 
             case GO_SLOT_2:
                 if (differential.atTarget) {
                     shootTimer.reset();
-                    intake.runIntake(-0.8);
                     arms.arm2_flickON();
+                    intake.runIntake(0.0);
                     shootState = ShootState.FLICK_AND_INTAKE;
                 }
                 break;
 
             case FLICK_AND_INTAKE:
-                if (shootTimer.seconds() >= 0.3) {
+                if (shootTimer.seconds() >= 0.3 && shootTimer.seconds() < 0.8) {
                     // intake.stop();
                     arms.arm2_flickOFF();
+                    intake.runIntake(-0.8);
 
-
-                    if (shootTimer.seconds() >= 0.7) {
-                        arms.arm2_flickON();
-                        shootTimer.reset();
-                        differential.goToSlot(3);
-                        shootState = ShootState.GO_SLOT_3;
-                    }
-
+                }
+                if (shootTimer.seconds() >= 0.8 && shootTimer.seconds() < 1.2) {
+                    intake.runIntake(0.0);
+                    arms.arm2_flickON();
+                }
+                if (shootTimer.seconds() >= 1.2) {
+                    intake.runIntake(-0.8);
+                    arms.arm2_flickOFF();
+                    shootTimer.reset();
+                    differential.goToSlot(3);
+                    shootState = ShootState.GO_SLOT_3;
                 }
                 break;
 

@@ -123,7 +123,10 @@ public class Red15Full extends LinearOpMode {
                 break;
 
             case SHOOTING_POSE_1:
-                robot.goalLock(robot.drivetrain.robotPose);
+                if (robot.drivetrain.robotPose.getHeading(AngleUnit.DEGREES) > 200) {
+                    robot.goalLock(robot.drivetrain.robotPose);
+                }
+
                 robot.differential.farZone = true;
                 if (!trigger) {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -57, AngleUnit.DEGREES, 300), 1, 3, 0.2);
@@ -148,6 +151,7 @@ public class Red15Full extends LinearOpMode {
                         robot.update();
                         state = State.FIRST_INTAKES;
                         robot.differential.farZone = false;
+                        robot.flywheel.velocityModifier = -53.0;
                         trigger = false;
                     }
                 }
@@ -156,7 +160,7 @@ public class Red15Full extends LinearOpMode {
                 if (robot.drivetrain.DTatTarget()) {
                     trigger = true;
                     robot.drivetrain.state = Drivetrain.State.IDLE;
-                    robot.flywheel.velocityModifier = -40.0; // VELOCITY OFFSET MODIFIER SET TODO: TUNE AT COMP
+                    robot.flywheel.velocityModifier = 10.0; // VELOCITY OFFSET MODIFIER SET TODO: TUNE AT COMP
                 }
                 break;
 
@@ -174,7 +178,7 @@ public class Red15Full extends LinearOpMode {
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 3) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 61, -66, AngleUnit.DEGREES, 270), 0.5, 3, 3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 61, -66, AngleUnit.DEGREES, 270), 0.5, 5, 3);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 4) {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, 28, -55, AngleUnit.DEGREES, 280), 1, 5, 20);
@@ -221,17 +225,17 @@ public class Red15Full extends LinearOpMode {
                 if (robot.splineCounter == 0) {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, 24, 10, AngleUnit.DEGREES, 0), 1, 4, Math.toRadians(20));
                     robot.nextSplinePoint();
-                    prepareGantryForShooting(0);
+
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, 53, 10, AngleUnit.DEGREES, 0), 1, 2, 10);
                     robot.nextSplinePoint();
-                    prepareGantryForShooting(0);
+
                 } else if (robot.splineCounter == 2) {
                     robot.intake.runIntake(-1.0);
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, 48, 4, AngleUnit.DEGREES, 0), 1, 2, 10);
                     robot.nextSplinePoint();
-                    prepareGantryForShooting(0);
+
                 } else if (robot.splineCounter == 3) {
                     robot.goalLock(robot.drivetrain.robotPose);
                     robot.intake.runIntake(0);
