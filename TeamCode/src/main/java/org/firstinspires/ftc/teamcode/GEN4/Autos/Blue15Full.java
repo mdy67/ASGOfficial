@@ -179,11 +179,11 @@ public class Blue15Full extends LinearOpMode {
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 2) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -61, -58, AngleUnit.DEGREES, 255), 0.5, 3, 8);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -61, -58, AngleUnit.DEGREES, 255), 0.7, 3, 8);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 3) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -61, -66, AngleUnit.DEGREES, 270), 0.5, 3, 3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -61, -65, AngleUnit.DEGREES, 270), 0.7, 5, 3);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 4) {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -28, -55, AngleUnit.DEGREES, 260), 1, 5, 20);
