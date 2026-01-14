@@ -123,7 +123,7 @@ public class Red15Full extends LinearOpMode {
                 break;
 
             case SHOOTING_POSE_1:
-
+                robot.goalLock(robot.drivetrain.robotPose);
                 robot.differential.farZone = true;
                 if (!trigger) {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -57, AngleUnit.DEGREES, 300), 1, 3, 0.2);
