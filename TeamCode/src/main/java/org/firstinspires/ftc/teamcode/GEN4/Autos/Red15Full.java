@@ -123,9 +123,6 @@ public class Red15Full extends LinearOpMode {
                 break;
 
             case SHOOTING_POSE_1:
-                if (robot.drivetrain.robotPose.getHeading(AngleUnit.DEGREES) > 200) {
-                    robot.goalLock(robot.drivetrain.robotPose);
-                }
 
                 robot.differential.farZone = true;
                 if (!trigger) {
