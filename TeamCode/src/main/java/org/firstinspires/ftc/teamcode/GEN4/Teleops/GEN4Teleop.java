@@ -70,10 +70,11 @@ public class GEN4Teleop extends OpMode {
         // Turret / Goal Tracking
         Pose2D goal = robot.getTargetGoal();
 
-        if (gamepad1.dpad_up) {
+        if (gamepad1.dpad_up) { // UP = CLOSE ZONE
             robot.flywheel.MAX_VELOCITY = 450;
-        } else if (gamepad1.dpad_left) {
-            robot.flywheel.MAX_VELOCITY = 800;
+        } else if (gamepad1.start) {
+            robot.flywheel.MAX_VELOCITY = 800; // LEFT = FAR ZONE
+            // TODO: IF YOU CHANGE THIS THEN CHANGE LINES BELOW THAT USE THIS
         }
 
         if (TUNING_MODE) {
@@ -109,7 +110,7 @@ public class GEN4Teleop extends OpMode {
         if (robot.drivetrain.robotPose.getY(DistanceUnit.INCH) >= -30) {
             robot.differential.farZone = false;
             robot.flywheel.velocityModifier = -53.0;
-        } else {
+        } else if (robot.flywheel.MAX_VELOCITY == 800){
             robot.differential.farZone = true;
             robot.flywheel.velocityModifier = 30.0;
         }
