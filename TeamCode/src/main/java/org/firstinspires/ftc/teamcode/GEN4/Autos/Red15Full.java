@@ -52,6 +52,7 @@ public class Red15Full extends LinearOpMode {
 
         robot = new Robot(hardwareMap);
         robot.startup();
+        robot.flywheel.MAX_VELOCITY = 800;
 
         telemetry = new MultipleTelemetry(
                 telemetry,
@@ -61,6 +62,7 @@ public class Red15Full extends LinearOpMode {
         // INIT LOOP
         while (opModeInInit()) {
             state = State.INITIALIZED;
+            robot.flywheel.stop();
             updateSequence();
         }
 
@@ -118,6 +120,7 @@ public class Red15Full extends LinearOpMode {
                 robot.drivetrain.setPosition(16, -66, 90);
                 robot.neutral();
                 robot.readMotifTag();
+                robot.flywheel.stop();
                 telemetry.addData("INITIALIZED -- MOTIF:", robot.MotifTagID);
                 telemetry.update();
                 break;

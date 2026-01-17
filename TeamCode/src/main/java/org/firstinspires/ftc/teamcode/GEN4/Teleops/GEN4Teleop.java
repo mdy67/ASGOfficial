@@ -70,6 +70,11 @@ public class GEN4Teleop extends OpMode {
         // Turret / Goal Tracking
         Pose2D goal = robot.getTargetGoal();
 
+        if (gamepad1.dpad_up) {
+            robot.flywheel.MAX_VELOCITY = 450;
+        } else if (gamepad1.dpad_left) {
+            robot.flywheel.MAX_VELOCITY = 800;
+        }
 
         if (TUNING_MODE) {
          //   if (gamepad1.dpad_left)  targetVel -= 2;

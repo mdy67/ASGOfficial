@@ -58,10 +58,14 @@ public class Blue15Full extends LinearOpMode {
                 FtcDashboard.getInstance().getTelemetry()
         );
 
+        robot.flywheel.MAX_VELOCITY = 800;
+
         alliance.set(alliance.Color.BLUE);
         // INIT LOOP
+
         while (opModeInInit()) {
             state = State.INITIALIZED;
+            robot.flywheel.stop();
             updateSequence();
         }
 
@@ -126,6 +130,7 @@ public class Blue15Full extends LinearOpMode {
                 robot.drivetrain.setPosition(-16, -66, 90);
                 robot.neutral();
                 robot.readMotifTag();
+                robot.flywheel.stop();
                 telemetry.addData("INITIALIZED -- MOTIF:", robot.MotifTagID);
                 telemetry.update();
                 break;
