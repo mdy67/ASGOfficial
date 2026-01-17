@@ -394,7 +394,7 @@ public class Robot {
             case GO_SLOT_2:
                 if (differential.atTarget) {
                     shootTimer.reset();
-                    intake.runIntake(-0.5);
+                    intake.runIntake(0);
                     arms.arm2_flickON();
                     shootState = ShootState.FLICK_AND_INTAKE;
                 }
