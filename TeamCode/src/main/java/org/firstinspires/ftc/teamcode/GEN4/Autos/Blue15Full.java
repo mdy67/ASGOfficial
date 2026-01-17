@@ -310,7 +310,7 @@ public class Blue15Full extends LinearOpMode {
                     prepareGantryForShooting(1);
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -53, -15, AngleUnit.DEGREES, 180), 1, 4, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -59, -15, AngleUnit.DEGREES, 180), 1, 4, 10);
                     robot.goalLock(robot.drivetrain.robotPose);
                     robot.nextSplinePoint();
                     if (robot.splineCounter == 2) robot.intake.runIntake(0);

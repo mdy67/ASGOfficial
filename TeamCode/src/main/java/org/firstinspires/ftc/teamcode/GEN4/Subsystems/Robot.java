@@ -332,17 +332,20 @@ public class Robot {
                 break;
 
             case FLICK_AND_INTAKE:
-                if (shootTimer.seconds() >= 0.3 && shootTimer.seconds() < 0.8) {
+                if (shootTimer.seconds() >= 0.3 && shootTimer.seconds() < 1.0) {
                     // intake.stop();
                     arms.arm2_flickOFF();
-                    intake.runIntake(-0.8);
+                    if (shootTimer.seconds() >= 0.6) {
+                        intake.runIntake(-0.8);
+                    }
+
 
                 }
-                if (shootTimer.seconds() >= 0.8 && shootTimer.seconds() < 1.2) {
+                if (shootTimer.seconds() >= 1.4 && shootTimer.seconds() < 1.8) {
                     intake.runIntake(0.0);
                     arms.arm2_flickON();
                 }
-                if (shootTimer.seconds() >= 1.2) {
+                if (shootTimer.seconds() >= 1.8) {
                     intake.runIntake(-0.8);
                     arms.arm2_flickOFF();
                     shootTimer.reset();
@@ -383,6 +386,7 @@ public class Robot {
             case IDLE:
                 if (goYet) {
                     differential.goToSlot(2);
+                    arms.reset();
                     shootState = ShootState.GO_SLOT_2;
                 }
                 break;
@@ -434,6 +438,7 @@ public class Robot {
 
             case IDLE:
                 if (goYet) {
+                    arms.reset();
                     differential.goToSlot(3);
                     shootState = ShootState.GO_SLOT_3;
                 }
