@@ -98,7 +98,7 @@ public class Robot {
         differential.resetEncoders();
      //   differential.encROffset = 0;
      //   differential.encLOffset = 0;
-        differential.resetToSlot3();
+     //   differential.resetToSlot3();
     }
 
     public void importAutoPose(double x, double y, double heading) {

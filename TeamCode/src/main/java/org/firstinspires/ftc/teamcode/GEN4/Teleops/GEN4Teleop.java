@@ -19,6 +19,7 @@ public class GEN4Teleop extends OpMode {
     private boolean TUNING_MODE = false;
     private double targetVel = 350;
     private double hoodAngle = 0.4;
+    private double modifierNigga = 0;
 
     @Override
     public void init() {
@@ -71,7 +72,7 @@ public class GEN4Teleop extends OpMode {
         Pose2D goal = robot.getTargetGoal();
 
         if (gamepad1.dpad_up) { // UP = CLOSE ZONE
-            robot.flywheel.MAX_VELOCITY = 450;
+            robot.flywheel.MAX_VELOCITY = 500;
         } else if (gamepad1.start) {
             robot.flywheel.MAX_VELOCITY = 800; // LEFT = FAR ZONE
             // TODO: IF YOU CHANGE THIS THEN CHANGE LINES BELOW THAT USE THIS
@@ -98,16 +99,17 @@ public class GEN4Teleop extends OpMode {
         }
 
         if (gamepad2.dpad_up) {
-            robot.differential.encLOffset -= 5 * gamepad2.left_stick_y;
-            robot.differential.encROffset -= 5 * gamepad2.right_stick_y;
+            robot.differential.encLOffset -= 25 * gamepad2.left_stick_y;
+            robot.differential.encROffset -= 25 * gamepad2.right_stick_y;
+
         }
 
 
 
-        if (gamepad1.x) {
-            robot.differential.slotOffset += 5;
+        if (gamepad1.dpad_up) {
+            modifierNigga += 5;
         } else if (gamepad1.options) {
-            robot.differential.slotOffset -= 5;
+            modifierNigga -= 5;
         }
 
         if (gamepad1.start) {
@@ -116,9 +118,10 @@ public class GEN4Teleop extends OpMode {
             TUNING_MODE = false;
         }
 
+
         if (robot.drivetrain.robotPose.getY(DistanceUnit.INCH) >= -30) {
             robot.differential.farZone = false;
-            robot.flywheel.velocityModifier = -53.0;
+            robot.flywheel.velocityModifier = -40.0 + modifierNigga;
         } else if (robot.flywheel.MAX_VELOCITY == 800){
             robot.differential.farZone = true;
             robot.flywheel.velocityModifier = 30.0;

@@ -76,7 +76,7 @@ public class Differential {
         diffyL.setDirection(CRServo.Direction.REVERSE);
         diffyR.setDirection(CRServo.Direction.FORWARD);
 
-        resetToSlot3();
+      //  resetToSlot3();
     }
 
     public void resetToSlot3() {

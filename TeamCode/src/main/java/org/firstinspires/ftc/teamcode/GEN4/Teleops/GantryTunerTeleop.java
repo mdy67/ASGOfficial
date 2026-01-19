@@ -18,7 +18,7 @@ public class GantryTunerTeleop extends OpMode {
     public void init() {
         robot = new Robot(hardwareMap);
         robot.startup();
-        robot.differential.resetToSlot3();
+    //    robot.differential.resetToSlot3();
     }
 
     @Override

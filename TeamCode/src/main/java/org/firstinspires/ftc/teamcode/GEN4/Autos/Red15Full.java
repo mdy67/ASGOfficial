@@ -149,9 +149,10 @@ public class Red15Full extends LinearOpMode {
                         robot.autoIdle();
                         robot.resetSplineCounter();
                         robot.update();
+                        robot.flywheel.velocityModifier = -50.0;
                         state = State.FIRST_INTAKES;
                         robot.differential.farZone = false;
-                        robot.flywheel.velocityModifier = -53.0;
+
                         trigger = false;
                     }
                 }
@@ -160,11 +161,12 @@ public class Red15Full extends LinearOpMode {
                 if (robot.drivetrain.DTatTarget()) {
                     trigger = true;
                     robot.drivetrain.state = Drivetrain.State.IDLE;
-                    robot.flywheel.velocityModifier = 10.0; // VELOCITY OFFSET MODIFIER SET TODO: TUNE AT COMP
+                    robot.flywheel.velocityModifier = 20.0; // VELOCITY OFFSET MODIFIER SET TODO: TUNE AT COMP
                 }
                 break;
 
             case FIRST_INTAKES: // INTAKE BALLS FROM CORNER
+                robot.flywheel.velocityModifier = -40.0;
                 if (robot.splineCounter == 0) {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, 30, -53, AngleUnit.DEGREES, 330), 1, 6, 30);
                     robot.nextSplinePoint();
@@ -233,11 +235,11 @@ public class Red15Full extends LinearOpMode {
 
                 } else if (robot.splineCounter == 2) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 48, 4, AngleUnit.DEGREES, 0), 1, 2, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 46, 4, AngleUnit.DEGREES, 0), 1, 2, 10);
                     robot.nextSplinePoint();
 
                 } else if (robot.splineCounter == 3) {
-                    robot.goalLock(robot.drivetrain.robotPose);
+                  //  robot.goalLock(robot.drivetrain.robotPose);
                     robot.intake.runIntake(0);
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, 55, 1, AngleUnit.DEGREES, 0), 1, 2, 3);
                     // WAIT 1s at GATE RAM POS
@@ -250,11 +252,11 @@ public class Red15Full extends LinearOpMode {
 
                     trigger = false;
                     robot.counter = 0;
-                    prepareGantryForShooting(0);
 
                 } else if (robot.splineCounter == 4) {
                     robot.goalLock(robot.drivetrain.robotPose);
                     if (!trigger) {
+                    //    prepareGantryForShooting(0);
                         robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, 8, AngleUnit.DEGREES, 280), 1, 3, 0.2);
                         trigger = true;
                     }
@@ -262,9 +264,9 @@ public class Red15Full extends LinearOpMode {
                     if (robot.systemsReady() && !shootStarted) {
                         shootStarted = true;
                         switch (shootingPattern[0]) {
-                            case "133": robot.shoot_133(true); break;
-                            case "233": robot.shoot_233(true); break;
-                            case "223": robot.shoot_223(true); break;
+                            case "133": robot.shoot_333(true); break;
+                            case "233": robot.shoot_333(true); break;
+                            case "223": robot.shoot_333(true); break;
                             case "333": robot.shoot_333(true); break;
                         }
                     }
@@ -272,9 +274,9 @@ public class Red15Full extends LinearOpMode {
                     if (shootStarted) {
                         boolean done = false;
                         switch (shootingPattern[0]) {
-                            case "133": done = robot.shoot_133(true); break;
-                            case "233": done = robot.shoot_233(true); break;
-                            case "223": done = robot.shoot_223(true); break;
+                            case "133": done = robot.shoot_333(true); break;
+                            case "233": done = robot.shoot_333(true); break;
+                            case "223": done = robot.shoot_333(true); break;
                             case "333": done = robot.shoot_333(true); break;
                         }
                         if (done) {
@@ -297,7 +299,7 @@ public class Red15Full extends LinearOpMode {
                 if (robot.splineCounter == 0) {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, 19, -15, AngleUnit.DEGREES, 0), 1, 5, 0.3);
                     robot.nextSplinePoint();
-                    prepareGantryForShooting(1);
+                 //   prepareGantryForShooting(1);
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, 58, -15, AngleUnit.DEGREES, 0), 1, 4, 10);
@@ -305,7 +307,7 @@ public class Red15Full extends LinearOpMode {
                     robot.nextSplinePoint();
                     if (robot.splineCounter == 2) robot.intake.runIntake(0);
                     trigger = false;
-                    prepareGantryForShooting(1);
+              //      prepareGantryForShooting(1);
                 } else if (robot.splineCounter == 2) {
                     robot.goalLock(robot.drivetrain.robotPose);
                     if (!trigger) {
@@ -316,9 +318,9 @@ public class Red15Full extends LinearOpMode {
                     if (robot.systemsReady() && !shootStarted) {
                         shootStarted = true;
                         switch (shootingPattern[1]) {
-                            case "133": robot.shoot_133(true); break;
-                            case "233": robot.shoot_233(true); break;
-                            case "223": robot.shoot_223(true); break;
+                            case "133": robot.shoot_333(true); break;
+                            case "233": robot.shoot_333(true); break;
+                            case "223": robot.shoot_333(true); break;
                             case "333": robot.shoot_333(true); break;
                         }
                     }
@@ -326,9 +328,9 @@ public class Red15Full extends LinearOpMode {
                     if (shootStarted) {
                         boolean done = false;
                         switch (shootingPattern[1]) {
-                            case "133": done = robot.shoot_133(true); break;
-                            case "233": done = robot.shoot_233(true); break;
-                            case "223": done = robot.shoot_223(true); break;
+                            case "133": done = robot.shoot_333(true); break;
+                            case "233": done = robot.shoot_333(true); break;
+                            case "223": done = robot.shoot_333(true); break;
                             case "333": done = robot.shoot_333(true); break;
                         }
                         if (done) {
@@ -351,19 +353,19 @@ public class Red15Full extends LinearOpMode {
                 if (robot.splineCounter == 0) {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, 24, -38, AngleUnit.DEGREES, 0), 1, 3, 0.3);
                     robot.nextSplinePoint();
-                    prepareGantryForShooting(2);
+                //    prepareGantryForShooting(2);
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, 64, -38, AngleUnit.DEGREES, 0), 1, 4, 10);
                     robot.nextSplinePoint();
-                    prepareGantryForShooting(2);
+                //    prepareGantryForShooting(2);
                 } else if (robot.splineCounter == 2) {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, 28, -15, AngleUnit.DEGREES, 280), 1, 15, 80);
                     robot.nextSplinePoint();
                     robot.goalLock(robot.drivetrain.robotPose);
                     if (robot.splineCounter == 3) robot.intake.runIntake(0);
                     trigger = false;
-                    prepareGantryForShooting(2);
+               //     prepareGantryForShooting(2);
                 } else if (robot.splineCounter == 3) {
                     robot.goalLock(robot.drivetrain.robotPose);
                     if (!trigger) {
@@ -374,9 +376,9 @@ public class Red15Full extends LinearOpMode {
                     if (robot.systemsReady() && !shootStarted) {
                         shootStarted = true;
                         switch (shootingPattern[2]) {
-                            case "133": robot.shoot_133(true); break;
-                            case "233": robot.shoot_233(true); break;
-                            case "223": robot.shoot_223(true); break;
+                            case "133": robot.shoot_333(true); break;
+                            case "233": robot.shoot_333(true); break;
+                            case "223": robot.shoot_333(true); break;
                             case "333": robot.shoot_333(true); break;
                         }
                     }
@@ -384,9 +386,9 @@ public class Red15Full extends LinearOpMode {
                     if (shootStarted) {
                         boolean done = false;
                         switch (shootingPattern[2]) {
-                            case "133": done = robot.shoot_133(true); break;
-                            case "233": done = robot.shoot_233(true); break;
-                            case "223": done = robot.shoot_223(true); break;
+                            case "133": done = robot.shoot_333(true); break;
+                            case "233": done = robot.shoot_333(true); break;
+                            case "223": done = robot.shoot_333(true); break;
                             case "333": done = robot.shoot_333(true); break;
                         }
                         if (done) {
@@ -429,11 +431,11 @@ public class Red15Full extends LinearOpMode {
 
         switch (pattern) {
             case "133":
-                robot.differential.goToSlot(1);
+                robot.differential.goToSlot(3);
                 break;
             case "223":
             case "233":
-                robot.differential.goToSlot(2);
+                robot.differential.goToSlot(3);
                 break;
             case "333":
                 robot.differential.goToSlot(3);
