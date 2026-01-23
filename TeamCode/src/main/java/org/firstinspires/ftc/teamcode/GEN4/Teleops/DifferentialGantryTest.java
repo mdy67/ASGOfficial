@@ -53,7 +53,7 @@ public class DifferentialGantryTest extends LinearOpMode {
             telemetry.addLine("=== DIFFY DEBUG ===");
             telemetry.addData("Slot", slot);
             telemetry.addData("Angle", angle);
-            telemetry.addData("Slot Base", diff.slot3Pos);
+          //  telemetry.addData("Slot Base", diff.slot3Pos);
             telemetry.addData("Target L / R", "%.1f / %.1f", diff.targetL, diff.targetR);
          //   telemetry.addData("Error L / R", "%.1f / %.1f", diff.errorL, diff.errorR);
             telemetry.addData("Enc L / R", "%.1f / %.1f", diff.getEncoderL(), diff.getEncoderR());

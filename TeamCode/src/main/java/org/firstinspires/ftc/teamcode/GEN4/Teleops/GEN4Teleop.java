@@ -6,10 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.GEN4.Autos.Blue15Full;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.AutoToTeleop;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Robot;
-import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Differential;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
 
 @TeleOp(name = "GEN4 TeleOp", group = "GEN4")
@@ -19,7 +17,7 @@ public class GEN4Teleop extends OpMode {
     private boolean TUNING_MODE = false;
     private double targetVel = 350;
     private double hoodAngle = 0.4;
-    private double modifierNigga = 0;
+    private double modifierLive = 0;
 
     @Override
     public void init() {
@@ -30,13 +28,26 @@ public class GEN4Teleop extends OpMode {
         robot.importAutoPose(AutoToTeleop.storedPose.getX(DistanceUnit.INCH), AutoToTeleop.storedPose.getY(DistanceUnit.INCH), AutoToTeleop.storedPose.getHeading(AngleUnit.DEGREES));
         robot.importAutoDiffy(AutoToTeleop.encLOffset, AutoToTeleop.encROffset);
         robot.flywheel.stop();
-
+        robot.flywheel.MAX_VELOCITY = 450;
         telemetry.addLine("Robot initialized. Waiting for start...");
         telemetry.update();
     }
 
     @Override
     public void loop() {
+
+        /**
+         *
+         * LEFT TRIGGER = OUTTAKE
+         * LEFT BUMPER = INTAKE
+         *
+         * RIGHT TRIGGER = SLOW MODE
+         * RIGHT BUMPER = RAPID FIRE
+         *
+         *
+         */
+
+
 
         double drive  = -gamepad1.left_stick_y;
         double strafe = -gamepad1.left_stick_x;
@@ -57,11 +68,17 @@ public class GEN4Teleop extends OpMode {
             intakePower = -0.8;
         } else if (gamepad1.left_bumper) {
             intakePower = -1.0;
-        } else if (gamepad1.dpad_down) {
+        } else if (gamepad1.left_trigger > 0.1) {
             intakePower = 0.75;
-        } else if (gamepad1.a) {
+        }
+
+        if (gamepad1.x) {
             robot.arms.arm3_flickON();
             intakePower = -0.8;
+        } else if (gamepad1.y) {
+            robot.arms.arm2_flickON();
+        } else if (gamepad1.b) {
+            robot.arms.arm1_flickON();
         } else {
             robot.arms.reset();
         }
@@ -71,11 +88,17 @@ public class GEN4Teleop extends OpMode {
         // Turret / Goal Tracking
         Pose2D goal = robot.getTargetGoal();
 
-        if (gamepad1.dpad_up) { // UP = CLOSE ZONE
-            robot.flywheel.MAX_VELOCITY = 500;
-        } else if (gamepad1.start) {
-            robot.flywheel.MAX_VELOCITY = 800; // LEFT = FAR ZONE
+        if (robot.adjustedPose.getY(DistanceUnit.INCH) >= -24) { // UP = CLOSE ZONE
+            robot.flywheel.MAX_VELOCITY = 450;
+            robot.differential.farZone = false;
+            robot.flywheel.velocityModifier = -40.0 + modifierLive;
+
+        } else if (gamepad1.right_stick_button) {
+            robot.flywheel.MAX_VELOCITY = 550; // LEFT = FAR ZONE
             // TODO: IF YOU CHANGE THIS THEN CHANGE LINES BELOW THAT USE THIS
+
+            robot.differential.farZone = true;
+            robot.flywheel.velocityModifier = 30.0 + modifierLive;
         }
 
         if (TUNING_MODE) {
@@ -107,25 +130,17 @@ public class GEN4Teleop extends OpMode {
 
 
         if (gamepad1.dpad_up) {
-            modifierNigga += 5;
-        } else if (gamepad1.options) {
-            modifierNigga -= 5;
+            modifierLive += 5;
+        } else if (gamepad1.dpad_down) {
+            modifierLive -= 5;
         }
 
-        if (gamepad1.start) {
+        if (gamepad1.options) {
             TUNING_MODE = true;
-        } if (gamepad1.options) {
+        } if (gamepad1.a) {
             TUNING_MODE = false;
         }
 
-
-        if (robot.drivetrain.robotPose.getY(DistanceUnit.INCH) >= -30) {
-            robot.differential.farZone = false;
-            robot.flywheel.velocityModifier = -40.0 + modifierNigga;
-        } else if (robot.flywheel.MAX_VELOCITY == 800){
-            robot.differential.farZone = true;
-            robot.flywheel.velocityModifier = 30.0;
-        }
 
         robot.update();
 
@@ -154,11 +169,20 @@ public class GEN4Teleop extends OpMode {
            //     robot.differential.targetR);
       //  telemetry.addData("Target Angle", "%.1f", robot.differential.compensatedAngle);
       //  telemetry.addData("Desired Angle", "%.1f", robot.differential.desiredAngle);
-
+        telemetry.addLine();
         double dx = goal.getX(DistanceUnit.INCH) - robot.drivetrain.robotPose.getX(DistanceUnit.INCH);
         double dy = goal.getY(DistanceUnit.INCH) - robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
-      //  telemetry.addData("Distance to Goal", "%.2f", Math.hypot(dx, dy));
+        telemetry.addData("Distance to Goal", "%.2f", Math.hypot(dx, dy));
+        telemetry.addData("FLYWHEEL TARGET: ", robot.flywheel.getTargetVelocity());
+        telemetry.addData("CURRENT VELOCITY: ", robot.flywheel.getVelocityRadPerSec());
 
+        telemetry.addLine();
+
+        telemetry.addData("Target L: ", robot.differential.targetL);
+        telemetry.addData("Target R: ", robot.differential.targetR);
+        telemetry.addData("Desired Angle: ", robot.differential.desiredAngle);
+        telemetry.addData("Compensated Angle: ", robot.differential.compensatedAngle);
+        telemetry.addData("Gantry Slot: ", robot.differential.currentSlotBase);
         telemetry.update();
     }
 }

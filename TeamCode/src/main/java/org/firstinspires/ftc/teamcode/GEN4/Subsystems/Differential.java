@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -29,7 +30,7 @@ public class Differential {
     public static double slot2Pos = -3000;
     public static double slot3Pos = 0;       // default starting slot
     public double slotOffset = 0;
-    public static double angleScale = 38.76; // turret rotation scaling
+    public static double angleScale = 0.00181944444444444444444444444444; // turret rotation scaling
 
     public double encLOffset;
     public double encROffset;
@@ -38,19 +39,19 @@ public class Differential {
     public double currR = 0;
 
     public boolean farZone = true;           // for tuning tolerances
-    private double currentSlotBase = 0;      // gantry position base
+    public double currentSlotBase = 3;      // gantry position base
 
     // --------------------
     // Hardware
     // --------------------
-    public CRServo diffyL, diffyR;
+    public Servo diffyL, diffyR;
     public DcMotorEx encL, encR;
 
     // --------------------
     // State
     // --------------------
-    public double targetL = 0;
-    public double targetR = 0;
+    public double targetL = 0.4912;
+    public double targetR = 0.79395;
 
     private double lastErrorL = 0;
     private double lastErrorR = 0;
@@ -60,25 +61,41 @@ public class Differential {
     public double compensatedAngle = 0; // turret angle offset only
     public double ANGLE_ADJUST = 0;
 
-    private double TURRET_OFFSET_INCHES = -4.5;
+    private double TURRET_OFFSET_INCHES = 5;
+
+  //  double slot3L = 0.3275;
+  //  double slot3R = 0.9577;
+    double slot3L = 0.3075;
+    double slot3R = 0.9377;
+    double slotIncrement = 0.115;
+
+    double slot2L = slot3L + slotIncrement;
+    double slot2R = slot3R - slotIncrement;
+    double slot1L = slot2L + slotIncrement;
+    double slot1R = slot2R - slotIncrement;
+
+
+    double slotOffsetR = slot3R;
+    double slotOffsetL = slot3L;
+
+
 
     // --------------------
     // Constructor
     // --------------------
     public Differential(HardwareMap hardwareMap) {
-        diffyL = hardwareMap.get(CRServo.class, "diffyL");
-        diffyR = hardwareMap.get(CRServo.class, "diffyR");
+        diffyL = hardwareMap.get(Servo.class, "diffyL");
+        diffyR = hardwareMap.get(Servo.class, "diffyR");
 
-        encL = hardwareMap.get(DcMotorEx.class, "rightFront");
-        encL.setDirection(DcMotorEx.Direction.REVERSE);
-        encR = hardwareMap.get(DcMotorEx.class, "intakeL");
+      //  encL = hardwareMap.get(DcMotorEx.class, "rightFront");
+     //   encL.setDirection(DcMotorEx.Direction.REVERSE);
+    //    encR = hardwareMap.get(DcMotorEx.class, "intakeL");
 
-        diffyL.setDirection(CRServo.Direction.REVERSE);
-        diffyR.setDirection(CRServo.Direction.FORWARD);
+
 
       //  resetToSlot3();
     }
-
+/*
     public void resetToSlot3() {
         currentSlotBase = slot3Pos;
         compensatedAngle = 0;
@@ -90,6 +107,8 @@ public class Differential {
         diffyL.setPower(0);
         diffyR.setPower(0);
     }
+
+ */
 
     public void resetEncoders() {
         encL.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -103,10 +122,22 @@ public class Differential {
     // --------------------
     public void goToSlot(int slot) {
         switch (slot) {
-            case 1: currentSlotBase = slot1Pos; TURRET_OFFSET_INCHES = 4.5; break;
-            case 2: currentSlotBase = slot2Pos; TURRET_OFFSET_INCHES = 0.0; break;
+            case 1: currentSlotBase = 1;
+                    TURRET_OFFSET_INCHES = -5;
+                    slotOffsetL = slot1L;
+                    slotOffsetR = slot1R;
+                    break;
+            case 2: currentSlotBase = 2;
+                    TURRET_OFFSET_INCHES = 0;
+                    slotOffsetL = slot2L;
+                    slotOffsetR = slot2R;
+                    break;
             case 3:
-            default: currentSlotBase = slot3Pos; TURRET_OFFSET_INCHES = -4.5; break;
+            default: currentSlotBase = 3;
+                    TURRET_OFFSET_INCHES = 5;
+                    slotOffsetL = slot3L;
+                    slotOffsetR = slot3R;
+                    break;
         }
         updateTargets();
     }
@@ -118,13 +149,19 @@ public class Differential {
         lastErrorL = 0;
         lastErrorR = 0;
 
-        compensatedAngle = -angle; // COMPENSATED ANGLE IS NEGATIVE
+        compensatedAngle = angle; // COMPENSATED ANGLE IS NEGATIVE
         updateTargets();
     }
 
     private void updateTargets() {
-        targetL = -(currentSlotBase - (compensatedAngle * angleScale));
-        targetR = currentSlotBase + (compensatedAngle * angleScale);
+     //   targetL = -(currentSlotBase - (compensatedAngle * angleScale));
+    //    targetR = currentSlotBase + (compensatedAngle * angleScale);
+        compensatedAngle = Range.clip(compensatedAngle, 0, 180);
+        targetL = slotOffsetL - (compensatedAngle * angleScale);
+        targetR = slotOffsetR - (compensatedAngle * angleScale);
+
+        targetL = Math.max(targetL, 0);
+        targetR = Math.min(targetR, 0.9577);
     }
 
     // --------------------
@@ -169,32 +206,35 @@ public class Differential {
     // Update loop (PID without integral)
     // --------------------
     public void update() {
-        currL = -encL.getCurrentPosition() + encLOffset;
-        currR = encR.getCurrentPosition() + encROffset;
+     //   currL = -encL.getCurrentPosition() + encLOffset;
+    //    currR = encR.getCurrentPosition() + encROffset;
 
-        double errorL = targetL - currL;
-        double errorR = targetR - currR;
+    //    double errorL = targetL - currL;
+    //    double errorR = targetR - currR;
 
-        double tolerance = farZone ? toleranceTicksFar : toleranceTicksClose;
+    //    double tolerance = farZone ? toleranceTicksFar : toleranceTicksClose;
 
-        double dL = errorL - lastErrorL;
-        double dR = errorR - lastErrorR;
+    //    double dL = errorL - lastErrorL;
+    //    double dR = errorR - lastErrorR;
 
-        lastErrorL = errorL;
-        lastErrorR = errorR;
+     //   lastErrorL = errorL;
+    //    lastErrorR = errorR;
 
-        double powerL = errorL * kP + dL * kD;
-        double powerR = errorR * kP + dR * kD;
+    //    double powerL = errorL * kP + dL * kD;
+    //    double powerR = errorR * kP + dR * kD;
 
         // Feedforward for large errors
-        if (Math.abs(errorL) > tolerance) powerL += Math.signum(errorL) * kS;
-        if (Math.abs(errorR) > tolerance) powerR += Math.signum(errorR) * kS;
+     //   if (Math.abs(errorL) > tolerance) powerL += Math.signum(errorL) * kS;
+    //    if (Math.abs(errorR) > tolerance) powerR += Math.signum(errorR) * kS;
 
-        atTarget = Math.abs(errorL) <= tolerance && Math.abs(errorR) <= tolerance;
+     //   atTarget = Math.abs(errorL) <= tolerance && Math.abs(errorR) <= tolerance;
 
         // Apply power to servos
-        diffyL.setPower(Range.clip(-powerL, -maxPower, maxPower));
-        diffyR.setPower(Range.clip(powerR, -maxPower, maxPower));
+    //    diffyL.setPower(Range.clip(-powerL, -maxPower, maxPower));
+    //    diffyR.setPower(Range.clip(powerR, -maxPower, maxPower));
+        atTarget = true; // TODO: TEMPORARY, MAYBE A TIMER?! what the fuck chat
+        diffyL.setPosition(targetL);
+        diffyR.setPosition(targetR);
     }
 
     // --------------------
