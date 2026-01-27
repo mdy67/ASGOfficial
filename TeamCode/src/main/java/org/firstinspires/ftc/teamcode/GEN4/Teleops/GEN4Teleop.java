@@ -9,6 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.AutoToTeleop;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
+import org.firstinspires.ftc.teamcode.GEN4.Subsystems.alliance;
 
 @TeleOp(name = "GEN4 TeleOp", group = "GEN4")
 public class GEN4Teleop extends OpMode {
@@ -24,6 +25,7 @@ public class GEN4Teleop extends OpMode {
 
         robot = new Robot(hardwareMap);
         robot.arms.reset();
+        alliance.set(alliance.Color.BLUE);
         robot.drivetrain.state = Drivetrain.State.TELEOP;
         robot.importAutoPose(AutoToTeleop.storedPose.getX(DistanceUnit.INCH), AutoToTeleop.storedPose.getY(DistanceUnit.INCH), AutoToTeleop.storedPose.getHeading(AngleUnit.DEGREES));
         robot.importAutoDiffy(AutoToTeleop.encLOffset, AutoToTeleop.encROffset);
