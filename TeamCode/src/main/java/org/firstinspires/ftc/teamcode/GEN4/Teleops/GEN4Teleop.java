@@ -30,7 +30,11 @@ public class GEN4Teleop extends OpMode {
         robot.importAutoPose(AutoToTeleop.storedPose.getX(DistanceUnit.INCH), AutoToTeleop.storedPose.getY(DistanceUnit.INCH), AutoToTeleop.storedPose.getHeading(AngleUnit.DEGREES));
         robot.importAutoDiffy(AutoToTeleop.encLOffset, AutoToTeleop.encROffset);
         robot.flywheel.stop();
+
         robot.flywheel.MAX_VELOCITY = 450;
+        robot.differential.farZone = false;
+        robot.flywheel.velocityModifier = -40.0 + modifierLive;
+
         telemetry.addLine("Robot initialized. Waiting for start...");
         telemetry.update();
     }
@@ -65,32 +69,48 @@ public class GEN4Teleop extends OpMode {
 
         // Intake & Arms
         double intakePower = 0;
-        if (gamepad1.right_bumper) {
-            robot.arms.arm3_flickRAPID();
-            intakePower = -0.8;
-        } else if (gamepad1.left_bumper) {
+        if (gamepad1.left_bumper) {
             intakePower = -1.0;
         } else if (gamepad1.left_trigger > 0.1) {
             intakePower = 0.75;
         }
 
+        /**
+         *
+         *             Y
+         *        X    :     B
+         *             A
+         *
+         */
+
+
         if (gamepad1.x) {
             robot.arms.arm3_flickON();
             intakePower = -0.8;
-        } else if (gamepad1.y) {
+        }
+        if (gamepad1.y) {
             robot.arms.arm2_flickON();
-        } else if (gamepad1.b) {
+        } else {
+            robot.arms.arm2_flickOFF();
+        }
+        if (gamepad1.b) {
             robot.arms.arm1_flickON();
         } else {
-            robot.arms.reset();
+            robot.arms.arm1_flickOFF();
+        }
+        if (gamepad1.right_bumper) {
+            robot.arms.arm3_flickRAPID();
+            intakePower = -0.8;
         }
 
-        robot.intake.runIntake(intakePower);
+        if (!gamepad1.x && !gamepad1.right_bumper) { robot.arms.arm3_flickOFF(); }
+
+        robot.intake.runIntake(intakePower); // APPLY INTAKEPOWER intakePower
 
         // Turret / Goal Tracking
         Pose2D goal = robot.getTargetGoal();
 
-        if (robot.adjustedPose.getY(DistanceUnit.INCH) >= -24) { // UP = CLOSE ZONE
+        if (gamepad1.left_stick_button) { // UP = CLOSE ZONE
             robot.flywheel.MAX_VELOCITY = 450;
             robot.differential.farZone = false;
             robot.flywheel.velocityModifier = -40.0 + modifierLive;

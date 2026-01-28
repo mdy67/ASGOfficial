@@ -61,7 +61,7 @@ public class Differential {
     public double compensatedAngle = 0; // turret angle offset only
     public double ANGLE_ADJUST = 0;
 
-    private double TURRET_OFFSET_INCHES = -5;
+    private double TURRET_OFFSET_INCHES = -4.5;
 
   //  double slot3L = 0.3275;
   //  double slot3R = 0.9577;
@@ -123,7 +123,7 @@ public class Differential {
     public void goToSlot(int slot) {
         switch (slot) {
             case 1: currentSlotBase = 1;
-                    TURRET_OFFSET_INCHES = 5;
+                    TURRET_OFFSET_INCHES = 4.5;
                     slotOffsetL = slot1L;
                     slotOffsetR = slot1R;
                     break;
@@ -134,7 +134,7 @@ public class Differential {
                     break;
             case 3:
             default: currentSlotBase = 3;
-                    TURRET_OFFSET_INCHES = -5;
+                    TURRET_OFFSET_INCHES = -4.5;
                     slotOffsetL = slot3L;
                     slotOffsetR = slot3R;
                     break;

@@ -41,7 +41,7 @@ public class Robot {
     private Pose2D odomOffset = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
     private boolean offsetInitialized = false;
 
-    private boolean AUTO_TESTING_MODE = true;
+    private boolean AUTO_TESTING_MODE = false;
 
 
     /* =========================
