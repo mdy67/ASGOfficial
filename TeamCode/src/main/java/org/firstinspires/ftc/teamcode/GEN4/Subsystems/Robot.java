@@ -190,18 +190,6 @@ public class Robot {
         drivetrain.goToPoint(targetPoint, maxPower, xyThreshold, hThreshold);
     }
 
-    public void goToPoint2(
-            Pose2D targetPoint,
-            double maxPower,
-            double xyThreshold,
-            double hThreshold,
-            double xyMult,
-            double hMult
-    ) {
-        drivetrain.state = Drivetrain.State.GO_TO_POINT;
-        drivetrain.goToPoint2(targetPoint, maxPower, xyThreshold, hThreshold, xyMult, hMult);
-    }
-
     public void holdPoint(Pose2D targetPoint, double maxPower) {
         drivetrain.state = Drivetrain.State.HOLD_POINT;
         drivetrain.goToPoint(targetPoint, maxPower, 0, 0);
@@ -488,6 +476,7 @@ public class Robot {
         update();
         if (drivetrain.DTatTarget()) splineCounter++;
     }
+
 
     public void resetSplineCounter() {
         splineCounter = 0;

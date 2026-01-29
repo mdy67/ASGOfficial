@@ -61,7 +61,7 @@ public class Differential {
     public double compensatedAngle = 0; // turret angle offset only
     public double ANGLE_ADJUST = 0;
 
-    private double TURRET_OFFSET_INCHES = -4.5;
+    private double TURRET_OFFSET_INCHES = -4.8;
 
   //  double slot3L = 0.3275;
   //  double slot3R = 0.9577;
@@ -78,7 +78,8 @@ public class Differential {
     double slotOffsetR = slot3R;
     double slotOffsetL = slot3L;
 
-
+    double MIN_ANGLE = 0;
+    double MAX_ANGLE = 180;
 
     // --------------------
     // Constructor
@@ -123,20 +124,26 @@ public class Differential {
     public void goToSlot(int slot) {
         switch (slot) {
             case 1: currentSlotBase = 1;
-                    TURRET_OFFSET_INCHES = 4.5;
+                    TURRET_OFFSET_INCHES = 4.8;
                     slotOffsetL = slot1L;
                     slotOffsetR = slot1R;
+                    MIN_ANGLE = 50;
+                    MAX_ANGLE = 130;
                     break;
             case 2: currentSlotBase = 2;
                     TURRET_OFFSET_INCHES = 0;
                     slotOffsetL = slot2L;
                     slotOffsetR = slot2R;
+                    MIN_ANGLE = 0;
+                    MAX_ANGLE = 180;
                     break;
             case 3:
             default: currentSlotBase = 3;
-                    TURRET_OFFSET_INCHES = -4.5;
+                    TURRET_OFFSET_INCHES = -4.8;
                     slotOffsetL = slot3L;
                     slotOffsetR = slot3R;
+                    MIN_ANGLE = 0;
+                    MAX_ANGLE = 180;
                     break;
         }
         updateTargets();
@@ -156,7 +163,7 @@ public class Differential {
     private void updateTargets() {
      //   targetL = -(currentSlotBase - (compensatedAngle * angleScale));
     //    targetR = currentSlotBase + (compensatedAngle * angleScale);
-        compensatedAngle = Range.clip(compensatedAngle, 0, 180);
+        compensatedAngle = Range.clip(compensatedAngle, MIN_ANGLE, MAX_ANGLE);
         targetL = slotOffsetL - (compensatedAngle * angleScale);
         targetR = slotOffsetR - (compensatedAngle * angleScale);
 

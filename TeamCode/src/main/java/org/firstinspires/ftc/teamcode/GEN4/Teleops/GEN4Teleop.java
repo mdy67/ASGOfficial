@@ -71,7 +71,7 @@ public class GEN4Teleop extends OpMode {
         double intakePower = 0;
         if (gamepad1.left_bumper) {
             intakePower = -1.0;
-        } else if (gamepad1.left_trigger > 0.1) {
+        } else if (gamepad1.a) {
             intakePower = 0.75;
         }
 
@@ -109,6 +109,9 @@ public class GEN4Teleop extends OpMode {
 
         // Turret / Goal Tracking
         Pose2D goal = robot.getTargetGoal();
+        double dx = goal.getX(DistanceUnit.INCH) - robot.drivetrain.robotPose.getX(DistanceUnit.INCH);
+        double dy = goal.getY(DistanceUnit.INCH) - robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
+        double distance = Math.hypot(dx, dy);
 
         if (gamepad1.left_stick_button) { // UP = CLOSE ZONE
             robot.flywheel.MAX_VELOCITY = 450;
@@ -134,7 +137,11 @@ public class GEN4Teleop extends OpMode {
           //  if (gamepad1.y) hoodAngle -= 0.01;
          //   robot.flywheel.setHoodAngle(hoodAngle);
         } else {
-            robot.goalLock(robot.drivetrain.robotPose);
+            robot.flywheel.aimToGoal(robot.getTargetGoal(), robot.drivetrain.robotPose, robot.drivetrain.XVel(), robot.drivetrain.YVel());
+            if (gamepad1.left_trigger > 0.1 && distance <= 130) {
+                robot.differential.aimToGoal(robot.drivetrain.robotPose, robot.getTargetGoal());
+            }
+
         }
 
         if (gamepad1.dpad_right) {
@@ -192,9 +199,8 @@ public class GEN4Teleop extends OpMode {
       //  telemetry.addData("Target Angle", "%.1f", robot.differential.compensatedAngle);
       //  telemetry.addData("Desired Angle", "%.1f", robot.differential.desiredAngle);
         telemetry.addLine();
-        double dx = goal.getX(DistanceUnit.INCH) - robot.drivetrain.robotPose.getX(DistanceUnit.INCH);
-        double dy = goal.getY(DistanceUnit.INCH) - robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
-        telemetry.addData("Distance to Goal", "%.2f", Math.hypot(dx, dy));
+
+        telemetry.addData("Distance to Goal", "%.2f", distance);
         telemetry.addData("FLYWHEEL TARGET: ", robot.flywheel.getTargetVelocity());
         telemetry.addData("CURRENT VELOCITY: ", robot.flywheel.getVelocityRadPerSec());
 

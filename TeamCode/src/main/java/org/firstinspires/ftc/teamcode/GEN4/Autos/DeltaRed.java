@@ -14,8 +14,8 @@ import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.alliance;
 
-@Autonomous(name = "Blue 15 Ball", group = "GEN4")
-public class Blue15Full extends LinearOpMode {
+@Autonomous(name = "Delta Red", group = "GEN4")
+public class DeltaRed extends LinearOpMode {
 
     private Robot robot;
 
@@ -39,6 +39,7 @@ public class Blue15Full extends LinearOpMode {
     private State state = State.START_POSE;
 
     private ElapsedTime rapidFireTimer = new ElapsedTime();
+    private ElapsedTime dtStallTimer = new ElapsedTime();
     private boolean rapidFireActive = false;
     private long rapidFireDuration = 0;
 
@@ -70,14 +71,6 @@ public class Blue15Full extends LinearOpMode {
         }
 
         // Setup motif-based patterns
-        shootingPattern = new String[] {"133", "133", "133"};
-        if (robot.MotifTagID == 21) {
-            shootingPattern = new String[] {"133","233","333"};
-        } else if (robot.MotifTagID == 22) {
-            shootingPattern = new String[] {"223","333","233"};
-        } else if (robot.MotifTagID == 23) {
-            shootingPattern = new String[] {"333","133","223"};
-        }
 
         waitForStart();
         state = State.SHOOTING_POSE_1;
@@ -98,22 +91,21 @@ public class Blue15Full extends LinearOpMode {
             telemetry.addData("Flywheel Actual rad/s", robot.flywheel.getVelocityRadPerSec());
 
             telemetry.update();
-       //     robot.finalAutoPose = robot.drivetrain.robotPose;
+            //     robot.finalAutoPose = robot.drivetrain.robotPose;
             AutoToTeleop.storedPose = robot.drivetrain.robotPose;
-            alliance.set(alliance.Color.BLUE);
 
 
         }
 
 
         // Store the final pose for teleop
-    //    robot.finalAutoPose = robot.drivetrain.robotPose;
+        //    robot.finalAutoPose = robot.drivetrain.robotPose;
 
         AutoToTeleop.storedPose = robot.drivetrain.robotPose;
-        AutoToTeleop.encLOffset = robot.differential.currL;
-        AutoToTeleop.encROffset = robot.differential.currR;
-    //    robot.differential.encLOffset = robot.differential.currL;
-    //    robot.differential.encROffset = robot.differential.currR;
+      //  AutoToTeleop.encLOffset = robot.differential.currL;
+      //  AutoToTeleop.encROffset = robot.differential.currR;
+        //    robot.differential.encLOffset = robot.differential.currL;
+        //    robot.differential.encROffset = robot.differential.currR;
         robot.update();
     }
     private void updateSequence() {
@@ -176,10 +168,14 @@ public class Blue15Full extends LinearOpMode {
                     robot.intake.runIntake(-1.0);
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -60, -50, AngleUnit.DEGREES, 250), 1, 4, 8);
                     robot.nextSplinePoint();
+
+                    dtStallTimer.reset();
                 } else if (robot.splineCounter == 2) {
                     robot.intake.runIntake(-1.0);
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -61, -58, AngleUnit.DEGREES, 255), 0.7, 3, 8);
                     robot.nextSplinePoint();
+
+
                 } else if (robot.splineCounter == 3) {
                     robot.intake.runIntake(-1.0);
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -61, -65, AngleUnit.DEGREES, 270), 0.7, 5, 3);
@@ -410,13 +406,13 @@ public class Blue15Full extends LinearOpMode {
                 break;
 
             case POINT_6: // MOVE OFF LINE
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -24, -36, AngleUnit.DEGREES, 100), 1, 3, 0.3);
-                    robot.update();
+                robot.goToPoint(new Pose2D(DistanceUnit.INCH, -24, -36, AngleUnit.DEGREES, 100), 1, 3, 0.3);
+                robot.update();
 
-                    if (robot.drivetrain.DTatTarget()) {
-                        robot.drivetrain.state = Drivetrain.State.IDLE;
-                        state = State.FINISHED;
-                    }
+                if (robot.drivetrain.DTatTarget()) {
+                    robot.drivetrain.state = Drivetrain.State.IDLE;
+                    state = State.FINISHED;
+                }
                 break;
             case POINT_7:
             case POINT_8:
@@ -427,21 +423,10 @@ public class Blue15Full extends LinearOpMode {
         }
     }
 
-    private void prepareGantryForShooting(int index) {
-        String pattern = shootingPattern[index];
-        robot.goalLock(robot.drivetrain.robotPose);
-
-        switch (pattern) {
-            case "133":
-                robot.differential.goToSlot(1);
-                break;
-            case "223":
-            case "233":
-                robot.differential.goToSlot(2);
-                break;
-            case "333":
-                robot.differential.goToSlot(3);
-                break;
+    public void checkStallTimer(double threshold) {
+        if (dtStallTimer.seconds() > threshold) {
+            robot.splineCounter++;
+            dtStallTimer.reset();
         }
     }
 }

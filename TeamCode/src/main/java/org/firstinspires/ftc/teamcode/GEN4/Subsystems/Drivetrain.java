@@ -133,14 +133,6 @@ public class Drivetrain {
         }
     }
 
-    public void goToPoint2(Pose2D targetPoint, double maxPower, double xyThreshold, double hThreshold, double xyMult, double hMult) {
-        goToPoint(targetPoint, maxPower, xyThreshold, hThreshold);
-        xONmult = xyMult;
-        yONmult = xyMult;
-        this.tONmult = hMult;
-
-    }
-
 
     // -------------------------
     // PID CONTROL FOR AUTON
