@@ -36,7 +36,7 @@ public class DiffyServoTesticler extends OpMode {
 
     int currentSlot = 3;
 
-    double targetAngle = 0.5;
+    double targetAngle = 0.8;
     double angleScale = 0.00181944444444444444444444444444;
     // 0.8, 0.1529
    // Differential diffy;

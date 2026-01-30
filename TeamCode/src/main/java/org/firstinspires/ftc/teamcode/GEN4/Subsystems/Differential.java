@@ -113,10 +113,10 @@ public class Differential {
  */
 
     public void resetEncoders() {
-        encL.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        encR.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        encL.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        encR.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+      //  encL.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+      //  encR.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+      //  encL.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+      //  encR.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     // --------------------

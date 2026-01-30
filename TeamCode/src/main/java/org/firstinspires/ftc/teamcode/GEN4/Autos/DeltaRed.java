@@ -23,10 +23,11 @@ public class DeltaRed extends LinearOpMode {
         INITIALIZED,
         START_POSE,
         SHOOTING_POSE_1,
-        FIRST_INTAKES,
+        SPIKE_INTAKES,
         SHOOTING_POSE_2,
         POOL_INTAKE,
-        POINT_5,
+        CORNER_INTAKE,
+        OFFLINE,
         POINT_6,
         POINT_7,
         POINT_8,
@@ -58,7 +59,7 @@ public class DeltaRed extends LinearOpMode {
         );
 
         robot.flywheel.MAX_VELOCITY = 800;
-        alliance.set(alliance.Color.BLUE);
+        alliance.set(alliance.Color.RED);
 
         while (opModeInInit()) {
             state = State.INITIALIZED;
@@ -69,12 +70,11 @@ public class DeltaRed extends LinearOpMode {
         waitForStart();
         state = State.SHOOTING_POSE_1;
 
-        while (opModeIsActive() && !state.equals(State.FINISHED)) {
-            alliance.set(alliance.Color.BLUE);
+        while (opModeIsActive()) {
+            alliance.set(alliance.Color.RED);
             updateSequence();
 
             telemetry.update();
-
             AutoToTeleop.storedPose = robot.drivetrain.robotPose;
         }
 
@@ -84,11 +84,25 @@ public class DeltaRed extends LinearOpMode {
 
     private void updateSequence() {
         switch (state) {
-
+            case INITIALIZED:
+                robot.flywheel.velocityModifier = -59.0;
+                robot.update();
+                robot.drivetrain.setPosition(16, -66, 90);
+                robot.neutral();
+                robot.readMotifTag();
+                robot.flywheel.stop();
+                telemetry.addData("INITIALIZED -- MOTIF:", robot.MotifTagID);
+                telemetry.update();
+                dtStallTimer.reset();
+                break;
             /* ================= SHOOT 1 ================= */
 
             case SHOOTING_POSE_1:
-                robot.goalLock(robot.drivetrain.robotPose);
+                //  robot.goalLock(robot.drivetrain.robotPose);
+                if (dtStallTimer.seconds() > 1) {
+                    robot.differential.aimToGoal(robot.drivetrain.robotPose, robot.getTargetGoal());
+                }
+                robot.flywheel.aimToGoal(robot.getTargetGoal(), robot.drivetrain.robotPose, robot.drivetrain.XVel(), robot.drivetrain.YVel());
                 robot.differential.farZone = true;
 
                 if (!trigger) {
@@ -111,7 +125,7 @@ public class DeltaRed extends LinearOpMode {
                         shootStarted = false;
                         robot.autoIdle();
                         robot.resetSplineCounter();
-                        state = State.FIRST_INTAKES;
+                        state = State.CORNER_INTAKE;
                         trigger = false;
                     }
                 }
@@ -123,19 +137,52 @@ public class DeltaRed extends LinearOpMode {
                 }
                 break;
 
-            case FIRST_INTAKES:
+            case CORNER_INTAKE:
+                if (robot.splineCounter == 0) {
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 30, -53, AngleUnit.DEGREES, 330), 1, 6, 30);
+                    robot.nextSplinePoint();
+                } else if (robot.splineCounter == 1) {
+                    robot.intake.runIntake(-1.0);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 60, -50, AngleUnit.DEGREES, 290), 1, 4, 8);
+                    robot.nextSplinePoint();
+                } else if (robot.splineCounter == 2) {
+                    robot.intake.runIntake(-1.0);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 61, -58, AngleUnit.DEGREES, 285), 0.5, 3, 8);
+                    robot.nextSplinePoint();
+                    dtStallTimer.reset();
+                } else if (robot.splineCounter == 3) {
+                    checkStallTimer(1);
+                    robot.intake.runIntake(-1.0);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 61, -66, AngleUnit.DEGREES, 270), 0.5, 5, 3);
+                    robot.nextSplinePoint();
+                } else if (robot.splineCounter == 4) {
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 40, -60, AngleUnit.DEGREES, 270), 0.5, 5, 3);
+                    robot.nextSplinePoint();
+                } else if (robot.splineCounter == 5) {
+                    robot.intake.runIntake(0);
+                    robot.resetSplineCounter();
+                    trigger = false;
+                    robot.update();
+                    state = State.SHOOTING_POSE_2;
+                }
+                break;
+
+            case SPIKE_INTAKES:
                 if (robot.splineCounter == 0) {
                     dtStallTimer.reset();
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, 24, -38, AngleUnit.DEGREES, 0), 1, 3, 0.3);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 66, -38, AngleUnit.DEGREES, 0), 1, 4, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 61, -38, AngleUnit.DEGREES, 0), 1, 4, 10);
                     robot.nextSplinePoint();
                     checkStallTimer(2);
                 } else if (robot.splineCounter == 2) {
+                    robot.intake.runIntake(0);
                     robot.resetSplineCounter();
-                    state = State.FIRST_INTAKES;
+                    trigger = false;
+                    robot.update();
+                    state = State.SHOOTING_POSE_2;
                 }
                 break;
 
@@ -144,7 +191,7 @@ public class DeltaRed extends LinearOpMode {
                 robot.differential.farZone = true;
 
                 if (!trigger) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -57, AngleUnit.DEGREES, 300), 1, 3, 0.2);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -57, AngleUnit.DEGREES, 300), 1, 2, 0.2);
                 }
 
                 if (robot.systemsReady() && !shootStarted) {
@@ -165,12 +212,13 @@ public class DeltaRed extends LinearOpMode {
                         robot.resetSplineCounter();
                         dtStallTimer.reset();
                         CycleCounter ++;
-                        if (CycleCounter > 2) {
-                            state = State.POINT_5;
-                        } else {
+                        if (CycleCounter == 1) {
+                            state = State.SPIKE_INTAKES;
+                        } else if (CycleCounter < 4){
                             state = State.POOL_INTAKE;
+                        } else {
+                            state = State.OFFLINE;
                         }
-
                         trigger = false;
                     }
                 }
@@ -184,21 +232,25 @@ public class DeltaRed extends LinearOpMode {
 
             case POOL_INTAKE:
                 if (robot.splineCounter == 0) {
-                    checkStallTimer(3);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 58, -30, AngleUnit.DEGREES, 300), 1, 3, 0.3);
+                  //  checkStallTimer(3);
+                    dtStallTimer.reset();
+                    robot.intake.runIntake(-1.0);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 50, -68, AngleUnit.DEGREES, 0), 0.5, 3, 0.3);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 60, -38, AngleUnit.DEGREES, 300), 1, 4, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 70, -68, AngleUnit.DEGREES, 0), 0.4, 2, 10);
                     robot.nextSplinePoint();
                     checkStallTimer(2);
                 } else if (robot.splineCounter == 2) {
+                    robot.intake.runIntake(0);
                     robot.resetSplineCounter();
+                    trigger = false;
                     state = State.SHOOTING_POSE_2;
                 }
                 break;
 
-            case POINT_5: // MOVE OFF LINE
+            case OFFLINE: // MOVE OFF LINE
                 if (robot.splineCounter == 0) {
                     checkStallTimer(3);
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -40, AngleUnit.DEGREES, 300), 0.3, 3, 0.3);
@@ -216,7 +268,7 @@ public class DeltaRed extends LinearOpMode {
 
     public void checkStallTimer(double threshold) {
         if (dtStallTimer.seconds() > threshold) {
-            robot.splineCounter++;
+            robot.splineCounter ++;
             dtStallTimer.reset();
         }
     }

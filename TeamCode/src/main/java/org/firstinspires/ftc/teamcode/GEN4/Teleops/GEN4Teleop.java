@@ -25,7 +25,7 @@ public class GEN4Teleop extends OpMode {
 
         robot = new Robot(hardwareMap);
         robot.arms.reset();
-        alliance.set(alliance.Color.BLUE);
+      //  alliance.set(alliance.Color.BLUE);
         robot.drivetrain.state = Drivetrain.State.TELEOP;
         robot.importAutoPose(AutoToTeleop.storedPose.getX(DistanceUnit.INCH), AutoToTeleop.storedPose.getY(DistanceUnit.INCH), AutoToTeleop.storedPose.getHeading(AngleUnit.DEGREES));
         robot.importAutoDiffy(AutoToTeleop.encLOffset, AutoToTeleop.encROffset);
@@ -138,9 +138,7 @@ public class GEN4Teleop extends OpMode {
          //   robot.flywheel.setHoodAngle(hoodAngle);
         } else {
             robot.flywheel.aimToGoal(robot.getTargetGoal(), robot.drivetrain.robotPose, robot.drivetrain.XVel(), robot.drivetrain.YVel());
-            if (gamepad1.left_trigger > 0.1 && distance <= 130) {
-                robot.differential.aimToGoal(robot.drivetrain.robotPose, robot.getTargetGoal());
-            }
+            robot.differential.setTargetAngle(90);
 
         }
 

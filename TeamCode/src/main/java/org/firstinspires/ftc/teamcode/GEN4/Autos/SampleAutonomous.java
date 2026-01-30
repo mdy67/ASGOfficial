@@ -24,7 +24,7 @@ public class SampleAutonomous extends LinearOpMode {
         FIRST_INTAKES,
         POINT_3,
         POINT_4,
-        POINT_5,
+        OFFLINE,
         POINT_6,
         POINT_7,
         POINT_8,
@@ -119,10 +119,10 @@ public class SampleAutonomous extends LinearOpMode {
                         0.4, 3, 5);
                 robot.update();
                 atPosition = robot.drivetrain.DTatTarget();
-                if (atPosition) { state = State.POINT_5; }
+                if (atPosition) { state = State.OFFLINE; }
                 break;
 
-            case POINT_5:
+            case OFFLINE:
                 robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -12, AngleUnit.DEGREES, 180),
                         0.4, 3, 5);
                 robot.update();
