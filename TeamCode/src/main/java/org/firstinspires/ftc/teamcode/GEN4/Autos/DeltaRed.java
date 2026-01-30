@@ -19,15 +19,13 @@ public class DeltaRed extends LinearOpMode {
 
     private Robot robot;
 
-    // Pose storage for teleop
-
     public enum State {
         INITIALIZED,
         START_POSE,
         SHOOTING_POSE_1,
         FIRST_INTAKES,
-        POINT_3,
-        POINT_4,
+        SHOOTING_POSE_2,
+        POOL_INTAKE,
         POINT_5,
         POINT_6,
         POINT_7,
@@ -43,9 +41,9 @@ public class DeltaRed extends LinearOpMode {
     private boolean rapidFireActive = false;
     private long rapidFireDuration = 0;
 
-    private boolean shootStarted = false;
-    private String[] shootingPattern;
+    private double CycleCounter = 0;
 
+    private boolean shootStarted = false;
     boolean trigger = false;
 
     @Override
@@ -60,17 +58,13 @@ public class DeltaRed extends LinearOpMode {
         );
 
         robot.flywheel.MAX_VELOCITY = 800;
-
         alliance.set(alliance.Color.BLUE);
-        // INIT LOOP
 
         while (opModeInInit()) {
             state = State.INITIALIZED;
             robot.flywheel.stop();
             updateSequence();
         }
-
-        // Setup motif-based patterns
 
         waitForStart();
         state = State.SHOOTING_POSE_1;
@@ -79,53 +73,26 @@ public class DeltaRed extends LinearOpMode {
             alliance.set(alliance.Color.BLUE);
             updateSequence();
 
-            telemetry.addData("AUTO FSM", state);
-            telemetry.addData("DRIVETRAIN FSM", robot.drivetrain.state);
-            telemetry.addData("Robot X", robot.drivetrain.robotPose.getX(DistanceUnit.INCH));
-            telemetry.addData("Robot Y", robot.drivetrain.robotPose.getY(DistanceUnit.INCH));
-            telemetry.addData("Robot Heading", robot.drivetrain.robotPose.getHeading(AngleUnit.DEGREES));
-            telemetry.addData("RapidFire Active", rapidFireActive);
-            telemetry.addData("Shoot Started", shootStarted);
-
-            telemetry.addData("Flywheel Target rad/s", robot.flywheel.getTargetVelocity());
-            telemetry.addData("Flywheel Actual rad/s", robot.flywheel.getVelocityRadPerSec());
-
             telemetry.update();
-            //     robot.finalAutoPose = robot.drivetrain.robotPose;
+
             AutoToTeleop.storedPose = robot.drivetrain.robotPose;
-
-
         }
 
-
-        // Store the final pose for teleop
-        //    robot.finalAutoPose = robot.drivetrain.robotPose;
-
         AutoToTeleop.storedPose = robot.drivetrain.robotPose;
-      //  AutoToTeleop.encLOffset = robot.differential.currL;
-      //  AutoToTeleop.encROffset = robot.differential.currR;
-        //    robot.differential.encLOffset = robot.differential.currL;
-        //    robot.differential.encROffset = robot.differential.currR;
         robot.update();
     }
+
     private void updateSequence() {
         switch (state) {
 
-            case INITIALIZED:
-                robot.update();
-                robot.drivetrain.setPosition(-16, -66, 90);
-                robot.neutral();
-                robot.readMotifTag();
-                robot.flywheel.stop();
-                telemetry.addData("INITIALIZED -- MOTIF:", robot.MotifTagID);
-                telemetry.update();
-                break;
+            /* ================= SHOOT 1 ================= */
 
             case SHOOTING_POSE_1:
                 robot.goalLock(robot.drivetrain.robotPose);
                 robot.differential.farZone = true;
+
                 if (!trigger) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -57, AngleUnit.DEGREES, 240), 1, 3, 0.2);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -57, AngleUnit.DEGREES, 300), 1, 3, 0.2);
                 }
 
                 if (robot.systemsReady() && !shootStarted) {
@@ -134,7 +101,7 @@ public class DeltaRed extends LinearOpMode {
                     rapidFireDuration = 1000;
                     rapidFireActive = true;
                 }
-                robot.flywheel.velocityModifier = 0.0; // VELOCITY OFFSETSET TODO: TUNE AT COMP
+
                 if (rapidFireActive) {
                     robot.goalLock(robot.drivetrain.robotPose);
                     robot.rapidFire();
@@ -144,10 +111,7 @@ public class DeltaRed extends LinearOpMode {
                         shootStarted = false;
                         robot.autoIdle();
                         robot.resetSplineCounter();
-                        robot.update();
                         state = State.FIRST_INTAKES;
-                        robot.flywheel.velocityModifier = -53.0; // VELOCITY OFFSETSET TODO: TUNE AT COMP
-                        robot.differential.farZone = false;
                         trigger = false;
                     }
                 }
@@ -156,267 +120,94 @@ public class DeltaRed extends LinearOpMode {
                 if (robot.drivetrain.DTatTarget()) {
                     trigger = true;
                     robot.drivetrain.state = Drivetrain.State.IDLE;
-
                 }
                 break;
 
-            case FIRST_INTAKES: // INTAKE BALLS FROM CORNER
+            case FIRST_INTAKES:
                 if (robot.splineCounter == 0) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -30, -53, AngleUnit.DEGREES, 210), 1, 6, 30);
-                    robot.nextSplinePoint();
-                } else if (robot.splineCounter == 1) {
-                    robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -60, -50, AngleUnit.DEGREES, 250), 1, 4, 8);
-                    robot.nextSplinePoint();
-
                     dtStallTimer.reset();
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 24, -38, AngleUnit.DEGREES, 0), 1, 3, 0.3);
+                    robot.nextSplinePoint();
+                } else if (robot.splineCounter == 1) {
+                    robot.intake.runIntake(-1.0);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 66, -38, AngleUnit.DEGREES, 0), 1, 4, 10);
+                    robot.nextSplinePoint();
+                    checkStallTimer(2);
                 } else if (robot.splineCounter == 2) {
-                    robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -61, -58, AngleUnit.DEGREES, 255), 0.7, 3, 8);
-                    robot.nextSplinePoint();
-
-
-                } else if (robot.splineCounter == 3) {
-                    robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -61, -65, AngleUnit.DEGREES, 270), 0.7, 5, 3);
-                    robot.nextSplinePoint();
-                } else if (robot.splineCounter == 4) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -28, -55, AngleUnit.DEGREES, 260), 1, 5, 20);
-                    robot.nextSplinePoint();
-                    if (robot.splineCounter == 5) robot.intake.runIntake(0);
-                    trigger = false;
-                } else if (robot.splineCounter == 5) {
-                    robot.goalLock(robot.drivetrain.robotPose);
-
-                    if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -10, -8, AngleUnit.DEGREES, 260), 1, 3, 0.2);
-                    }
-
-                    if (robot.systemsReady() && !shootStarted) {
-                        shootStarted = true;
-                        rapidFireTimer.reset();
-                        rapidFireDuration = 1000;
-                        rapidFireActive = true;
-                    }
-
-                    if (rapidFireActive) {
-                        robot.goalLock(robot.drivetrain.robotPose);
-                        robot.rapidFire();
-                        if (rapidFireTimer.milliseconds() >= rapidFireDuration) {
-                            rapidFireActive = false;
-                            shootStarted = false;
-                            robot.autoIdle();
-                            robot.resetSplineCounter();
-                            robot.update();
-                            trigger = false;
-                            state = State.POINT_3;
-                        }
-                    }
-
-                    robot.update();
-                    if (robot.drivetrain.DTatTarget()) {
-                        trigger = true;
-                        robot.drivetrain.state = Drivetrain.State.IDLE;
-                    }
+                    robot.resetSplineCounter();
+                    state = State.FIRST_INTAKES;
                 }
                 break;
 
-            case POINT_3:
-                if (robot.splineCounter == 0) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -24, 10, AngleUnit.DEGREES, 180), 1, 4, Math.toRadians(20));
-                    robot.nextSplinePoint();
-                    prepareGantryForShooting(0);
-                } else if (robot.splineCounter == 1) {
-                    robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -53, 10, AngleUnit.DEGREES, 180), 1, 2, 10);
-                    robot.nextSplinePoint();
-                    prepareGantryForShooting(0);
-                } else if (robot.splineCounter == 2) {
-                    robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -46, 4, AngleUnit.DEGREES, 180), 1, 2, 10);
-                    robot.nextSplinePoint();
-                    prepareGantryForShooting(0);
-                } else if (robot.splineCounter == 3) {
-                    robot.goalLock(robot.drivetrain.robotPose);
-                    robot.intake.runIntake(0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -55, 0, AngleUnit.DEGREES, 180), 1, 2, 3);
-                    // WAIT 1s at GATE RAM POS
-                    robot.update();
-                    if (robot.drivetrain.DTatTarget() && !robot.wait.isFinished() && !robot.wait.isActive()) {
-                        robot.wait.waitSeconds(1);
-                    } else if (robot.wait.isFinished()) {
-                        robot.nextSplinePoint();
-                    }
+            case SHOOTING_POSE_2:
+                robot.goalLock(robot.drivetrain.robotPose);
+                robot.differential.farZone = true;
 
-                    trigger = false;
-                    robot.counter = 0;
-                    prepareGantryForShooting(0);
-
-                } else if (robot.splineCounter == 4) {
-                    robot.goalLock(robot.drivetrain.robotPose);
-                    if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, 8, AngleUnit.DEGREES, 260), 1, 3, 0.2);
-                        trigger = true;
-                    }
-                    robot.update();
-                    if (robot.systemsReady() && !shootStarted) {
-                        shootStarted = true;
-                        switch (shootingPattern[0]) {
-                            case "133": robot.shoot_133(true); break;
-                            case "233": robot.shoot_233(true); break;
-                            case "223": robot.shoot_223(true); break;
-                            case "333": robot.shoot_333(true); break;
-                        }
-                    }
-
-                    if (shootStarted) {
-                        boolean done = false;
-                        switch (shootingPattern[0]) {
-                            case "133": done = robot.shoot_133(true); break;
-                            case "233": done = robot.shoot_233(true); break;
-                            case "223": done = robot.shoot_223(true); break;
-                            case "333": done = robot.shoot_333(true); break;
-                        }
-                        if (done) {
-                            shootStarted = false;
-                            robot.resetSplineCounter();
-                            robot.update();
-                            trigger = false;
-                            state = State.POINT_4;
-                        }
-                    }
-
-
-                    if (robot.drivetrain.DTatTarget()) {
-                        robot.drivetrain.state = Drivetrain.State.IDLE;
-                    }
+                if (!trigger) {
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -57, AngleUnit.DEGREES, 300), 1, 3, 0.2);
                 }
-                break;
 
-            case POINT_4:
-                if (robot.splineCounter == 0) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -19, -15, AngleUnit.DEGREES, 180), 1, 5, 0.3);
-                    robot.nextSplinePoint();
-                    prepareGantryForShooting(1);
-                } else if (robot.splineCounter == 1) {
-                    robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -59, -15, AngleUnit.DEGREES, 180), 1, 4, 10);
-                    robot.goalLock(robot.drivetrain.robotPose);
-                    robot.nextSplinePoint();
-                    if (robot.splineCounter == 2) robot.intake.runIntake(0);
-                    trigger = false;
-                    prepareGantryForShooting(1);
-                } else if (robot.splineCounter == 2) {
-                    robot.goalLock(robot.drivetrain.robotPose);
-                    if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -10, -8, AngleUnit.DEGREES, 260), 1, 3, 0.2);
-                        trigger = true;
-                    }
-                    robot.update();
-                    if (robot.systemsReady() && !shootStarted) {
-                        shootStarted = true;
-                        switch (shootingPattern[1]) {
-                            case "133": robot.shoot_133(true); break;
-                            case "233": robot.shoot_233(true); break;
-                            case "223": robot.shoot_223(true); break;
-                            case "333": robot.shoot_333(true); break;
-                        }
-                    }
+                if (robot.systemsReady() && !shootStarted) {
+                    shootStarted = true;
+                    rapidFireTimer.reset();
+                    rapidFireDuration = 1000;
+                    rapidFireActive = true;
+                }
 
-                    if (shootStarted) {
-                        boolean done = false;
-                        switch (shootingPattern[1]) {
-                            case "133": done = robot.shoot_133(true); break;
-                            case "233": done = robot.shoot_233(true); break;
-                            case "223": done = robot.shoot_223(true); break;
-                            case "333": done = robot.shoot_333(true); break;
-                        }
-                        if (done) {
-                            shootStarted = false;
-                            robot.resetSplineCounter();
-                            robot.update();
-                            trigger = false;
+                if (rapidFireActive) {
+                    robot.goalLock(robot.drivetrain.robotPose);
+                    robot.rapidFire();
+
+                    if (rapidFireTimer.milliseconds() >= rapidFireDuration) {
+                        rapidFireActive = false;
+                        shootStarted = false;
+                        robot.autoIdle();
+                        robot.resetSplineCounter();
+                        dtStallTimer.reset();
+                        CycleCounter ++;
+                        if (CycleCounter > 2) {
                             state = State.POINT_5;
+                        } else {
+                            state = State.POOL_INTAKE;
                         }
-                    }
 
-
-                    if (robot.drivetrain.DTatTarget()) {
-                        robot.drivetrain.state = Drivetrain.State.IDLE;
+                        trigger = false;
                     }
+                }
+
+                robot.update();
+                if (robot.drivetrain.DTatTarget()) {
+                    trigger = true;
+                    robot.drivetrain.state = Drivetrain.State.IDLE;
                 }
                 break;
 
-            case POINT_5: // SHOOT "BOTTOM" 3 balls
+            case POOL_INTAKE:
                 if (robot.splineCounter == 0) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -24, -38, AngleUnit.DEGREES, 180), 1, 3, 0.3);
+                    checkStallTimer(3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 58, -30, AngleUnit.DEGREES, 300), 1, 3, 0.3);
                     robot.nextSplinePoint();
-                    prepareGantryForShooting(2);
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -64, -38, AngleUnit.DEGREES, 180), 1, 4, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 60, -38, AngleUnit.DEGREES, 300), 1, 4, 10);
                     robot.nextSplinePoint();
-                    prepareGantryForShooting(2);
+                    checkStallTimer(2);
                 } else if (robot.splineCounter == 2) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -28, -15, AngleUnit.DEGREES, 260), 1, 15, 80);
-                    robot.nextSplinePoint();
-                    robot.goalLock(robot.drivetrain.robotPose);
-                    if (robot.splineCounter == 3) robot.intake.runIntake(0);
-                    trigger = false;
-                    prepareGantryForShooting(2);
-                } else if (robot.splineCounter == 3) {
-                    robot.goalLock(robot.drivetrain.robotPose);
-                    if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -10, -8, AngleUnit.DEGREES, 260), 1, 3, 0.2);
-                        trigger = true;
-                    }
-                    robot.update();
-                    if (robot.systemsReady() && !shootStarted) {
-                        shootStarted = true;
-                        switch (shootingPattern[2]) {
-                            case "133": robot.shoot_133(true); break;
-                            case "233": robot.shoot_233(true); break;
-                            case "223": robot.shoot_223(true); break;
-                            case "333": robot.shoot_333(true); break;
-                        }
-                    }
-
-                    if (shootStarted) {
-                        boolean done = false;
-                        switch (shootingPattern[2]) {
-                            case "133": done = robot.shoot_133(true); break;
-                            case "233": done = robot.shoot_233(true); break;
-                            case "223": done = robot.shoot_223(true); break;
-                            case "333": done = robot.shoot_333(true); break;
-                        }
-                        if (done) {
-                            shootStarted = false;
-                            robot.resetSplineCounter();
-                            robot.update();
-                            trigger = false;
-                            state = State.POINT_6;
-                        }
-                    }
-
-
-                    if (robot.drivetrain.DTatTarget()) {
-                        robot.drivetrain.state = Drivetrain.State.IDLE;
-                    }
+                    robot.resetSplineCounter();
+                    state = State.SHOOTING_POSE_2;
                 }
                 break;
 
-            case POINT_6: // MOVE OFF LINE
-                robot.goToPoint(new Pose2D(DistanceUnit.INCH, -24, -36, AngleUnit.DEGREES, 100), 1, 3, 0.3);
-                robot.update();
-
-                if (robot.drivetrain.DTatTarget()) {
-                    robot.drivetrain.state = Drivetrain.State.IDLE;
+            case POINT_5: // MOVE OFF LINE
+                if (robot.splineCounter == 0) {
+                    checkStallTimer(3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -40, AngleUnit.DEGREES, 300), 0.3, 3, 0.3);
+                    robot.nextSplinePoint();
+                } else if (robot.splineCounter == 1) {
                     state = State.FINISHED;
                 }
                 break;
-            case POINT_7:
-            case POINT_8:
-            case POINT_9:
+
             case FINISHED:
                 robot.update();
                 break;
@@ -430,3 +221,7 @@ public class DeltaRed extends LinearOpMode {
         }
     }
 }
+
+
+
+

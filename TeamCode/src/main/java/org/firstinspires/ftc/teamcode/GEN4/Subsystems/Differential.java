@@ -30,7 +30,7 @@ public class Differential {
     public static double slot2Pos = -3000;
     public static double slot3Pos = 0;       // default starting slot
     public double slotOffset = 0;
-    public static double angleScale = 0.00181944444444444444444444444444; // turret rotation scaling
+    public static double angleScale = 0.003595; // turret rotation scaling
 
     public double encLOffset;
     public double encROffset;
@@ -50,8 +50,8 @@ public class Differential {
     // --------------------
     // State
     // --------------------
-    public double targetL = 0.3275;
-    public double targetR = 0.9577;
+    public double targetL = 0.8;
+    public double targetR = 0.8;
 
     private double lastErrorL = 0;
     private double lastErrorR = 0;
@@ -65,8 +65,9 @@ public class Differential {
 
   //  double slot3L = 0.3275;
   //  double slot3R = 0.9577;
-    double slot3L = 0.3275;
-    double slot3R = 0.9577;
+    // 0.8 - 0.1529
+    double slot3L = 0.8;
+    double slot3R = 0.8;
     double slotIncrement = 0.115;
 
     double slot2L = slot3L + slotIncrement;
@@ -167,8 +168,8 @@ public class Differential {
         targetL = slotOffsetL - (compensatedAngle * angleScale);
         targetR = slotOffsetR - (compensatedAngle * angleScale);
 
-        targetL = Math.max(targetL, 0);
-        targetR = Math.min(targetR, 0.9577);
+        targetL = Range.clip(targetL, 0.1529, 0.8);
+        targetR = Range.clip(targetR, 0.1529, 0.8);
     }
 
     // --------------------

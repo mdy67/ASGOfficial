@@ -17,12 +17,12 @@ import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Robot;
 public class DiffyServoTesticler extends OpMode {
 
     Servo diffyL, diffyR;
-    double targetL = 0.3275;
-    double targetR = 0.9577;
+    double targetL = 0.5;
+    double targetR = 0.5;
 
 
-    double slot3L = 0.3275;
-    double slot3R = 0.9577;
+    double slot3L = 0.5;
+    double slot3R = 0.5;
     double slotIncrement = 0.115;
 
     double slot2L = slot3L + slotIncrement;
@@ -36,16 +36,16 @@ public class DiffyServoTesticler extends OpMode {
 
     int currentSlot = 3;
 
-    double targetAngle = 0;
+    double targetAngle = 0.5;
     double angleScale = 0.00181944444444444444444444444444;
-
-    Differential diffy;
+    // 0.8, 0.1529
+   // Differential diffy;
 
     @Override
     public void init() {
-        diffy = new Differential(hardwareMap);
-      //  diffyL = hardwareMap.get(Servo.class, "diffyL");
-      //  diffyR = hardwareMap.get(Servo.class, "diffyR");
+     //   diffy = new Differential(hardwareMap);
+        diffyL = hardwareMap.get(Servo.class, "diffyL");
+        diffyR = hardwareMap.get(Servo.class, "diffyR");
         telemetry.addLine("Robot initialized. Waiting for start...");
         telemetry.update();
     }
@@ -75,31 +75,31 @@ public class DiffyServoTesticler extends OpMode {
             currentSlot = 3;
         }
 
-
-
-        targetL = slotOffsetL - (targetAngle * angleScale);
-        targetR = slotOffsetR - (targetAngle * angleScale);
+*/
 
         diffyL.setPosition(targetL);
         diffyR.setPosition(targetR);
 
-         */
-        diffy.setTargetAngle(targetAngle);
 
-        if (gamepad1.dpad_left) {
-            currentSlot = 1;
-        } else if (gamepad1.dpad_down) {
-            currentSlot = 2;
-        } else if (gamepad1.dpad_right) {
-            currentSlot = 3;
-        }
 
-        diffy.goToSlot(currentSlot);
-        diffy.update();
+     //   diffy.setTargetAngle(targetAngle);
 
-        targetAngle += gamepad1.right_stick_x * 0.3;
-        targetAngle = Range.clip(targetAngle, 0, 180);
+   //     if (gamepad1.dpad_left) {
+    //        currentSlot = 1;
+    //    } else if (gamepad1.dpad_down) {
+     //       currentSlot = 2;
+    //    } else if (gamepad1.dpad_right) {
+    //        currentSlot = 3;
+    //    }
 
+     //   diffy.goToSlot(currentSlot);
+    //    diffy.update();
+
+        targetAngle += gamepad1.right_stick_x * 0.003;
+        targetAngle = Range.clip(targetAngle, 0, 1);
+
+        targetL = targetAngle;
+        targetR = targetAngle;
 
       //  telemetry.addData("diffyL: ", diffyL.getPosition());
       //  telemetry.addData("diffyR:", diffyR.getPosition());
