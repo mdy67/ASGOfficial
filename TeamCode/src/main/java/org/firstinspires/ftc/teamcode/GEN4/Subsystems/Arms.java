@@ -10,7 +10,7 @@ public class Arms {
     // Saved positions — tune these with the test TeleOp
     public double arm1_off = 0.0758, arm1_on = 0.3306;
     public double arm2_off = 0.13, arm2_on = 0.4;
-    public double arm3_off = 0.47, arm3_on = 0.69;
+    public double arm3_off = 0.46, arm3_on = 0.69;
     public double arm3_rapid = 0.515;
 
     public Arms(HardwareMap hw) {

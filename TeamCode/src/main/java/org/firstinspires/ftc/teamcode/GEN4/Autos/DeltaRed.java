@@ -85,7 +85,8 @@ public class DeltaRed extends LinearOpMode {
     private void updateSequence() {
         switch (state) {
             case INITIALIZED:
-                robot.flywheel.velocityModifier = -59.0;
+               // robot.differential.setTargetAngle(90);
+                robot.flywheel.velocityModifier = -40.0;
                 robot.update();
                 robot.drivetrain.setPosition(16, -66, 90);
                 robot.neutral();
@@ -98,15 +99,17 @@ public class DeltaRed extends LinearOpMode {
             /* ================= SHOOT 1 ================= */
 
             case SHOOTING_POSE_1:
-                //  robot.goalLock(robot.drivetrain.robotPose);
-                if (dtStallTimer.seconds() > 1) {
-                    robot.differential.aimToGoal(robot.drivetrain.robotPose, robot.getTargetGoal());
+
+                if (dtStallTimer.seconds() < 1) {
+                    robot.flywheel.aimToGoal(robot.getTargetGoal(), robot.drivetrain.robotPose, robot.drivetrain.XVel(), robot.drivetrain.YVel());
+                } else {
+                    robot.goalLock(robot.drivetrain.robotPose);
                 }
-                robot.flywheel.aimToGoal(robot.getTargetGoal(), robot.drivetrain.robotPose, robot.drivetrain.XVel(), robot.drivetrain.YVel());
+
                 robot.differential.farZone = true;
 
                 if (!trigger) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -57, AngleUnit.DEGREES, 300), 1, 3, 0.2);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -57, AngleUnit.DEGREES, 300), 1, 3, 0.15);
                 }
 
                 if (robot.systemsReady() && !shootStarted) {
@@ -191,10 +194,10 @@ public class DeltaRed extends LinearOpMode {
                 robot.differential.farZone = true;
 
                 if (!trigger) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -57, AngleUnit.DEGREES, 300), 1, 2, 0.2);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -57, AngleUnit.DEGREES, 300), 1, 2, 0.15);
                 }
 
-                if (robot.systemsReady() && !shootStarted) {
+                if (robot.systemsReady() && !shootStarted && dtStallTimer.seconds() > 0.75) {
                     shootStarted = true;
                     rapidFireTimer.reset();
                     rapidFireDuration = 1000;
@@ -225,7 +228,11 @@ public class DeltaRed extends LinearOpMode {
 
                 robot.update();
                 if (robot.drivetrain.DTatTarget()) {
+                    if (!trigger) { dtStallTimer.reset(); }
                     trigger = true;
+
+
+
                     robot.drivetrain.state = Drivetrain.State.IDLE;
                 }
                 break;
@@ -235,13 +242,13 @@ public class DeltaRed extends LinearOpMode {
                   //  checkStallTimer(3);
                     dtStallTimer.reset();
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 50, -68, AngleUnit.DEGREES, 0), 0.5, 3, 0.3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 50, -62, AngleUnit.DEGREES, 0), 0.5, 3, 0.3);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 70, -68, AngleUnit.DEGREES, 0), 0.4, 2, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 68, -68, AngleUnit.DEGREES, 0), 0.4, 2, 10);
                     robot.nextSplinePoint();
-                    checkStallTimer(2);
+                    checkStallTimer(1.5);
                 } else if (robot.splineCounter == 2) {
                     robot.intake.runIntake(0);
                     robot.resetSplineCounter();
@@ -261,7 +268,9 @@ public class DeltaRed extends LinearOpMode {
                 break;
 
             case FINISHED:
+                robot.differential.aimToGoal(robot.drivetrain.robotPose, robot.getTargetGoal());
                 robot.update();
+
                 break;
         }
     }

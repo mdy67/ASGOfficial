@@ -82,6 +82,8 @@ public class Differential {
     double MIN_ANGLE = 0;
     double MAX_ANGLE = 180;
 
+    double RED_ANGLE_OFFSET = 0;
+    double BLUE_ANGLE_OFFSET = 0;
     // --------------------
     // Constructor
     // --------------------
@@ -163,7 +165,8 @@ public class Differential {
 
     private void updateTargets() {
      //   targetL = -(currentSlotBase - (compensatedAngle * angleScale));
-    //    targetR = currentSlotBase + (compensatedAngle * angleScale);
+    //    targetR = currentSlotBase + (compensatedAngle * angleScale)
+        compensatedAngle += (alliance.isBlue() ? BLUE_ANGLE_OFFSET : RED_ANGLE_OFFSET);
         compensatedAngle = Range.clip(compensatedAngle, MIN_ANGLE, MAX_ANGLE);
         targetL = slotOffsetL - (compensatedAngle * angleScale);
         targetR = slotOffsetR - (compensatedAngle * angleScale);

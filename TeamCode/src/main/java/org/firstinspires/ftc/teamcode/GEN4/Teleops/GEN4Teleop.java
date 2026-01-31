@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.GEN4.Teleops;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -19,10 +20,11 @@ public class GEN4Teleop extends OpMode {
     private double targetVel = 350;
     private double hoodAngle = 0.4;
     private double modifierLive = 0;
+    ElapsedTime timer = new ElapsedTime();
 
     @Override
     public void init() {
-
+        timer.reset();
         robot = new Robot(hardwareMap);
         robot.arms.reset();
       //  alliance.set(alliance.Color.BLUE);
@@ -37,7 +39,11 @@ public class GEN4Teleop extends OpMode {
 
         telemetry.addLine("Robot initialized. Waiting for start...");
         telemetry.update();
+
+
     }
+
+
 
     @Override
     public void loop() {
@@ -138,8 +144,14 @@ public class GEN4Teleop extends OpMode {
          //   robot.flywheel.setHoodAngle(hoodAngle);
         } else {
             robot.flywheel.aimToGoal(robot.getTargetGoal(), robot.drivetrain.robotPose, robot.drivetrain.XVel(), robot.drivetrain.YVel());
-            robot.differential.setTargetAngle(90);
+            if (gamepad1.left_trigger > 0.1) {
+                robot.differential.aimToGoal(robot.drivetrain.robotPose, robot.getTargetGoal());
+            }
 
+        }
+
+        if (timer.seconds() < 10) {
+            robot.differential.aimToGoal(robot.drivetrain.robotPose, robot.getTargetGoal());
         }
 
         if (gamepad1.dpad_right) {
@@ -148,11 +160,7 @@ public class GEN4Teleop extends OpMode {
             robot.differential.ANGLE_ADJUST += 1;
         }
 
-        if (gamepad2.dpad_up) {
-            robot.differential.encLOffset -= 25 * gamepad2.left_stick_y;
-            robot.differential.encROffset -= 25 * gamepad2.right_stick_y;
 
-        }
 
 
 
@@ -160,12 +168,6 @@ public class GEN4Teleop extends OpMode {
             modifierLive += 5;
         } else if (gamepad1.dpad_down) {
             modifierLive -= 5;
-        }
-
-        if (gamepad1.options) {
-            TUNING_MODE = true;
-        } if (gamepad1.a) {
-            TUNING_MODE = false;
         }
 
 
