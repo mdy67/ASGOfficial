@@ -119,9 +119,12 @@ public class GEN4Teleop extends OpMode {
         double dy = goal.getY(DistanceUnit.INCH) - robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
         double distance = Math.hypot(dx, dy);
 
+        robot.flywheel.MAX_VELOCITY = 450;
+        robot.differential.farZone = false;
+        robot.flywheel.velocityModifier = -40.0 + modifierLive;
+        /*
         if (gamepad1.left_stick_button) { // UP = CLOSE ZONE
-            robot.flywheel.MAX_VELOCITY = 450;
-            robot.differential.farZone = false;
+
             robot.flywheel.velocityModifier = -40.0 + modifierLive;
 
         } else if (gamepad1.right_stick_button) {
@@ -131,6 +134,8 @@ public class GEN4Teleop extends OpMode {
             robot.differential.farZone = true;
             robot.flywheel.velocityModifier = 30.0 + modifierLive;
         }
+
+         */
 
         if (TUNING_MODE) {
          //   if (gamepad1.dpad_left)  targetVel -= 2;
