@@ -45,6 +45,8 @@ public class Blue15Full extends LinearOpMode {
     private boolean shootStarted = false;
     private String[] shootingPattern;
 
+    private ElapsedTime dtStallTimer = new ElapsedTime();
+
     boolean trigger = false;
 
     @Override
@@ -174,6 +176,7 @@ public class Blue15Full extends LinearOpMode {
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
+                    dtStallTimer.reset(); // RESET DT STALL TIMER
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -60, -50, AngleUnit.DEGREES, 250), 1, 4, 8);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 2) {
@@ -183,6 +186,7 @@ public class Blue15Full extends LinearOpMode {
                 } else if (robot.splineCounter == 3) {
                     robot.intake.runIntake(-1.0);
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -61, -65, AngleUnit.DEGREES, 270), 0.7, 5, 3);
+                    checkStallTimer(2);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 4) {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -28, -55, AngleUnit.DEGREES, 260), 1, 5, 20);
@@ -229,17 +233,18 @@ public class Blue15Full extends LinearOpMode {
                 if (robot.splineCounter == 0) {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -24, 10, AngleUnit.DEGREES, 180), 1, 4, Math.toRadians(20));
                     robot.nextSplinePoint();
-                    prepareGantryForShooting(0);
+
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -53, 10, AngleUnit.DEGREES, 180), 1, 2, 10);
                     robot.nextSplinePoint();
-                    prepareGantryForShooting(0);
+                    dtStallTimer.reset();
+
                 } else if (robot.splineCounter == 2) {
                     robot.intake.runIntake(-1.0);
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -46, 4, AngleUnit.DEGREES, 180), 1, 2, 10);
                     robot.nextSplinePoint();
-                    prepareGantryForShooting(0);
+                    checkStallTimer(2);
                 } else if (robot.splineCounter == 3) {
                     robot.goalLock(robot.drivetrain.robotPose);
                     robot.intake.runIntake(0);
@@ -254,35 +259,29 @@ public class Blue15Full extends LinearOpMode {
 
                     trigger = false;
                     robot.counter = 0;
-                    prepareGantryForShooting(0);
+
 
                 } else if (robot.splineCounter == 4) {
                     robot.goalLock(robot.drivetrain.robotPose);
+
                     if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, 8, AngleUnit.DEGREES, 260), 1, 3, 0.2);
-                        trigger = true;
-                    }
-                    robot.update();
-                    if (robot.systemsReady() && !shootStarted) {
-                        shootStarted = true;
-                        switch (shootingPattern[0]) {
-                            case "133": robot.shoot_133(true); break;
-                            case "233": robot.shoot_233(true); break;
-                            case "223": robot.shoot_223(true); break;
-                            case "333": robot.shoot_333(true); break;
-                        }
+                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -8, AngleUnit.DEGREES, 260), 1, 3, 0.2);
                     }
 
-                    if (shootStarted) {
-                        boolean done = false;
-                        switch (shootingPattern[0]) {
-                            case "133": done = robot.shoot_133(true); break;
-                            case "233": done = robot.shoot_233(true); break;
-                            case "223": done = robot.shoot_223(true); break;
-                            case "333": done = robot.shoot_333(true); break;
-                        }
-                        if (done) {
+                    if (robot.systemsReady() && !shootStarted) {
+                        shootStarted = true;
+                        rapidFireTimer.reset();
+                        rapidFireDuration = 1000;
+                        rapidFireActive = true;
+                    }
+
+                    if (rapidFireActive) {
+                        robot.goalLock(robot.drivetrain.robotPose);
+                        robot.rapidFire();
+                        if (rapidFireTimer.milliseconds() >= rapidFireDuration) {
+                            rapidFireActive = false;
                             shootStarted = false;
+                            robot.autoIdle();
                             robot.resetSplineCounter();
                             robot.update();
                             trigger = false;
@@ -290,8 +289,9 @@ public class Blue15Full extends LinearOpMode {
                         }
                     }
 
-
+                    robot.update();
                     if (robot.drivetrain.DTatTarget()) {
+                        trigger = true;
                         robot.drivetrain.state = Drivetrain.State.IDLE;
                     }
                 }
@@ -301,7 +301,7 @@ public class Blue15Full extends LinearOpMode {
                 if (robot.splineCounter == 0) {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -19, -15, AngleUnit.DEGREES, 180), 1, 5, 0.3);
                     robot.nextSplinePoint();
-                    prepareGantryForShooting(1);
+
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -59, -15, AngleUnit.DEGREES, 180), 1, 4, 10);
@@ -309,34 +309,28 @@ public class Blue15Full extends LinearOpMode {
                     robot.nextSplinePoint();
                     if (robot.splineCounter == 2) robot.intake.runIntake(0);
                     trigger = false;
-                    prepareGantryForShooting(1);
+
                 } else if (robot.splineCounter == 2) {
                     robot.goalLock(robot.drivetrain.robotPose);
+
                     if (!trigger) {
                         robot.goToPoint(new Pose2D(DistanceUnit.INCH, -10, -8, AngleUnit.DEGREES, 260), 1, 3, 0.2);
-                        trigger = true;
-                    }
-                    robot.update();
-                    if (robot.systemsReady() && !shootStarted) {
-                        shootStarted = true;
-                        switch (shootingPattern[1]) {
-                            case "133": robot.shoot_133(true); break;
-                            case "233": robot.shoot_233(true); break;
-                            case "223": robot.shoot_223(true); break;
-                            case "333": robot.shoot_333(true); break;
-                        }
                     }
 
-                    if (shootStarted) {
-                        boolean done = false;
-                        switch (shootingPattern[1]) {
-                            case "133": done = robot.shoot_133(true); break;
-                            case "233": done = robot.shoot_233(true); break;
-                            case "223": done = robot.shoot_223(true); break;
-                            case "333": done = robot.shoot_333(true); break;
-                        }
-                        if (done) {
+                    if (robot.systemsReady() && !shootStarted) {
+                        shootStarted = true;
+                        rapidFireTimer.reset();
+                        rapidFireDuration = 1000;
+                        rapidFireActive = true;
+                    }
+
+                    if (rapidFireActive) {
+                        robot.goalLock(robot.drivetrain.robotPose);
+                        robot.rapidFire();
+                        if (rapidFireTimer.milliseconds() >= rapidFireDuration) {
+                            rapidFireActive = false;
                             shootStarted = false;
+                            robot.autoIdle();
                             robot.resetSplineCounter();
                             robot.update();
                             trigger = false;
@@ -344,8 +338,9 @@ public class Blue15Full extends LinearOpMode {
                         }
                     }
 
-
+                    robot.update();
                     if (robot.drivetrain.DTatTarget()) {
+                        trigger = true;
                         robot.drivetrain.state = Drivetrain.State.IDLE;
                     }
                 }
@@ -355,46 +350,41 @@ public class Blue15Full extends LinearOpMode {
                 if (robot.splineCounter == 0) {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -24, -38, AngleUnit.DEGREES, 180), 1, 3, 0.3);
                     robot.nextSplinePoint();
-                    prepareGantryForShooting(2);
+                    dtStallTimer.reset();
+
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
+                    checkStallTimer(2);
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -64, -38, AngleUnit.DEGREES, 180), 1, 4, 10);
                     robot.nextSplinePoint();
-                    prepareGantryForShooting(2);
+
                 } else if (robot.splineCounter == 2) {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -28, -15, AngleUnit.DEGREES, 260), 1, 15, 80);
                     robot.nextSplinePoint();
                     robot.goalLock(robot.drivetrain.robotPose);
                     if (robot.splineCounter == 3) robot.intake.runIntake(0);
                     trigger = false;
-                    prepareGantryForShooting(2);
                 } else if (robot.splineCounter == 3) {
                     robot.goalLock(robot.drivetrain.robotPose);
+
                     if (!trigger) {
                         robot.goToPoint(new Pose2D(DistanceUnit.INCH, -10, -8, AngleUnit.DEGREES, 260), 1, 3, 0.2);
-                        trigger = true;
-                    }
-                    robot.update();
-                    if (robot.systemsReady() && !shootStarted) {
-                        shootStarted = true;
-                        switch (shootingPattern[2]) {
-                            case "133": robot.shoot_133(true); break;
-                            case "233": robot.shoot_233(true); break;
-                            case "223": robot.shoot_223(true); break;
-                            case "333": robot.shoot_333(true); break;
-                        }
                     }
 
-                    if (shootStarted) {
-                        boolean done = false;
-                        switch (shootingPattern[2]) {
-                            case "133": done = robot.shoot_133(true); break;
-                            case "233": done = robot.shoot_233(true); break;
-                            case "223": done = robot.shoot_223(true); break;
-                            case "333": done = robot.shoot_333(true); break;
-                        }
-                        if (done) {
+                    if (robot.systemsReady() && !shootStarted) {
+                        shootStarted = true;
+                        rapidFireTimer.reset();
+                        rapidFireDuration = 1000;
+                        rapidFireActive = true;
+                    }
+
+                    if (rapidFireActive) {
+                        robot.goalLock(robot.drivetrain.robotPose);
+                        robot.rapidFire();
+                        if (rapidFireTimer.milliseconds() >= rapidFireDuration) {
+                            rapidFireActive = false;
                             shootStarted = false;
+                            robot.autoIdle();
                             robot.resetSplineCounter();
                             robot.update();
                             trigger = false;
@@ -402,8 +392,9 @@ public class Blue15Full extends LinearOpMode {
                         }
                     }
 
-
+                    robot.update();
                     if (robot.drivetrain.DTatTarget()) {
+                        trigger = true;
                         robot.drivetrain.state = Drivetrain.State.IDLE;
                     }
                 }
@@ -427,21 +418,10 @@ public class Blue15Full extends LinearOpMode {
         }
     }
 
-    private void prepareGantryForShooting(int index) {
-        String pattern = shootingPattern[index];
-        robot.goalLock(robot.drivetrain.robotPose);
-
-        switch (pattern) {
-            case "133":
-                robot.differential.goToSlot(1);
-                break;
-            case "223":
-            case "233":
-                robot.differential.goToSlot(2);
-                break;
-            case "333":
-                robot.differential.goToSlot(3);
-                break;
+    public void checkStallTimer(double threshold) {
+        if (dtStallTimer.seconds() > threshold) {
+            robot.splineCounter ++;
+            dtStallTimer.reset();
         }
     }
 }
