@@ -68,6 +68,7 @@ public class Blue15Full extends LinearOpMode {
         while (opModeInInit()) {
             state = State.INITIALIZED;
             robot.flywheel.stop();
+            robot.differential.setTargetAngle(180);
             updateSequence();
         }
 
@@ -84,7 +85,7 @@ public class Blue15Full extends LinearOpMode {
         waitForStart();
         state = State.SHOOTING_POSE_1;
 
-        while (opModeIsActive() && !state.equals(State.FINISHED)) {
+        while (opModeIsActive()) {
             alliance.set(alliance.Color.BLUE);
             updateSequence();
 
@@ -129,10 +130,18 @@ public class Blue15Full extends LinearOpMode {
                 robot.flywheel.stop();
                 telemetry.addData("INITIALIZED -- MOTIF:", robot.MotifTagID);
                 telemetry.update();
+                dtStallTimer.reset();
                 break;
 
             case SHOOTING_POSE_1:
-                robot.goalLock(robot.drivetrain.robotPose);
+
+                if (dtStallTimer.seconds() > 1) {
+                    robot.differential.aimToGoal(robot.drivetrain.robotPose, robot.getTargetGoal());
+                    robot.flywheel.aimToGoal(robot.getTargetGoal(), robot.drivetrain.robotPose, robot.drivetrain.XVel(), robot.drivetrain.YVel());
+                } else {
+                    robot.flywheel.aimToGoal(robot.getTargetGoal(), robot.drivetrain.robotPose, robot.drivetrain.XVel(), robot.drivetrain.YVel());
+                }
+
                 robot.differential.farZone = true;
                 if (!trigger) {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -57, AngleUnit.DEGREES, 240), 1, 3, 0.2);
@@ -198,9 +207,10 @@ public class Blue15Full extends LinearOpMode {
 
                     if (!trigger) {
                         robot.goToPoint(new Pose2D(DistanceUnit.INCH, -10, -8, AngleUnit.DEGREES, 260), 1, 3, 0.2);
+                        dtStallTimer.reset();
                     }
 
-                    if (robot.systemsReady() && !shootStarted) {
+                    if (robot.systemsReady() && !shootStarted && dtStallTimer.seconds() > 0.5) {
                         shootStarted = true;
                         rapidFireTimer.reset();
                         rapidFireDuration = 1000;
@@ -265,10 +275,11 @@ public class Blue15Full extends LinearOpMode {
                     robot.goalLock(robot.drivetrain.robotPose);
 
                     if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -8, AngleUnit.DEGREES, 260), 1, 3, 0.2);
+                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -10, 10, AngleUnit.DEGREES, 260), 1, 3, 0.2);
+                        dtStallTimer.reset();
                     }
 
-                    if (robot.systemsReady() && !shootStarted) {
+                    if (robot.systemsReady() && !shootStarted && dtStallTimer.seconds() > 0.5) {
                         shootStarted = true;
                         rapidFireTimer.reset();
                         rapidFireDuration = 1000;
@@ -315,9 +326,10 @@ public class Blue15Full extends LinearOpMode {
 
                     if (!trigger) {
                         robot.goToPoint(new Pose2D(DistanceUnit.INCH, -10, -8, AngleUnit.DEGREES, 260), 1, 3, 0.2);
+                        dtStallTimer.reset();
                     }
 
-                    if (robot.systemsReady() && !shootStarted) {
+                    if (robot.systemsReady() && !shootStarted && dtStallTimer.seconds() > 0.5) {
                         shootStarted = true;
                         rapidFireTimer.reset();
                         rapidFireDuration = 1000;
@@ -369,9 +381,10 @@ public class Blue15Full extends LinearOpMode {
 
                     if (!trigger) {
                         robot.goToPoint(new Pose2D(DistanceUnit.INCH, -10, -8, AngleUnit.DEGREES, 260), 1, 3, 0.2);
+                        dtStallTimer.reset();
                     }
 
-                    if (robot.systemsReady() && !shootStarted) {
+                    if (robot.systemsReady() && !shootStarted && dtStallTimer.seconds() > 0.5) {
                         shootStarted = true;
                         rapidFireTimer.reset();
                         rapidFireDuration = 1000;
@@ -401,9 +414,11 @@ public class Blue15Full extends LinearOpMode {
                 break;
 
             case POINT_6: // MOVE OFF LINE
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -24, -36, AngleUnit.DEGREES, 100), 1, 3, 0.3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -24, -10, AngleUnit.DEGREES, 270), 1, 3, 0.15);
+                    robot.differential.aimToGoal(robot.drivetrain.robotPose, robot.getTargetGoal());
+                    AutoToTeleop.storedPose = robot.drivetrain.robotPose;
+                    alliance.set(alliance.Color.BLUE);
                     robot.update();
-
                     if (robot.drivetrain.DTatTarget()) {
                         robot.drivetrain.state = Drivetrain.State.IDLE;
                         state = State.FINISHED;
@@ -413,6 +428,8 @@ public class Blue15Full extends LinearOpMode {
             case POINT_8:
             case POINT_9:
             case FINISHED:
+                AutoToTeleop.storedPose = robot.drivetrain.robotPose;
+                alliance.set(alliance.Color.BLUE);
                 robot.update();
                 break;
         }

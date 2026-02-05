@@ -30,7 +30,7 @@ public class GEN4Teleop extends OpMode {
       //  alliance.set(alliance.Color.BLUE);
         robot.drivetrain.state = Drivetrain.State.TELEOP;
         robot.importAutoPose(AutoToTeleop.storedPose.getX(DistanceUnit.INCH), AutoToTeleop.storedPose.getY(DistanceUnit.INCH), AutoToTeleop.storedPose.getHeading(AngleUnit.DEGREES));
-        robot.importAutoDiffy(AutoToTeleop.encLOffset, AutoToTeleop.encROffset);
+     //   robot.importAutoDiffy(AutoToTeleop.encLOffset, AutoToTeleop.encROffset);
         robot.flywheel.stop();
 
         robot.flywheel.MAX_VELOCITY = 450;
