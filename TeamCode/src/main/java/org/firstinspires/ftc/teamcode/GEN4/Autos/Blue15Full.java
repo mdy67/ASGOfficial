@@ -251,14 +251,19 @@ public class Blue15Full extends LinearOpMode {
                     dtStallTimer.reset();
 
                 } else if (robot.splineCounter == 2) {
-                    robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -46, 4, AngleUnit.DEGREES, 180), 1, 2, 10);
+                    robot.intake.runIntake(-1.0); // GATE INTERMEDIARY POS
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -46, 6, AngleUnit.DEGREES, 180), 1, 2, 10);
                     robot.nextSplinePoint();
                     checkStallTimer(2);
+                    trigger = true;
                 } else if (robot.splineCounter == 3) {
+                    if (trigger) {
+                        dtStallTimer.reset();
+                        trigger = false;
+                    }
                     robot.goalLock(robot.drivetrain.robotPose);
-                    robot.intake.runIntake(0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -55, 0, AngleUnit.DEGREES, 180), 1, 2, 3);
+                    robot.intake.runIntake(0); // GATE RAM POS
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -55, -2, AngleUnit.DEGREES, 180), 1, 2, 3);
                     // WAIT 1s at GATE RAM POS
                     robot.update();
                     if (robot.drivetrain.DTatTarget() && !robot.wait.isFinished() && !robot.wait.isActive()) {
@@ -266,6 +271,8 @@ public class Blue15Full extends LinearOpMode {
                     } else if (robot.wait.isFinished()) {
                         robot.nextSplinePoint();
                     }
+
+                    checkStallTimer(2);
 
                     trigger = false;
                     robot.counter = 0;
@@ -275,7 +282,7 @@ public class Blue15Full extends LinearOpMode {
                     robot.goalLock(robot.drivetrain.robotPose);
 
                     if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -10, 10, AngleUnit.DEGREES, 260), 1, 3, 0.2);
+                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -10, 12, AngleUnit.DEGREES, 260), 1, 3, 0.2);
                         dtStallTimer.reset();
                     }
 

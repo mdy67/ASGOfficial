@@ -153,7 +153,7 @@ public class Red15Full extends LinearOpMode {
                     rapidFireDuration = 1000;
                     rapidFireActive = true;
                 }
-                robot.flywheel.velocityModifier = 0.0; // VELOCITY OFFSETSET TODO: TUNE AT COMP
+                robot.flywheel.velocityModifier = 0.0; // VELOCITY OFFSET TODO: TUNE AT COMP
                 if (rapidFireActive) {
                     robot.goalLock(robot.drivetrain.robotPose);
                     robot.rapidFire();
@@ -251,13 +251,18 @@ public class Red15Full extends LinearOpMode {
 
                 } else if (robot.splineCounter == 2) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 46, 4, AngleUnit.DEGREES, 0), 1, 2, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 46, 6, AngleUnit.DEGREES, 0), 1, 2, 10);
                     robot.nextSplinePoint();
                     checkStallTimer(2);
+                    trigger = true;
                 } else if (robot.splineCounter == 3) {
+                    if (trigger) {
+                        dtStallTimer.reset();
+                        trigger = false;
+                    }
                     robot.goalLock(robot.drivetrain.robotPose);
                     robot.intake.runIntake(0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 55, 0, AngleUnit.DEGREES, 0), 1, 2, 3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 55, -2, AngleUnit.DEGREES, 0), 1, 2, 3);
                     // WAIT 1s at GATE RAM POS
                     robot.update();
                     if (robot.drivetrain.DTatTarget() && !robot.wait.isFinished() && !robot.wait.isActive()) {
@@ -265,6 +270,8 @@ public class Red15Full extends LinearOpMode {
                     } else if (robot.wait.isFinished()) {
                         robot.nextSplinePoint();
                     }
+
+                    checkStallTimer(2);
 
                     trigger = false;
                     robot.counter = 0;
@@ -274,7 +281,8 @@ public class Red15Full extends LinearOpMode {
                     robot.goalLock(robot.drivetrain.robotPose);
 
                     if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, 10, 10, AngleUnit.DEGREES, 280), 1, 3, 0.2);
+                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, 10, 12, AngleUnit.DEGREES, 280), 1, 3, 0.2);
+                        dtStallTimer.reset();
                     }
 
                     if (robot.systemsReady() && !shootStarted) {
@@ -414,6 +422,7 @@ public class Red15Full extends LinearOpMode {
                 robot.differential.aimToGoal(robot.drivetrain.robotPose, robot.getTargetGoal());
                 AutoToTeleop.storedPose = robot.drivetrain.robotPose;
                 alliance.set(alliance.Color.RED);
+                dtStallTimer.reset();
                 robot.update();
                 if (robot.drivetrain.DTatTarget()) {
                     robot.drivetrain.state = Drivetrain.State.IDLE;
