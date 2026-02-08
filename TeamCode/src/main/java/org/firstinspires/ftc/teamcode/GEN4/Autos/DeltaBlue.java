@@ -88,6 +88,7 @@ public class DeltaBlue extends LinearOpMode {
                 // robot.differential.setTargetAngle(90);
                 robot.flywheel.velocityModifier = -40.0;
                 robot.update();
+                robot.differential.setTargetAngle(180);
                 robot.drivetrain.setPosition(-16, -66, 90);
                 robot.neutral();
                 robot.readMotifTag();

@@ -95,8 +95,8 @@ public class DiffyServoTesticler extends OpMode {
      //   diffy.goToSlot(currentSlot);
     //    diffy.update();
 
-        targetAngle += gamepad1.right_stick_x * 0.003;
-        targetAngle = Range.clip(targetAngle, 0, 1);
+        targetAngle += gamepad1.right_stick_x * 0.006;
+        targetAngle = Range.clip(targetAngle, 0, 0.95);
 
         targetL = targetAngle;
         targetR = targetAngle;

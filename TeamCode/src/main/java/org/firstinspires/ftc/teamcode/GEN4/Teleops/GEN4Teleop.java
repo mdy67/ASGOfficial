@@ -35,7 +35,7 @@ public class GEN4Teleop extends OpMode {
 
         robot.flywheel.MAX_VELOCITY = 450;
         robot.differential.farZone = false;
-        robot.flywheel.velocityModifier = -40.0 + modifierLive;
+        robot.flywheel.velocityModifier = -55 + modifierLive;
 
         telemetry.addLine("Robot initialized. Waiting for start...");
         telemetry.update();

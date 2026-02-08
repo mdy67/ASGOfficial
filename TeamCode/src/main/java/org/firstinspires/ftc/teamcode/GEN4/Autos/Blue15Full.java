@@ -263,7 +263,7 @@ public class Blue15Full extends LinearOpMode {
                     }
                     robot.goalLock(robot.drivetrain.robotPose);
                     robot.intake.runIntake(0); // GATE RAM POS
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -55, -2, AngleUnit.DEGREES, 180), 1, 2, 3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -55, -4, AngleUnit.DEGREES, 180), 1, 2, 3);
                     // WAIT 1s at GATE RAM POS
                     robot.update();
                     if (robot.drivetrain.DTatTarget() && !robot.wait.isFinished() && !robot.wait.isActive()) {
@@ -317,12 +317,12 @@ public class Blue15Full extends LinearOpMode {
 
             case POINT_4:
                 if (robot.splineCounter == 0) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -19, -15, AngleUnit.DEGREES, 180), 1, 5, 0.3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -19, -17, AngleUnit.DEGREES, 180), 1, 5, 0.3);
                     robot.nextSplinePoint();
 
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -59, -15, AngleUnit.DEGREES, 180), 1, 4, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -59, -17, AngleUnit.DEGREES, 180), 1, 4, 10);
                     robot.goalLock(robot.drivetrain.robotPose);
                     robot.nextSplinePoint();
                     if (robot.splineCounter == 2) robot.intake.runIntake(0);
