@@ -14,8 +14,8 @@ import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.alliance;
 
-@Autonomous(name = "Delta Blue", group = "GEN4")
-public class DeltaBlue extends LinearOpMode {
+@Autonomous(name = "Desoto Red", group = "GEN4")
+public class DesotoRed extends LinearOpMode {
 
     private Robot robot;
 
@@ -59,7 +59,7 @@ public class DeltaBlue extends LinearOpMode {
         );
 
         robot.flywheel.MAX_VELOCITY = 800;
-        alliance.set(alliance.Color.BLUE);
+        alliance.set(alliance.Color.RED);
 
         while (opModeInInit()) {
             state = State.INITIALIZED;
@@ -71,7 +71,7 @@ public class DeltaBlue extends LinearOpMode {
         state = State.SHOOTING_POSE_1;
 
         while (opModeIsActive()) {
-            alliance.set(alliance.Color.BLUE);
+            alliance.set(alliance.Color.RED);
             updateSequence();
 
             telemetry.update();
@@ -85,11 +85,11 @@ public class DeltaBlue extends LinearOpMode {
     private void updateSequence() {
         switch (state) {
             case INITIALIZED:
-                // robot.differential.setTargetAngle(90);
-                robot.flywheel.velocityModifier = -40.0;
+               // robot.differential.setTargetAngle(90);
+                robot.flywheel.velocityModifier = -55.0;
                 robot.update();
-                robot.differential.setTargetAngle(180);
-                robot.drivetrain.setPosition(-16, -66, 90);
+                robot.differential.setTargetAngle(0);
+                robot.drivetrain.setPosition(16, -66, 90);
                 robot.neutral();
                 robot.readMotifTag();
                 robot.flywheel.stop();
@@ -110,7 +110,7 @@ public class DeltaBlue extends LinearOpMode {
                 robot.differential.farZone = true;
 
                 if (!trigger) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -57, AngleUnit.DEGREES, 240), 1, 3, 0.15);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -57, AngleUnit.DEGREES, 300), 1, 3, 0.15);
                 }
 
                 if (robot.systemsReady() && !shootStarted) {
@@ -143,24 +143,24 @@ public class DeltaBlue extends LinearOpMode {
 
             case CORNER_INTAKE:
                 if (robot.splineCounter == 0) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -30, -53, AngleUnit.DEGREES, 210), 1, 6, 30);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 30, -53, AngleUnit.DEGREES, 330), 1, 6, 30);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -60, -50, AngleUnit.DEGREES, 250), 1, 4, 8);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 60, -50, AngleUnit.DEGREES, 290), 1, 4, 8);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 2) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -61, -58, AngleUnit.DEGREES, 255), 0.5, 3, 8);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 61, -58, AngleUnit.DEGREES, 285), 0.5, 3, 8);
                     robot.nextSplinePoint();
                     dtStallTimer.reset();
                 } else if (robot.splineCounter == 3) {
                     checkStallTimer(1);
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -61, -66, AngleUnit.DEGREES, 270), 0.5, 5, 3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 61, -66, AngleUnit.DEGREES, 270), 0.5, 5, 3);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 4) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -40, -60, AngleUnit.DEGREES, 270), 0.5, 5, 3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 40, -60, AngleUnit.DEGREES, 270), 0.5, 5, 3);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 5) {
                     robot.intake.runIntake(0);
@@ -174,11 +174,11 @@ public class DeltaBlue extends LinearOpMode {
             case SPIKE_INTAKES:
                 if (robot.splineCounter == 0) {
                     dtStallTimer.reset();
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -24, -38, AngleUnit.DEGREES, 180), 1, 3, 0.3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 24, -38, AngleUnit.DEGREES, 0), 1, 3, 0.3);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -61, -38, AngleUnit.DEGREES, 180), 1, 4, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 61, -38, AngleUnit.DEGREES, 0), 1, 4, 10);
                     robot.nextSplinePoint();
                     checkStallTimer(2);
                 } else if (robot.splineCounter == 2) {
@@ -195,7 +195,7 @@ public class DeltaBlue extends LinearOpMode {
                 robot.differential.farZone = true;
 
                 if (!trigger) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -57, AngleUnit.DEGREES, 240), 1, 2, 0.15);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -57, AngleUnit.DEGREES, 300), 1, 2, 0.15);
                 }
 
                 if (robot.systemsReady() && !shootStarted && dtStallTimer.seconds() > 0.75) {
@@ -240,14 +240,14 @@ public class DeltaBlue extends LinearOpMode {
 
             case POOL_INTAKE:
                 if (robot.splineCounter == 0) {
-                    //  checkStallTimer(3);
+                  //  checkStallTimer(3);
                     dtStallTimer.reset();
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -50, -62, AngleUnit.DEGREES, 180), 0.5, 3, 0.3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 50, -62, AngleUnit.DEGREES, 0), 0.5, 3, 0.3);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -68, -68, AngleUnit.DEGREES, 180), 0.4, 2, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 68, -68, AngleUnit.DEGREES, 0), 0.4, 2, 10);
                     robot.nextSplinePoint();
                     checkStallTimer(1.5);
                 } else if (robot.splineCounter == 2) {
@@ -261,7 +261,7 @@ public class DeltaBlue extends LinearOpMode {
             case OFFLINE: // MOVE OFF LINE
                 if (robot.splineCounter == 0) {
                     checkStallTimer(3);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -40, AngleUnit.DEGREES, 240), 0.3, 3, 0.3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -40, AngleUnit.DEGREES, 300), 0.3, 3, 0.3);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 1) {
                     state = State.FINISHED;
