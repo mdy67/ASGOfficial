@@ -30,7 +30,10 @@ public class Differential {
     public static double slot2Pos = -3000;
     public static double slot3Pos = 0;       // default starting slot
     public double slotOffset = 0;
-    public static double angleScale = 0.0052777777777778; // turret rotation scaling
+
+    double MAX_RIGHT = 0.95;
+    double MIN_LEFT = 0.057;
+    double angleScale = 0.0052855555555556; // turret rotation scaling
 
     public double encLOffset;
     public double encROffset;
@@ -84,6 +87,8 @@ public class Differential {
 
     double RED_ANGLE_OFFSET = -1.5;
     double BLUE_ANGLE_OFFSET = -0.25;
+
+    public double SPECIAL_OFFSET = 0;
     // --------------------
     // Constructor
     // --------------------
@@ -166,13 +171,13 @@ public class Differential {
     private void updateTargets() {
      //   targetL = -(currentSlotBase - (compensatedAngle * angleScale));
     //    targetR = currentSlotBase + (compensatedAngle * angleScale)
-        compensatedAngle += (alliance.isBlue() ? BLUE_ANGLE_OFFSET : RED_ANGLE_OFFSET);
+        compensatedAngle += (alliance.isBlue() ? BLUE_ANGLE_OFFSET - SPECIAL_OFFSET : RED_ANGLE_OFFSET + SPECIAL_OFFSET);
         compensatedAngle = Range.clip(compensatedAngle, MIN_ANGLE, MAX_ANGLE);
         targetL = slotOffsetL - (compensatedAngle * angleScale);
         targetR = slotOffsetR - (compensatedAngle * angleScale);
 
-        targetL = Range.clip(targetL, 0, 0.95);
-        targetR = Range.clip(targetR, 0, 0.95);
+        targetL = Range.clip(targetL, MIN_LEFT, MAX_RIGHT);
+        targetR = Range.clip(targetR, MIN_LEFT, MAX_RIGHT);
     }
 
     // --------------------

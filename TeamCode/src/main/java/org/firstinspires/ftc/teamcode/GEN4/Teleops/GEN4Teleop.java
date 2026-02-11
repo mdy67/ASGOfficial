@@ -137,6 +137,13 @@ public class GEN4Teleop extends OpMode {
 
          */
 
+        if (robot.drivetrain.robotPose.getY(DistanceUnit.INCH) > -24) {
+            robot.differential.SPECIAL_OFFSET = robot.drivetrain.robotPose.getY(DistanceUnit.INCH) * (2.0/60.0); // 2/60 [2 DEGREES AT 60 INCHES]
+        } else {
+            robot.differential.SPECIAL_OFFSET = 0;
+        }
+
+
         if (TUNING_MODE) {
          //   if (gamepad1.dpad_left)  targetVel -= 2;
          //   if (gamepad1.dpad_right) targetVel += 2;
@@ -160,9 +167,9 @@ public class GEN4Teleop extends OpMode {
         }
 
         if (gamepad1.dpad_right) {
-            robot.differential.ANGLE_ADJUST -= 1;
+            robot.differential.ANGLE_ADJUST -= 2.5;
         } else if (gamepad1.dpad_left) {
-            robot.differential.ANGLE_ADJUST += 1;
+            robot.differential.ANGLE_ADJUST += 2.5;
         }
 
 
