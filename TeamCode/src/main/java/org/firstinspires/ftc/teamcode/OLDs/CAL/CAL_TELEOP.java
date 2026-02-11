@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.OLDs.CAL;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -12,7 +13,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.teamcode.OLDs.CAL.Flywheel.CALFlywheelClass;
-
+@Disabled
 @TeleOp(name = "Nolan is amazing", group = "Testing")
 public class CAL_TELEOP extends OpMode {
     private DcMotorEx flywheelMotor, intake, leftFront, leftBack, rightFront, rightBack;

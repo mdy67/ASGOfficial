@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode.OLDs.CAL.Flywheel;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Disabled
 @TeleOp(name = "CAL KP Tuner", group = "Flywheel Tuning")
 public class CALKPTuner extends LinearOpMode {
 

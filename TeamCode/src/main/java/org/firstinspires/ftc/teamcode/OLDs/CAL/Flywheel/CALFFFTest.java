@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.OLDs.CAL.Flywheel;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import org.firstinspires.ftc.teamcode.OLDs.Main.Subsystems.Flywheels;
 
+@Disabled
 @TeleOp(name = "Flywheel Feedforward + kP Test", group = "Flywheel Testing")
 public class CALFFFTest extends LinearOpMode {
 
