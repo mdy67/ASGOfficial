@@ -33,10 +33,6 @@ public class GEN4Teleop extends OpMode {
      //   robot.importAutoDiffy(AutoToTeleop.encLOffset, AutoToTeleop.encROffset);
         robot.flywheel.stop();
 
-        robot.flywheel.MAX_VELOCITY = 450;
-        robot.differential.farZone = false;
-        robot.flywheel.velocityModifier = -55 + modifierLive;
-
         telemetry.addLine("Robot initialized. Waiting for start...");
         telemetry.update();
 
@@ -119,9 +115,9 @@ public class GEN4Teleop extends OpMode {
         double dy = goal.getY(DistanceUnit.INCH) - robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
         double distance = Math.hypot(dx, dy);
 
-        robot.flywheel.MAX_VELOCITY = 450;
+        robot.flywheel.MAX_VELOCITY = 570;
         robot.differential.farZone = false;
-        robot.flywheel.velocityModifier = -40.0 + modifierLive;
+        robot.flywheel.velocityModifier = -0.0 + modifierLive;
         /*
         if (gamepad1.left_stick_button) { // UP = CLOSE ZONE
 

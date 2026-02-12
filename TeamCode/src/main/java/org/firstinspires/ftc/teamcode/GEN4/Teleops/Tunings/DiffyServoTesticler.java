@@ -1,17 +1,9 @@
-package org.firstinspires.ftc.teamcode.GEN4.Teleops;
+package org.firstinspires.ftc.teamcode.GEN4.Teleops.Tunings;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.GEN4.Subsystems.AutoToTeleop;
-import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Differential;
-import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
-import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Robot;
 
 @TeleOp
 public class DiffyServoTesticler extends OpMode {

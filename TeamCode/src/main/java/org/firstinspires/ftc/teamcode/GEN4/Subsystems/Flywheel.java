@@ -20,7 +20,7 @@ public class Flywheel {
     private final VoltageSensor battery;
 
     private static final double HOOD_TOP = 0.0;
-    private static final double HOOD_BOTTOM = 0.76;
+    private static final double HOOD_BOTTOM = 0.79;
 
     private double targetVelocity = 0.0;
     private double kP = 0.004;
@@ -133,9 +133,9 @@ public class Flywheel {
 
     public void aimToGoal(Pose2D targetGoal, Pose2D currentPose, double velX, double velY) {
         stoppage = false;
-        double a = 1.52872 * Math.pow(10, -8); // TODO: TUNE THESE WITH NEW REGRESSION
-        double b = 1.77413;
-        double c = 259.12373;
+        double a = 3.02129 * Math.pow(10, -8); // TODO: TUNE THESE WITH NEW REGRESSION
+        double b = 2.27752;
+        double c = 186.32838;
 
 
         double tx = targetGoal.getX(DistanceUnit.INCH);
@@ -153,19 +153,39 @@ public class Flywheel {
         // ax^4 + bx^1 + c
         double targetVelABCD = ((a * (Math.pow(distance, 4))) + (b * Math.pow(distance, 1)) + c);
         targetVelABCD += velocityModifier;
-        targetVelABCD = Range.clip(targetVelABCD, 0, MAX_VELOCITY); // POSSIBLY 450 / 800 : MIN / MAX
+        targetVelABCD = Range.clip(targetVelABCD, 0, MAX_VELOCITY);
         setTargetVelocity(targetVelABCD);
         angleHood(targetVelABCD);
     }
 
     public void angleHood(double currentVelocity) {
-        // - (a * b) x^3 + cx^2 - dx + e
-        double a = 8.48022;
-        double b = Math.pow(10, -7);
-        double c = 0.00115801;
-        double d = 0.526599;
-        double e = 80.04987;
-        double targetHoodAngle = - ((a * b) * Math.pow(currentVelocity, 3)) + (c * Math.pow(currentVelocity, 2)) - (d * currentVelocity) + e;
+
+        // Sorted velocity (x) and hood position (y) calibration points
+        double[] xs = {320, 345, 370, 395, 430, 440, 500, 520, 555, 560};
+        double[] ys = {0.79, 0.70, 0.57, 0.38, 0.37, 0.21, 0.17, 0.15, 0.39, 0.41};
+
+        double targetHoodAngle;
+
+        // Clamp outside range
+        if (currentVelocity <= xs[0]) {
+            targetHoodAngle = ys[0];
+        } else if (currentVelocity >= xs[xs.length - 1]) {
+            targetHoodAngle = ys[ys.length - 1];
+        } else {
+            // Find segment and linearly interpolate
+            targetHoodAngle = ys[0];
+            for (int i = 0; i < xs.length - 1; i++) {
+                if (currentVelocity >= xs[i] && currentVelocity <= xs[i + 1]) {
+                    double x1 = xs[i];
+                    double x2 = xs[i + 1];
+                    double y1 = ys[i];
+                    double y2 = ys[i + 1];
+
+                    targetHoodAngle = y1 + (currentVelocity - x1) * (y2 - y1) / (x2 - x1);
+                    break;
+                }
+            }
+        }
 
         targetHoodAngle = Range.clip(targetHoodAngle, HOOD_TOP, HOOD_BOTTOM);
         setHoodAngle(targetHoodAngle);
