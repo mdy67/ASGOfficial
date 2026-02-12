@@ -171,7 +171,7 @@ public class Differential {
     private void updateTargets() {
      //   targetL = -(currentSlotBase - (compensatedAngle * angleScale));
     //    targetR = currentSlotBase + (compensatedAngle * angleScale)
-        compensatedAngle += (alliance.isBlue() ? BLUE_ANGLE_OFFSET - SPECIAL_OFFSET : RED_ANGLE_OFFSET + SPECIAL_OFFSET);
+        compensatedAngle += (alliance.isBlue() ? BLUE_ANGLE_OFFSET + SPECIAL_OFFSET : RED_ANGLE_OFFSET - SPECIAL_OFFSET);
         compensatedAngle = Range.clip(compensatedAngle, MIN_ANGLE, MAX_ANGLE);
         targetL = slotOffsetL - (compensatedAngle * angleScale);
         targetR = slotOffsetR - (compensatedAngle * angleScale);

@@ -134,7 +134,7 @@ public class GEN4Teleop extends OpMode {
          */
 
         if (robot.drivetrain.robotPose.getY(DistanceUnit.INCH) > -24) {
-            robot.differential.SPECIAL_OFFSET = robot.drivetrain.robotPose.getY(DistanceUnit.INCH) * (2.0/60.0); // 2/60 [2 DEGREES AT 60 INCHES]
+            robot.differential.SPECIAL_OFFSET = robot.drivetrain.robotPose.getY(DistanceUnit.INCH) * (4.0/60.0); // 2/60 [2 DEGREES AT 60 INCHES]
         } else {
             robot.differential.SPECIAL_OFFSET = 0;
         }
