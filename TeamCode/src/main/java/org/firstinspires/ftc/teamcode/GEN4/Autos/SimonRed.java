@@ -60,9 +60,9 @@ public class SimonRed extends LinearOpMode {
                 FtcDashboard.getInstance().getTelemetry()
         );
 
-        robot.flywheel.MAX_VELOCITY = 800;
+        robot.flywheel.MAX_VELOCITY = 450;
 
-        alliance.set(alliance.Color.BLUE);
+        alliance.set(alliance.Color.RED);
         // INIT LOOP
 
         while (opModeInInit()) {
@@ -76,7 +76,7 @@ public class SimonRed extends LinearOpMode {
         state = State.SHOOTING_POSE_1;
 
         while (opModeIsActive()) {
-            alliance.set(alliance.Color.BLUE);
+            alliance.set(alliance.Color.RED);
             updateSequence();
 
             telemetry.addData("AUTO FSM", state);
@@ -114,19 +114,20 @@ public class SimonRed extends LinearOpMode {
 
             case INITIALIZED:
                 robot.update();
-                robot.drivetrain.setPosition(36, 66, 180);
+                robot.drivetrain.setPosition(33, 63, 180);
                 robot.neutral();
                 robot.readMotifTag();
                 robot.flywheel.stop();
                 telemetry.addData("INITIALIZED -- MOTIF:", robot.MotifTagID);
                 telemetry.update();
                 dtStallTimer.reset();
+                robot.flywheel.velocityModifier = -15.0; // VELOCITY OFFSETSET TODO: TUNE AT COMP
                 robot.differential.farZone = false;
                 break;
 
             case SHOOTING_POSE_1:
 
-                if (dtStallTimer.seconds() > 1) {
+                if (dtStallTimer.seconds() > 0) {
                     robot.differential.aimToGoal(robot.drivetrain.robotPose, robot.getTargetGoal());
                     robot.flywheel.aimToGoal(robot.getTargetGoal(), robot.drivetrain.robotPose, robot.drivetrain.XVel(), robot.drivetrain.YVel());
                 } else {
@@ -134,7 +135,7 @@ public class SimonRed extends LinearOpMode {
                 }
 
                 if (!trigger) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, 24, AngleUnit.DEGREES, 270), 1, 2, 0.2);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 10, 14, AngleUnit.DEGREES, 270), 1, 2, 0.15);
                 }
 
                 if (robot.systemsReady() && !shootStarted) {
@@ -143,7 +144,7 @@ public class SimonRed extends LinearOpMode {
                     rapidFireDuration = 1000;
                     rapidFireActive = true;
                 }
-                robot.flywheel.velocityModifier = 0.0; // VELOCITY OFFSETSET TODO: TUNE AT COMP
+
                 if (rapidFireActive) {
                     robot.goalLock(robot.drivetrain.robotPose);
                     robot.rapidFire();
@@ -155,7 +156,7 @@ public class SimonRed extends LinearOpMode {
                         robot.resetSplineCounter();
                         robot.update();
                         state = State.FIRST_INTAKES;
-                        robot.flywheel.velocityModifier = -53.0; // VELOCITY OFFSETSET TODO: TUNE AT COMP
+
                         robot.differential.farZone = false;
                         trigger = false;
                     }
@@ -177,7 +178,7 @@ public class SimonRed extends LinearOpMode {
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
 
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 64, -12, AngleUnit.DEGREES, 0), 1, 4, 1);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 60, -12, AngleUnit.DEGREES, 0), 1, 4, 1);
                     robot.nextSplinePoint();
                     checkStallTimer(2);
                 } else if (robot.splineCounter == 2) {
@@ -192,7 +193,7 @@ public class SimonRed extends LinearOpMode {
                     }
                     // GATE RAM POS
                     robot.intake.runIntake(0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 55, -2, AngleUnit.DEGREES, 0), 1, 4, 3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 53, -2, AngleUnit.DEGREES, 0), 1, 4, 3);
                     // WAIT 1s at GATE RAM POS
                     robot.update();
                     if (robot.drivetrain.DTatTarget() && !robot.wait.isFinished() && !robot.wait.isActive()) {
@@ -219,7 +220,7 @@ public class SimonRed extends LinearOpMode {
                     robot.goalLock(robot.drivetrain.robotPose);
 
                     if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, 24, AngleUnit.DEGREES, 280), 1, 3, 0.2);
+                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, 10, 14, AngleUnit.DEGREES, 270), 1, 3, 0.2);
                         dtStallTimer.reset();
                     }
 
@@ -276,7 +277,7 @@ public class SimonRed extends LinearOpMode {
                     }
                     robot.goalLock(robot.drivetrain.robotPose);
                     robot.intake.runIntake(0); // GATE RAM POS
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 55, -4, AngleUnit.DEGREES, 0), 1, 2, 3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 53, -4, AngleUnit.DEGREES, 0), 1, 2, 3);
                     // WAIT 1s at GATE RAM POS
                     robot.update();
                     if (robot.drivetrain.DTatTarget() && !robot.wait.isFinished() && !robot.wait.isActive()) {
@@ -295,7 +296,7 @@ public class SimonRed extends LinearOpMode {
                     robot.goalLock(robot.drivetrain.robotPose);
 
                     if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, 36, AngleUnit.DEGREES, 210), 1, 3, 0.2);
+                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, 12, 27, AngleUnit.DEGREES, 215), 1, 3, 0.2);
                         dtStallTimer.reset();
                     }
 
@@ -333,10 +334,10 @@ public class SimonRed extends LinearOpMode {
             case POINT_9:
             case FINISHED:
                 AutoToTeleop.storedPose = robot.drivetrain.robotPose;
-                alliance.set(alliance.Color.BLUE);
+                alliance.set(alliance.Color.RED);
                 robot.update();
                 AutoToTeleop.storedPose = robot.drivetrain.robotPose;
-                alliance.set(alliance.Color.BLUE);
+                alliance.set(alliance.Color.RED);
                 break;
         }
     }
