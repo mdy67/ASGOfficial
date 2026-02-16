@@ -165,7 +165,6 @@ public class Blue15Full extends LinearOpMode {
                         robot.resetSplineCounter();
                         robot.update();
                         state = State.FIRST_INTAKES;
-                        robot.flywheel.velocityModifier = -53.0; // VELOCITY OFFSETSET TODO: TUNE AT COMP
                         robot.differential.farZone = false;
                         trigger = false;
                     }

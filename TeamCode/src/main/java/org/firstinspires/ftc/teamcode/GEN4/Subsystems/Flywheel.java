@@ -36,6 +36,7 @@ public class Flywheel {
     private double lastTime = 0.0;
 
     public double velocityModifier = 0.0;
+    public double MIN_VELOCITY = 330;
     public double MAX_VELOCITY = 800;
 
     public static final double THRESHOLD = 15; // Threshold Radians Per Second
@@ -153,7 +154,7 @@ public class Flywheel {
         // ax^4 + bx^1 + c
         double targetVelABCD = ((a * (Math.pow(distance, 4))) + (b * Math.pow(distance, 1)) + c);
         targetVelABCD += velocityModifier;
-        targetVelABCD = Range.clip(targetVelABCD, 0, MAX_VELOCITY);
+        targetVelABCD = Range.clip(targetVelABCD, MIN_VELOCITY, MAX_VELOCITY);
         setTargetVelocity(targetVelABCD);
         angleHood(targetVelABCD);
     }

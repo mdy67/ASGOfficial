@@ -93,7 +93,13 @@ public class SimonRed extends LinearOpMode {
             telemetry.update();
             //     robot.finalAutoPose = robot.drivetrain.robotPose;
             AutoToTeleop.storedPose = robot.drivetrain.robotPose;
-            alliance.set(alliance.Color.BLUE);
+            alliance.set(alliance.Color.RED);
+
+            if (robot.drivetrain.robotPose.getY(DistanceUnit.INCH) > -4) {
+                robot.differential.SPECIAL_OFFSET = robot.drivetrain.robotPose.getY(DistanceUnit.INCH) * (3.50/60.0); // 2/60 [2 DEGREES AT 60 INCHES]
+            } else {
+                robot.differential.SPECIAL_OFFSET = 0;
+            }
 
 
         }
@@ -138,7 +144,7 @@ public class SimonRed extends LinearOpMode {
                     robot.goToPoint(new Pose2D(DistanceUnit.INCH, 10, 14, AngleUnit.DEGREES, 270), 1, 2, 0.15);
                 }
 
-                if (robot.systemsReady() && !shootStarted) {
+                if (robot.systemsReady() && !shootStarted && dtStallTimer.seconds() > 4) {
                     shootStarted = true;
                     rapidFireTimer.reset();
                     rapidFireDuration = 1000;

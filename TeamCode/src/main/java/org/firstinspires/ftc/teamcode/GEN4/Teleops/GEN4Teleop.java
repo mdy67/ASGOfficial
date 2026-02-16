@@ -91,7 +91,13 @@ public class GEN4Teleop extends OpMode {
             intakePower = -0.8;
         }
         if (gamepad1.y) {
-            robot.arms.arm2_flickON();
+            if (alliance.isBlue()) {
+                robot.drivetrain.setPosition(55, -63.8, 0);
+            } else {
+                robot.drivetrain.setPosition(-55, -63.8, 180);
+            }
+
+            //robot.arms.arm2_flickON();
         } else {
             robot.arms.arm2_flickOFF();
         }
@@ -116,6 +122,7 @@ public class GEN4Teleop extends OpMode {
         double distance = Math.hypot(dx, dy);
 
         robot.flywheel.MAX_VELOCITY = 570;
+        robot.flywheel.MIN_VELOCITY = 330;
         robot.differential.farZone = false;
         robot.flywheel.velocityModifier = -0.0 + modifierLive;
         /*
@@ -133,8 +140,8 @@ public class GEN4Teleop extends OpMode {
 
          */
 
-        if (robot.drivetrain.robotPose.getY(DistanceUnit.INCH) > -24) {
-            robot.differential.SPECIAL_OFFSET = robot.drivetrain.robotPose.getY(DistanceUnit.INCH) * (4.0/60.0); // 2/60 [2 DEGREES AT 60 INCHES]
+        if (robot.drivetrain.robotPose.getY(DistanceUnit.INCH) > -4) {
+            robot.differential.SPECIAL_OFFSET = robot.drivetrain.robotPose.getY(DistanceUnit.INCH) * (3.50/60.0); // 2/60 [2 DEGREES AT 60 INCHES]
         } else {
             robot.differential.SPECIAL_OFFSET = 0;
         }
@@ -186,17 +193,6 @@ public class GEN4Teleop extends OpMode {
                 robot.drivetrain.robotPose.getX(DistanceUnit.INCH),
                 robot.drivetrain.robotPose.getY(DistanceUnit.INCH),
                 robot.drivetrain.robotPose.getHeading(AngleUnit.DEGREES));
-        telemetry.addLine("=== ADJ POSE ===");
-        telemetry.addData("X / Y / Heading", "%.1f / %.1f / %.1f",
-                robot.adjustedPose.getX(DistanceUnit.INCH),
-                robot.adjustedPose.getY(DistanceUnit.INCH),
-                robot.adjustedPose.getHeading(AngleUnit.DEGREES));
-        telemetry.addLine("=== LL POSE ===");
-        telemetry.addData("X / Y / Heading", "%.1f / %.1f / %.1f",
-                robot.limelight.LimelightPose.position.x,
-                robot.limelight.LimelightPose.position.y,
-                robot.adjustedPose.getHeading(AngleUnit.DEGREES));
-
       //  telemetry.addLine("=== DIFFERENTIAL ===");
      //   telemetry.addData("Encoders L/R", "%d / %d",
          //       robot.differential.getEncoderL(),
@@ -214,11 +210,6 @@ public class GEN4Teleop extends OpMode {
 
         telemetry.addLine();
 
-        telemetry.addData("Target L: ", robot.differential.targetL);
-        telemetry.addData("Target R: ", robot.differential.targetR);
-        telemetry.addData("Desired Angle: ", robot.differential.desiredAngle);
-        telemetry.addData("Compensated Angle: ", robot.differential.compensatedAngle);
-        telemetry.addData("Gantry Slot: ", robot.differential.currentSlotBase);
         telemetry.update();
     }
 }

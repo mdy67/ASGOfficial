@@ -86,7 +86,6 @@ public class DesotoRed extends LinearOpMode {
         switch (state) {
             case INITIALIZED:
                // robot.differential.setTargetAngle(90);
-                robot.flywheel.velocityModifier = -55.0;
                 robot.update();
                 robot.differential.setTargetAngle(0);
                 robot.drivetrain.setPosition(16, -66, 90);
