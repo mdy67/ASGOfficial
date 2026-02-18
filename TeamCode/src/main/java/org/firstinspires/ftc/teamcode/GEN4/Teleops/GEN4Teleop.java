@@ -92,9 +92,9 @@ public class GEN4Teleop extends OpMode {
         }
         if (gamepad1.y) {
             if (alliance.isBlue()) {
-                robot.drivetrain.setPosition(55, -63.8, 0);
+                robot.drivetrain.setPosition(63, -63.8, 0);
             } else {
-                robot.drivetrain.setPosition(-55, -63.8, 180);
+                robot.drivetrain.setPosition(-63, -63.8, 180);
             }
 
             //robot.arms.arm2_flickON();
@@ -141,7 +141,7 @@ public class GEN4Teleop extends OpMode {
          */
 
         if (robot.drivetrain.robotPose.getY(DistanceUnit.INCH) > -4) {
-            robot.differential.SPECIAL_OFFSET = robot.drivetrain.robotPose.getY(DistanceUnit.INCH) * (3.50/60.0); // 2/60 [2 DEGREES AT 60 INCHES]
+            robot.differential.SPECIAL_OFFSET = robot.drivetrain.robotPose.getY(DistanceUnit.INCH) * (2/60.0); // 2/60 [2 DEGREES AT 60 INCHES]
         } else {
             robot.differential.SPECIAL_OFFSET = 0;
         }

@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.alliance;
 
-@Autonomous(name = "Desoto Blue", group = "GEN4")
+@Autonomous(name = "Desoto BLUE", group = "GEN4")
 public class DesotoBlue extends LinearOpMode {
 
     private Robot robot;
@@ -173,11 +173,11 @@ public class DesotoBlue extends LinearOpMode {
             case SPIKE_INTAKES:
                 if (robot.splineCounter == 0) {
                     dtStallTimer.reset();
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -24, -38, AngleUnit.DEGREES, 180), 1, 3, 0.3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -24, -38, AngleUnit.DEGREES, 180), 1, 3, 0.15);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -61, -38, AngleUnit.DEGREES, 180), 1, 4, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -61, -38, AngleUnit.DEGREES, 180), 1, 4, 0.15);
                     robot.nextSplinePoint();
                     checkStallTimer(2);
                 } else if (robot.splineCounter == 2) {
@@ -242,11 +242,11 @@ public class DesotoBlue extends LinearOpMode {
                     //  checkStallTimer(3);
                     dtStallTimer.reset();
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -50, -62, AngleUnit.DEGREES, 180), 0.5, 3, 0.3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -50, -62, AngleUnit.DEGREES, 180), 0.5, 3, 0.15);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -68, -68, AngleUnit.DEGREES, 180), 0.4, 2, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -68, -68, AngleUnit.DEGREES, 180), 0.4, 2, 0.15);
                     robot.nextSplinePoint();
                     checkStallTimer(1.5);
                 } else if (robot.splineCounter == 2) {
@@ -260,7 +260,7 @@ public class DesotoBlue extends LinearOpMode {
             case OFFLINE: // MOVE OFF LINE
                 if (robot.splineCounter == 0) {
                     checkStallTimer(3);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -40, AngleUnit.DEGREES, 240), 0.3, 3, 0.3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -40, AngleUnit.DEGREES, 240), 0.3, 3, 0.15);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 1) {
                     state = State.FINISHED;
