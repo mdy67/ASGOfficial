@@ -85,8 +85,8 @@ public class Differential {
     double MIN_ANGLE = 0;
     double MAX_ANGLE = 180;
 
-    double RED_ANGLE_OFFSET = 3.5;
-    double BLUE_ANGLE_OFFSET = -0.25;
+    double RED_ANGLE_OFFSET = 4.5;
+    double BLUE_ANGLE_OFFSET = 4;
 
     public double SPECIAL_OFFSET = 0;
     // --------------------

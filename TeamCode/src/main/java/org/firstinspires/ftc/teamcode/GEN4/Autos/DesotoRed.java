@@ -58,7 +58,7 @@ public class DesotoRed extends LinearOpMode {
                 FtcDashboard.getInstance().getTelemetry()
         );
 
-        robot.flywheel.MAX_VELOCITY = 800;
+        robot.flywheel.MAX_VELOCITY = 850;
         alliance.set(alliance.Color.RED);
 
         while (opModeInInit()) {
@@ -109,7 +109,7 @@ public class DesotoRed extends LinearOpMode {
                 robot.differential.farZone = true;
 
                 if (!trigger) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -57, AngleUnit.DEGREES, 300), 1, 3, 0.15);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 17, -57, AngleUnit.DEGREES, 300), 1, 3, 0.15);
                 }
 
                 if (robot.systemsReady() && !shootStarted) {
@@ -194,7 +194,7 @@ public class DesotoRed extends LinearOpMode {
                 robot.differential.farZone = true;
 
                 if (!trigger) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -57, AngleUnit.DEGREES, 300), 1, 2, 0.15);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 17, -57, AngleUnit.DEGREES, 300), 1, 2, 0.15);
                 }
 
                 if (robot.systemsReady() && !shootStarted && dtStallTimer.seconds() > 0.75) {
