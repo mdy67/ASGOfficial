@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.GEN4.Subsystems.alliance;
 
-@Autonomous(name = "Desoto BLUECHEW", group = "GEN4")
+@Autonomous(name = "Desoto BLUE", group = "GEN4")
 public class DesotoBlue extends LinearOpMode {
 
     private Robot robot;
@@ -87,7 +87,7 @@ public class DesotoBlue extends LinearOpMode {
             case INITIALIZED:
                 // robot.differential.setTargetAngle(90);
                 robot.update();
-                robot.differential.setTargetAngle(0);
+                robot.differential.setTargetAngle(180);
                 robot.drivetrain.setPosition(-16, -66, 90);
                 robot.neutral();
                 robot.readMotifTag();
@@ -146,7 +146,7 @@ public class DesotoBlue extends LinearOpMode {
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -60, -50, AngleUnit.DEGREES, 240), 1, 4, 8);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -60, -50, AngleUnit.DEGREES, 250), 1, 4, 8);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 2) {
                     robot.intake.runIntake(-1.0);
