@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.GEN4.Autos;
+package org.firstinspires.ftc.teamcode.GEN4.OLDautos;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -9,13 +9,13 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.GEN4.Subsystems.AutoToTeleop;
-import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
-import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Robot;
-import org.firstinspires.ftc.teamcode.GEN4.Subsystems.alliance;
+import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.AutoToTeleop;
+import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.Drivetrain;
+import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.Robot;
+import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.alliance;
 
-@Autonomous(name = "SIMON BLUE 9", group = "GEN4")
-public class SimonBlue extends LinearOpMode {
+@Autonomous(name = "SIMON RED 9", group = "GEN4")
+public class SimonRed extends LinearOpMode {
 
     private Robot robot;
 
@@ -60,9 +60,9 @@ public class SimonBlue extends LinearOpMode {
                 FtcDashboard.getInstance().getTelemetry()
         );
 
-        robot.flywheel.MAX_VELOCITY = 800;
+        robot.flywheel.MAX_VELOCITY = 450;
 
-        alliance.set(alliance.Color.BLUE);
+        alliance.set(alliance.Color.RED);
         // INIT LOOP
 
         while (opModeInInit()) {
@@ -76,7 +76,7 @@ public class SimonBlue extends LinearOpMode {
         state = State.SHOOTING_POSE_1;
 
         while (opModeIsActive()) {
-            alliance.set(alliance.Color.BLUE);
+            alliance.set(alliance.Color.RED);
             updateSequence();
 
             telemetry.addData("AUTO FSM", state);
@@ -93,13 +93,14 @@ public class SimonBlue extends LinearOpMode {
             telemetry.update();
             //     robot.finalAutoPose = robot.drivetrain.robotPose;
             AutoToTeleop.storedPose = robot.drivetrain.robotPose;
-            alliance.set(alliance.Color.BLUE);
+            alliance.set(alliance.Color.RED);
 
             if (robot.drivetrain.robotPose.getY(DistanceUnit.INCH) > -4) {
                 robot.differential.SPECIAL_OFFSET = robot.drivetrain.robotPose.getY(DistanceUnit.INCH) * (3.50/60.0); // 2/60 [2 DEGREES AT 60 INCHES]
             } else {
                 robot.differential.SPECIAL_OFFSET = 0;
             }
+
 
         }
 
@@ -119,19 +120,20 @@ public class SimonBlue extends LinearOpMode {
 
             case INITIALIZED:
                 robot.update();
-                robot.drivetrain.setPosition(-33, 63, 0);
+                robot.drivetrain.setPosition(33, 63, 180);
                 robot.neutral();
                 robot.readMotifTag();
                 robot.flywheel.stop();
                 telemetry.addData("INITIALIZED -- MOTIF:", robot.MotifTagID);
                 telemetry.update();
                 dtStallTimer.reset();
+                robot.flywheel.velocityModifier = -15.0; // VELOCITY OFFSETSET TODO: TUNE AT COMP
                 robot.differential.farZone = false;
                 break;
 
             case SHOOTING_POSE_1:
 
-                if (dtStallTimer.seconds() > 1) {
+                if (dtStallTimer.seconds() > 0) {
                     robot.differential.aimToGoal(robot.drivetrain.robotPose, robot.getTargetGoal());
                     robot.flywheel.aimToGoal(robot.getTargetGoal(), robot.drivetrain.robotPose, robot.drivetrain.XVel(), robot.drivetrain.YVel());
                 } else {
@@ -139,7 +141,7 @@ public class SimonBlue extends LinearOpMode {
                 }
 
                 if (!trigger) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -10, 14, AngleUnit.DEGREES, 270), 1, 2, 0.2);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 10, 14, AngleUnit.DEGREES, 270), 1, 2, 0.15);
                 }
 
                 if (robot.systemsReady() && !shootStarted && dtStallTimer.seconds() > 4) {
@@ -148,7 +150,7 @@ public class SimonBlue extends LinearOpMode {
                     rapidFireDuration = 1000;
                     rapidFireActive = true;
                 }
-                robot.flywheel.velocityModifier = 0.0; // VELOCITY OFFSETSET TODO: TUNE AT COMP
+
                 if (rapidFireActive) {
                     robot.goalLock(robot.drivetrain.robotPose);
                     robot.rapidFire();
@@ -160,6 +162,7 @@ public class SimonBlue extends LinearOpMode {
                         robot.resetSplineCounter();
                         robot.update();
                         state = State.FIRST_INTAKES;
+
                         robot.differential.farZone = false;
                         trigger = false;
                     }
@@ -175,19 +178,19 @@ public class SimonBlue extends LinearOpMode {
 
             case FIRST_INTAKES: // INTAKE BALLS FROM CORNER
                 if (robot.splineCounter == 0) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, -12, AngleUnit.DEGREES, 180), 1, 3, 0.2);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 18, -12, AngleUnit.DEGREES, 0), 1, 3, 0.2);
                     robot.nextSplinePoint();
                     dtStallTimer.reset(); // RESET DT STALL TIMER
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
 
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -60, -12, AngleUnit.DEGREES, 180), 1, 4, 1);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 60, -12, AngleUnit.DEGREES, 0), 1, 4, 1);
                     robot.nextSplinePoint();
                     checkStallTimer(2);
                 } else if (robot.splineCounter == 2) {
                     dtStallTimer.reset(); // RESET DT STALL TIMER
                     robot.intake.runIntake(0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -40, -12, AngleUnit.DEGREES, 180), 1, 2, 1);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 40, -12, AngleUnit.DEGREES, 0), 1, 2, 1);
                     robot.nextSplinePoint();
                 } else if (robot.splineCounter == 3) { // GATE RAM POS
                     if (trigger) {
@@ -196,7 +199,7 @@ public class SimonBlue extends LinearOpMode {
                     }
                     // GATE RAM POS
                     robot.intake.runIntake(0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -53, -2, AngleUnit.DEGREES, 180), 1, 4, 3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 53, -2, AngleUnit.DEGREES, 0), 1, 4, 3);
                     // WAIT 1s at GATE RAM POS
                     robot.update();
                     if (robot.drivetrain.DTatTarget() && !robot.wait.isFinished() && !robot.wait.isActive()) {
@@ -211,7 +214,7 @@ public class SimonBlue extends LinearOpMode {
                 } else if (robot.splineCounter == 4) {
 
                     robot.intake.runIntake(0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -30, -6, AngleUnit.DEGREES, 260), 1, 4, 3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 30, -6, AngleUnit.DEGREES, 280), 1, 4, 3);
 
                     robot.update();
                     robot.nextSplinePoint();
@@ -223,7 +226,7 @@ public class SimonBlue extends LinearOpMode {
                     robot.goalLock(robot.drivetrain.robotPose);
 
                     if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -10, 14, AngleUnit.DEGREES, 260), 1, 3, 0.2);
+                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, 10, 14, AngleUnit.DEGREES, 270), 1, 3, 0.2);
                         dtStallTimer.reset();
                     }
 
@@ -258,18 +261,18 @@ public class SimonBlue extends LinearOpMode {
 
             case POINT_3:
                 if (robot.splineCounter == 0) {
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -24, 11, AngleUnit.DEGREES, 180), 1, 4, Math.toRadians(10));
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 24, 11, AngleUnit.DEGREES, 0), 1, 4, Math.toRadians(10));
                     robot.nextSplinePoint();
 
                 } else if (robot.splineCounter == 1) {
                     robot.intake.runIntake(-1.0);
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -53, 11, AngleUnit.DEGREES, 180), 1, 2, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 53, 11, AngleUnit.DEGREES, 0), 1, 2, 10);
                     robot.nextSplinePoint();
                     dtStallTimer.reset();
 
                 } else if (robot.splineCounter == 2) {
                     robot.intake.runIntake(-1.0); // GATE INTERMEDIARY POS
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -40, 7, AngleUnit.DEGREES, 180), 1, 2, 10);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 40, 7, AngleUnit.DEGREES, 0), 1, 2, 10);
                     robot.nextSplinePoint();
                     checkStallTimer(2);
                     trigger = true;
@@ -280,7 +283,7 @@ public class SimonBlue extends LinearOpMode {
                     }
                     robot.goalLock(robot.drivetrain.robotPose);
                     robot.intake.runIntake(0); // GATE RAM POS
-                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, -53, -4, AngleUnit.DEGREES, 180), 1, 2, 3);
+                    robot.goToPoint(new Pose2D(DistanceUnit.INCH, 53, -4, AngleUnit.DEGREES, 0), 1, 2, 3);
                     // WAIT 1s at GATE RAM POS
                     robot.update();
                     if (robot.drivetrain.DTatTarget() && !robot.wait.isFinished() && !robot.wait.isActive()) {
@@ -299,7 +302,7 @@ public class SimonBlue extends LinearOpMode {
                     robot.goalLock(robot.drivetrain.robotPose);
 
                     if (!trigger) {
-                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, -12, 27, AngleUnit.DEGREES, 330), 1, 3, 0.2);
+                        robot.goToPoint(new Pose2D(DistanceUnit.INCH, 12, 27, AngleUnit.DEGREES, 215), 1, 3, 0.2);
                         dtStallTimer.reset();
                     }
 
@@ -337,10 +340,10 @@ public class SimonBlue extends LinearOpMode {
             case POINT_9:
             case FINISHED:
                 AutoToTeleop.storedPose = robot.drivetrain.robotPose;
-                alliance.set(alliance.Color.BLUE);
+                alliance.set(alliance.Color.RED);
                 robot.update();
                 AutoToTeleop.storedPose = robot.drivetrain.robotPose;
-                alliance.set(alliance.Color.BLUE);
+                alliance.set(alliance.Color.RED);
                 break;
         }
     }

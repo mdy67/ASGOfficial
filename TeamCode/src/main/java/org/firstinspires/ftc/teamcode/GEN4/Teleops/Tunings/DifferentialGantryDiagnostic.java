@@ -4,8 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Differential;
-import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
+import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.Differential;
+import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.Drivetrain;
 
 @TeleOp(name = "Differential Gantry Diagnostic", group = "TEST")
 public class DifferentialGantryDiagnostic extends LinearOpMode {

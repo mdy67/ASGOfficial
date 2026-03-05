@@ -1,13 +1,8 @@
-package org.firstinspires.ftc.teamcode.GEN4.Subsystems;
+package org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems;
 
-import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 @TeleOp (name = "LIMELIGHT TEST", group = "GEN4")
 public class AprilTagLimelightTest extends OpMode {

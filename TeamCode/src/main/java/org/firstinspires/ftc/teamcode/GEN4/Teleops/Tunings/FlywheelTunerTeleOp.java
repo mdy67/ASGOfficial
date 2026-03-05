@@ -6,9 +6,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Robot;
-import org.firstinspires.ftc.teamcode.GEN4.Subsystems.Drivetrain;
-import org.firstinspires.ftc.teamcode.GEN4.Subsystems.alliance;
+import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.Robot;
+import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.Drivetrain;
+import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.alliance;
 
 @TeleOp(name = "GovCup Flywheel Tuner", group = "1Tuning")
 public class FlywheelTunerTeleOp extends OpMode {

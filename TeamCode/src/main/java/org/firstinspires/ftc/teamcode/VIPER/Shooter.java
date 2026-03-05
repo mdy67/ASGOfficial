@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.GEN4.Subsystems;
+package org.firstinspires.ftc.teamcode.VIPER;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -13,20 +13,20 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-public class Flywheel {
+public class Shooter {
 
     private final DcMotorEx shooterL, shooterR;
     private final Servo hood;
     private final VoltageSensor battery;
 
     private static final double HOOD_TOP = 0.0;
-    private static final double HOOD_BOTTOM = 0.79;
+    private static final double HOOD_BOTTOM = 0.0;
 
     private double targetVelocity = 0.0;
-    private double kP = 0.004;
-    private double kV = 0.0017;
-    private double kS = 0.08765;
-    private double tunedVoltage = 12.583;
+    private double kP = 0.0;
+    private double kV = 0.0;
+    private double kS = 0.0;
+    private double tunedVoltage = 0.0;
 
     private final Deque<Double> velBuffer = new ArrayDeque<>();
     private final int BUFFER_SIZE = 18;
@@ -41,7 +41,7 @@ public class Flywheel {
 
     public static final double THRESHOLD = 15; // Threshold Radians Per Second
 
-    public Flywheel(HardwareMap hardwareMap, VoltageSensor battery) {
+    public Shooter (HardwareMap hardwareMap, VoltageSensor battery) {
         this.battery = battery;
 
         hood = hardwareMap.get(Servo.class, "hood");
