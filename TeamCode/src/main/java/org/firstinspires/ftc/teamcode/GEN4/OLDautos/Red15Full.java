@@ -10,9 +10,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.AutoToTeleop;
-import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.Drivetrain;
+import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.OLDDrivetrain;
 import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.Robot;
-import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.alliance;
+import org.firstinspires.ftc.teamcode.VIPER.alliance;
 
 @Autonomous(name = "Red 15 Ball", group = "GEN4")
 public class Red15Full extends LinearOpMode {
@@ -174,7 +174,7 @@ public class Red15Full extends LinearOpMode {
                 robot.update();
                 if (robot.drivetrain.DTatTarget()) {
                     trigger = true;
-                    robot.drivetrain.state = Drivetrain.State.IDLE;
+                    robot.drivetrain.state = OLDDrivetrain.State.IDLE;
 
                 }
                 break;
@@ -233,7 +233,7 @@ public class Red15Full extends LinearOpMode {
                     robot.update();
                     if (robot.drivetrain.DTatTarget()) {
                         trigger = true;
-                        robot.drivetrain.state = Drivetrain.State.IDLE;
+                        robot.drivetrain.state = OLDDrivetrain.State.IDLE;
                     }
                 }
                 break;
@@ -309,7 +309,7 @@ public class Red15Full extends LinearOpMode {
                     robot.update();
                     if (robot.drivetrain.DTatTarget()) {
                         trigger = true;
-                        robot.drivetrain.state = Drivetrain.State.IDLE;
+                        robot.drivetrain.state = OLDDrivetrain.State.IDLE;
                     }
                 }
                 break;
@@ -358,7 +358,7 @@ public class Red15Full extends LinearOpMode {
                     robot.update();
                     if (robot.drivetrain.DTatTarget()) {
                         trigger = true;
-                        robot.drivetrain.state = Drivetrain.State.IDLE;
+                        robot.drivetrain.state = OLDDrivetrain.State.IDLE;
                     }
                 }
                 break;
@@ -412,7 +412,7 @@ public class Red15Full extends LinearOpMode {
                     robot.update();
                     if (robot.drivetrain.DTatTarget()) {
                         trigger = true;
-                        robot.drivetrain.state = Drivetrain.State.IDLE;
+                        robot.drivetrain.state = OLDDrivetrain.State.IDLE;
                     }
                 }
                 break;
@@ -425,7 +425,7 @@ public class Red15Full extends LinearOpMode {
                 dtStallTimer.reset();
                 robot.update();
                 if (robot.drivetrain.DTatTarget()) {
-                    robot.drivetrain.state = Drivetrain.State.IDLE;
+                    robot.drivetrain.state = OLDDrivetrain.State.IDLE;
                     state = State.FINISHED;
                 }
                 break;

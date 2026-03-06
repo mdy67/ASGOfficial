@@ -32,6 +32,11 @@ public class Turret {
     private final double TOLERANCE_DEGS = 5;
     private double TOLERANCE_TICKS = (REVCODER_SCALE / TOTALDEGS) * TOLERANCE_DEGS;
     private double targetAngle = 0;
+
+
+    private double SOTM_OFFSET = 0;
+    private static double kVel = 0.1;
+
     private double tgtServoPos = 0;
     private double currentDegs = 0;
 
@@ -47,10 +52,11 @@ public class Turret {
         return Math.abs(currentTicks - (tgtServoPos * REVCODER_SCALE)) <= TOLERANCE_TICKS;
     }
 
-    public void update(Pose2D robotPos, Pose2D targetGoal) {
+    public void update(Pose2D robotPos, Pose2D targetGoal, double TVel) {
         tgtServoPos = turret1.getPosition();
         currentTicks = revCoder.getCurrentPosition();
         currentDegs = (TOTALDEGS * (currentTicks / REVCODER_SCALE) - ((TOTALDEGS - 360) / 2));
+        calcSOTMOffset(TVel);
 
         switch (state) {
             case FIXED:
@@ -70,6 +76,10 @@ public class Turret {
         }
     }
 
+    private void calcSOTMOffset(double TVel) {
+        SOTM_OFFSET = kVel * -TVel;
+    }
+
     private void setServoPos(double pos) {
         turret1.setPosition(pos);
         turret2.setPosition(pos);
@@ -81,13 +91,10 @@ public class Turret {
     }
 
     private void aimToGoal(Pose2D robotPos, Pose2D targetGoal, boolean SOTM) {
-
         double dx = targetGoal.getX(DistanceUnit.INCH) - robotPos.getX(DistanceUnit.INCH);
         double dy = targetGoal.getY(DistanceUnit.INCH) - robotPos.getY(DistanceUnit.INCH);
         double fieldAngle = Math.toDegrees(Math.atan2(dy, dx));
         fieldAngle = fieldAngle - robotPos.getHeading(AngleUnit.DEGREES);
-
-
 
         double diff = fieldAngle - currentDegs;
 
@@ -98,11 +105,8 @@ public class Turret {
         }
 
         fieldAngle = Range.clip(fieldAngle, -20, 380);
-
+        if (SOTM) { fieldAngle += SOTM_OFFSET; }
         setAngle(fieldAngle);
     }
-
-
-
 
 }

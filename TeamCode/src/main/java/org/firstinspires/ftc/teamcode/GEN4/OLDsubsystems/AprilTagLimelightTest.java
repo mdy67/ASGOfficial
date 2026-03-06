@@ -16,7 +16,7 @@ public class AprilTagLimelightTest extends OpMode {
 
         robot = new Robot(hardwareMap);
         robot.startup();
-        robot.drivetrain.state = Drivetrain.State.TELEOP;
+        robot.drivetrain.state = OLDDrivetrain.State.TELEOP;
 
         robot.arms.arm1_flickOFF();
         robot.arms.arm2_flickOFF();

@@ -6,12 +6,13 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.VIPER.alliance;
 
 public class Robot {
 
     public HardwareMap hardwareMap;
 
-    public Drivetrain drivetrain;
+    public OLDDrivetrain drivetrain;
     public Differential differential;
     public Flywheel flywheel;
     public Intake intake;
@@ -67,7 +68,7 @@ public class Robot {
     public Robot(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
 
-        drivetrain   = new Drivetrain(hardwareMap);
+        drivetrain   = new OLDDrivetrain(hardwareMap);
         differential = new Differential(hardwareMap);
         colors       = new Colors(hardwareMap);
         arms         = new Arms(hardwareMap);
@@ -185,12 +186,12 @@ public class Robot {
        DRIVETRAIN HELPERS
        ========================= */
     public void goToPoint(Pose2D targetPoint, double maxPower, double xyThreshold, double hThreshold) {
-        drivetrain.state = Drivetrain.State.GO_TO_POINT;
+        drivetrain.state = OLDDrivetrain.State.GO_TO_POINT;
         drivetrain.goToPoint(targetPoint, maxPower, xyThreshold, hThreshold);
     }
 
     public void holdPoint(Pose2D targetPoint, double maxPower) {
-        drivetrain.state = Drivetrain.State.HOLD_POINT;
+        drivetrain.state = OLDDrivetrain.State.HOLD_POINT;
         drivetrain.goToPoint(targetPoint, maxPower, 0, 0);
     }
 

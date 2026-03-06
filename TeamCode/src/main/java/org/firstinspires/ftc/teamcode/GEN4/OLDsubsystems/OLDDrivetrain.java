@@ -13,7 +13,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit
 import org.firstinspires.ftc.teamcode.GEN4.Misc.DTPID;
 import org.firstinspires.ftc.teamcode.GEN4.Misc.Utils;
 
-public class Drivetrain {
+public class OLDDrivetrain {
 
     public enum State {
         GO_TO_POINT,
@@ -34,7 +34,7 @@ public class Drivetrain {
     private double teleopTurn = 0;
 
 
-    public Drivetrain(HardwareMap hardwareMap) {
+    public OLDDrivetrain(HardwareMap hardwareMap) {
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftBack = hardwareMap.get(DcMotorEx.class, "leftBack");
         rightBack = hardwareMap.get(DcMotorEx.class, "rightBack");

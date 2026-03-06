@@ -7,8 +7,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.Robot;
-import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.Drivetrain;
-import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.alliance;
+import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.OLDDrivetrain;
+import org.firstinspires.ftc.teamcode.VIPER.alliance;
 
 @TeleOp(name = "GovCup Flywheel Tuner", group = "1Tuning")
 public class FlywheelTunerTeleOp extends OpMode {
@@ -23,7 +23,7 @@ public class FlywheelTunerTeleOp extends OpMode {
         robot = new Robot(hardwareMap);
         robot.arms.reset();
         alliance.set(alliance.Color.BLUE);
-        robot.drivetrain.state = Drivetrain.State.TELEOP;
+        robot.drivetrain.state = OLDDrivetrain.State.TELEOP;
       //  robot.importAutoPose(AutoToTeleop.storedPose.getX(DistanceUnit.INCH), AutoToTeleop.storedPose.getY(DistanceUnit.INCH), AutoToTeleop.storedPose.getHeading(AngleUnit.DEGREES));
         //   robot.importAutoDiffy(AutoToTeleop.encLOffset, AutoToTeleop.encROffset);
         robot.flywheel.stop();
