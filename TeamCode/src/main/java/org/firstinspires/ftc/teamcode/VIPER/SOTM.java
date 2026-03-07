@@ -14,17 +14,23 @@ public class SOTM {
      * @param XVel
      * @param YVel
      */
-    private double kX = 0.8;
-    private double kY = 0.8;
+    private double kXClose = 0.8;
+    private double kYClose = 0.8;
+    private double kXFar = 1.1;
+    private double kYFar = 1.1;
+
+    private double farZoneMax = -24; // above this it will be close zone SOTM
+
+
     public Pose2D virtualGoal = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
 
-    public void update(Pose2D targetGoal, double XVel, double YVel) {
-        calculateVirtualGoal(targetGoal, XVel, YVel);
+    public void update(Pose2D robotPose, Pose2D targetGoal, double XVel, double YVel) {
+        calculateVirtualGoal(robotPose, targetGoal, XVel, YVel);
     }
 
-    private void calculateVirtualGoal(Pose2D targetGoal, double XVel, double YVel) {
-        double x = targetGoal.getX(DistanceUnit.INCH) + (XVel * kX);
-        double y = targetGoal.getY(DistanceUnit.INCH) + (YVel * kY);
+    private void calculateVirtualGoal(Pose2D robotPose, Pose2D targetGoal, double XVel, double YVel) {
+        double x = targetGoal.getX(DistanceUnit.INCH) + (XVel * robotPose.getY(DistanceUnit.INCH) > farZoneMax ? kXClose : kXFar);
+        double y = targetGoal.getY(DistanceUnit.INCH) + (YVel * robotPose.getY(DistanceUnit.INCH) > farZoneMax ? kYClose : kYFar);
 
         virtualGoal = new Pose2D(DistanceUnit.INCH, x, y, AngleUnit.DEGREES, 0);
     }
