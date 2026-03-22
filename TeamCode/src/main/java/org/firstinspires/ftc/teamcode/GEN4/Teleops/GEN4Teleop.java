@@ -8,14 +8,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.AutoToTeleop;
-import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.Robot;
+import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.OLDRobot;
+
 import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.OLDDrivetrain;
 import org.firstinspires.ftc.teamcode.VIPER.alliance;
 
 @TeleOp(name = "GEN4 TeleOp", group = "GEN4")
 public class GEN4Teleop extends OpMode {
 
-    private Robot robot;
+    private OLDRobot robot;
     private boolean TUNING_MODE = false;
     private double targetVel = 350;
     private double hoodAngle = 0;
@@ -25,7 +26,7 @@ public class GEN4Teleop extends OpMode {
     @Override
     public void init() {
         timer.reset();
-        robot = new Robot(hardwareMap);
+        robot = new OLDRobot(hardwareMap);
         robot.arms.reset();
       //  alliance.set(alliance.Color.BLUE);
         robot.drivetrain.state = OLDDrivetrain.State.TELEOP;

@@ -16,35 +16,46 @@ import java.util.Deque;
 public class Shooter {
 
     private final DcMotorEx shooterL, shooterR;
-    private final Servo hood;
-    private final VoltageSensor battery;
+    private final Servo hoodL, hoodR;
 
-    private static final double HOOD_TOP = 0.0;
-    private static final double HOOD_BOTTOM = 0.0;
+
+    private static final double HOOD_TOP = 0.9;
+    private static final double HOOD_BOTTOM = 0.025;
 
     private double targetVelocity = 0.0;
-    private double kP = 0.0;
-    private double kV = 0.0;
-    private double kS = 0.0;
-    private double tunedVoltage = 0.0;
+    public double kPL = 0.083;
+    public double kVL = 0.002;
+    public double kPR = 0.0049;
+    public double kVR = 0.0023;
 
-    private final Deque<Double> velBuffer = new ArrayDeque<>();
+
+    private final Deque<Double> velBufferL = new ArrayDeque<>();
+    private final Deque<Double> velBufferR = new ArrayDeque<>();
     private final int BUFFER_SIZE = 18;
-    private double smoothedVelocity = 0.0;
 
-    private double lastTicks = 0.0;
+    private double smoothedVelocityL = 0.0;
+    private double smoothedVelocityR = 0.0;
+
+    private double lastTicksL = 0.0;
+    private double lastTicksR = 0.0;
     private double lastTime = 0.0;
 
     public double velocityModifier = 0.0;
     public double MIN_VELOCITY = 330;
     public double MAX_VELOCITY = 800;
 
-    public static final double THRESHOLD = 15; // Threshold Radians Per Second
+    public static final double THRESHOLD = 15; // rad/s
 
-    public Shooter (HardwareMap hardwareMap, VoltageSensor battery) {
-        this.battery = battery;
+    boolean stoppage = false;
 
-        hood = hardwareMap.get(Servo.class, "hood");
+    public Shooter(HardwareMap hardwareMap) {
+        // L IS MAIN FLYWHEEL
+        // R IS COUNTER ROLLERS
+
+
+        hoodL = hardwareMap.get(Servo.class, "hoodL");
+        hoodR = hardwareMap.get(Servo.class, "hoodR");
+
         shooterL = hardwareMap.get(DcMotorEx.class, "shooterL");
         shooterR = hardwareMap.get(DcMotorEx.class, "shooterR");
 
@@ -57,124 +68,167 @@ public class Shooter {
         shooterL.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         shooterR.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
-        lastTicks = -shooterR.getCurrentPosition();
+        lastTicksL = shooterL.getCurrentPosition(); // TODO: CHANGE
+        lastTicksR = -shooterR.getCurrentPosition();
         lastTime = System.nanoTime() / 1e9;
     }
 
-    public void setFeedforward(double kV, double kS, double tunedVoltage) {
-        this.kV = kV;
-        this.kS = kS;
-        this.tunedVoltage = tunedVoltage;
+    // ---------------- HOOD ----------------
+
+    public void setHoodAngle(double servoPos) {
+        servoPos = Range.clip(servoPos, HOOD_BOTTOM, HOOD_TOP);
+        hoodL.setPosition(servoPos);
+        hoodR.setPosition(servoPos);
     }
 
-    public void setKP(double kP) { this.kP = kP; }
+    public double getHoodAngle() {
+        return hoodL.getPosition();
+    }
 
-    public void setHoodAngle(double servoPos) { hood.setPosition(servoPos);}
-    public double getHoodAngle() { return hood.getPosition(); }
+    // ---------------- TARGET ----------------
 
-    public void setTargetVelocity(double radPerSec) { this.targetVelocity = radPerSec; stoppage = false; }
+    public void setTargetVelocity(double radPerSec) {
+        this.targetVelocity = radPerSec;
+        stoppage = false;
+    }
 
-    public double getTargetVelocity() { return targetVelocity; }
+    public double getTargetVelocity() {
+        return targetVelocity;
+    }
+
+    // ---------------- VELOCITY ----------------
 
     public void updateVelocity() {
-        double currentTicks = -shooterR.getCurrentPosition();
         double currentTime = System.nanoTime() / 1e9;
 
-        double deltaTicks = currentTicks - lastTicks;
+        double currentTicksL = -shooterL.getCurrentPosition();
+        double currentTicksR = -shooterR.getCurrentPosition();
+
         double deltaTime = currentTime - lastTime;
 
-        double instVel = deltaTime > 0 ? (deltaTicks / deltaTime) * 2 * Math.PI / 28.0 : 0.0;
+        double velL = 0.0;
+        double velR = 0.0;
 
-        velBuffer.addLast(instVel);
-        if (velBuffer.size() > BUFFER_SIZE) velBuffer.removeFirst();
+        if (deltaTime > 0) {
+            velL = (currentTicksL - lastTicksL) / deltaTime * 2 * Math.PI / 28.0;
+            velR = (currentTicksR - lastTicksR) / deltaTime * 2 * Math.PI / 28.0;
+        }
 
-        smoothedVelocity = velBuffer.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+        velBufferL.addLast(velL);
+        velBufferR.addLast(velR);
 
-        lastTicks = currentTicks;
+        if (velBufferL.size() > BUFFER_SIZE) velBufferL.removeFirst();
+        if (velBufferR.size() > BUFFER_SIZE) velBufferR.removeFirst();
+
+        smoothedVelocityL = velBufferL.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+        smoothedVelocityR = velBufferR.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+
+        lastTicksL = currentTicksL;
+        lastTicksR = currentTicksR;
         lastTime = currentTime;
     }
 
-    public boolean atTargetVelocity() {
-        if (Math.abs(targetVelocity - getVelocityRadPerSec()) <= THRESHOLD) {
-            return true;
-        } else {
-            return false;
-        }
+    public double getVelocityL() {
+        return smoothedVelocityL;
     }
 
-    public double getVelocityRadPerSec() { return smoothedVelocity; }
+    public double getVelocityR() {
+        return smoothedVelocityR;
+    }
 
-    public double getVelocityRPM() { return smoothedVelocity * 60.0 / (2.0 * Math.PI); }
+    public double getVelocityRadPerSec() {
+        return (smoothedVelocityL + smoothedVelocityR) / 2.0;
+    }
 
-    public double getPower() { return shooterL.getPower(); }
+    public double getVelocityRPM() {
+        return getVelocityRadPerSec() * 60.0 / (2.0 * Math.PI);
+    }
+
+    public double getPowerL() {
+        return shooterL.getPower();
+    }
+
+    public double getPowerR() {
+        return shooterR.getPower();
+    }
+
+    public boolean atTargetVelocity() {
+        return Math.abs(targetVelocity - smoothedVelocityL) <= THRESHOLD &&
+                Math.abs(targetVelocity - smoothedVelocityR) <= THRESHOLD;
+    }
+
+    // ---------------- CONTROL LOOP ----------------
 
     public void update() {
         updateVelocity();
 
-        double voltage = (battery != null) ? battery.getVoltage() : 13.0;
-        double feedforwardPower = (kV * targetVelocity + kS) * tunedVoltage / voltage;
+        double feedforwardL = (kVL * targetVelocity);
+        double feedforwardR = (kVR * targetVelocity);
 
-        double error = targetVelocity - smoothedVelocity;
-        double power = feedforwardPower + (kP * error);
+        double errorL = targetVelocity - smoothedVelocityL;
+        double errorR = targetVelocity - smoothedVelocityR;
 
-        power = Range.clip(power, 0.0, 1.0);
+        double powerL = feedforwardL + (kPL * errorL);
+        double powerR = feedforwardR + (kPR * errorR);
+
+        powerL = Range.clip(powerL, 0, 1.0);
+        powerR = Range.clip(powerR, 0, 1.0);
 
         if (!stoppage) {
-            shooterL.setPower(-power);
-            shooterR.setPower(-power);
+            shooterL.setPower(-powerL);
+            shooterR.setPower(-powerR);
         }
-
     }
-    boolean stoppage = false;
+
     public void stop() {
         stoppage = true;
         shooterL.setPower(0.0);
         shooterR.setPower(0.0);
     }
 
-    public void aimToGoal(Pose2D targetGoal, Pose2D currentPose, double velX, double velY) {
+    // ---------------- AIMING ----------------
+
+    public void aimToGoal(Pose2D targetGoal, Pose2D currentPose) {
         stoppage = false;
-        double a = 3.02129 * Math.pow(10, -8); // TODO: TUNE THESE WITH NEW REGRESSION
+
+        double a = 3.02129 * Math.pow(10, -8);
         double b = 2.27752;
         double c = 186.32838;
-
 
         double tx = targetGoal.getX(DistanceUnit.INCH);
         double ty = targetGoal.getY(DistanceUnit.INCH);
         double x = currentPose.getX(DistanceUnit.INCH);
         double y = currentPose.getY(DistanceUnit.INCH);
 
-        double kVX = 0.2; // Drivetrain velocity coefficients
-        double kVY = 0.2;
-
-        double dx = tx - (x + (kVX * velX));
-        double dy = ty - (y + (kVY * velY));
+        double dx = tx - x;
+        double dy = ty - y;
         double distance = Math.sqrt(dx * dx + dy * dy);
 
-        // ax^4 + bx^1 + c
-        double targetVelABCD = ((a * (Math.pow(distance, 4))) + (b * Math.pow(distance, 1)) + c);
-        targetVelABCD += velocityModifier;
-        targetVelABCD = Range.clip(targetVelABCD, MIN_VELOCITY, MAX_VELOCITY);
-        setTargetVelocity(targetVelABCD);
-        angleHood(targetVelABCD);
+        double targetVel = (a * Math.pow(distance, 4)) + (b * distance) + c;
+
+        targetVel += velocityModifier;
+        targetVel = Range.clip(targetVel, MIN_VELOCITY, MAX_VELOCITY);
+
+        setTargetVelocity(targetVel);
+        angleHood(targetVel);
     }
+
+    // ---------------- HOOD INTERPOLATION ----------------
 
     public void angleHood(double currentVelocity) {
 
-        // Sorted velocity (x) and hood position (y) calibration points
         double[] xs = {320, 345, 370, 395, 430, 440, 500, 520, 555, 560};
         double[] ys = {0.79, 0.70, 0.57, 0.38, 0.37, 0.21, 0.17, 0.15, 0.39, 0.41};
 
         double targetHoodAngle;
 
-        // Clamp outside range
         if (currentVelocity <= xs[0]) {
             targetHoodAngle = ys[0];
         } else if (currentVelocity >= xs[xs.length - 1]) {
             targetHoodAngle = ys[ys.length - 1];
         } else {
-            // Find segment and linearly interpolate
             targetHoodAngle = ys[0];
+
             for (int i = 0; i < xs.length - 1; i++) {
                 if (currentVelocity >= xs[i] && currentVelocity <= xs[i + 1]) {
                     double x1 = xs[i];

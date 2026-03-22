@@ -8,7 +8,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.VIPER.alliance;
 
-public class Robot {
+public class OLDRobot {
 
     public HardwareMap hardwareMap;
 
@@ -65,7 +65,7 @@ public class Robot {
     /* =========================
        CONSTRUCTOR
        ========================= */
-    public Robot(HardwareMap hardwareMap) {
+    public OLDRobot(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
 
         drivetrain   = new OLDDrivetrain(hardwareMap);

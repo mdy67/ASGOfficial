@@ -10,12 +10,24 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 public class Turret {
+
     public enum State {
         FIXED,
         TRACKING,
         SOTM,
         IDLE
     }
+
+    /*
+        CALIBRATION (REAL MEASURED):
+
+        90°  → 0.1173 servo pos
+        180° → 0.4066 servo pos
+
+        Mapping used:
+        servoPos = 0.1173 + (angle - 90) * 0.003214
+    */
+
     public State state = State.IDLE;
 
     Servo turret1, turret2, turret3;
@@ -24,15 +36,15 @@ public class Turret {
     private double SERVO_MIN_POS = 0;
     private double SERVO_MAX_POS = 1;
 
+    private double REVCODER_SCALE = 3500; // encoder ticks across full servo range
+    private double TOTALDEGS = 280;       // still used for encoder (ignored for output now)
+    private double zeroServoPos = 0.0566; // no longer used for output
 
-    private double REVCODER_SCALE = 3500; // TODO: servo pos * scale = current ticks
-    private double TOTALDEGS = 400; // SERVO_MAX_POS = servoScale in degrees; angle / servoScale) + zeroServoPos = real degrees
-    private double zeroServoPos = 0.0566;
     private double currentTicks = 0;
     private final double TOLERANCE_DEGS = 5;
     private double TOLERANCE_TICKS = (REVCODER_SCALE / TOTALDEGS) * TOLERANCE_DEGS;
-    private double targetAngle = 0;
 
+    private double targetAngle = 0;
 
     private double SOTM_OFFSET = 0;
     private static double kVel = 0.1;
@@ -40,22 +52,30 @@ public class Turret {
     private double tgtServoPos = 0;
     private double currentDegs = 0;
 
-
     public Turret(HardwareMap hardwareMap) {
         turret1 = hardwareMap.get(Servo.class, "turret1");
         turret2 = hardwareMap.get(Servo.class, "turret2");
         turret3 = hardwareMap.get(Servo.class, "turret3");
-        revCoder = hardwareMap.get(DcMotorEx.class, "intakeR"); // TODO: CHANGE IF NEEDED
+
+        revCoder = hardwareMap.get(DcMotorEx.class, "intakeR"); // TODO: change if needed
     }
 
     public boolean atTarget() {
         return Math.abs(currentTicks - (tgtServoPos * REVCODER_SCALE)) <= TOLERANCE_TICKS;
     }
 
+    public double getServoPos() {
+        return turret1.getPosition();
+    }
+
     public void update(Pose2D robotPos, Pose2D targetGoal, double TVel) {
+
         tgtServoPos = turret1.getPosition();
         currentTicks = revCoder.getCurrentPosition();
+
+        // NOTE: encoder math unchanged
         currentDegs = (TOTALDEGS * (currentTicks / REVCODER_SCALE) - ((TOTALDEGS - 360) / 2));
+
         calcSOTMOffset(TVel);
 
         switch (state) {
@@ -86,13 +106,31 @@ public class Turret {
         turret3.setPosition(pos);
     }
 
-    private void setAngle(double angle) {
-        setServoPos((angle / TOTALDEGS) + zeroServoPos);
+    // ---------------- NEW CORRECT MAPPING ----------------
+    /*
+        Uses real measured calibration points.
+
+        HOW TO TUNE:
+        - If high angles are off → adjust 0.003214 slightly
+        - If everything shifts → adjust 0.1173 slightly
+    */
+    public void setAngle(double angle) {
+
+        targetAngle = angle;
+
+        double servoPos = 0.1173 + (angle - 90.0) * 0.003214;
+
+        servoPos = Range.clip(servoPos, SERVO_MIN_POS, SERVO_MAX_POS);
+
+        setServoPos(servoPos);
     }
+    // ----------------------------------------------------
 
     private void aimToGoal(Pose2D robotPos, Pose2D targetGoal, boolean SOTM) {
+
         double dx = targetGoal.getX(DistanceUnit.INCH) - robotPos.getX(DistanceUnit.INCH);
         double dy = targetGoal.getY(DistanceUnit.INCH) - robotPos.getY(DistanceUnit.INCH);
+
         double fieldAngle = Math.toDegrees(Math.atan2(dy, dx));
         fieldAngle = fieldAngle - robotPos.getHeading(AngleUnit.DEGREES);
 
@@ -104,9 +142,22 @@ public class Turret {
             fieldAngle += 360;
         }
 
-        fieldAngle = Range.clip(fieldAngle, -20, 380);
-        if (SOTM) { fieldAngle += SOTM_OFFSET; }
+        fieldAngle = Range.clip(fieldAngle, 55, 325);
+
+        if (SOTM) {
+            fieldAngle += SOTM_OFFSET;
+        }
+
         setAngle(fieldAngle);
     }
 
+    // ---------------- DEBUG ----------------
+
+    public double getCurrentAngleDeg() {
+        return currentDegs;
+    }
+
+    public double getTargetAngle() {
+        return targetAngle;
+    }
 }

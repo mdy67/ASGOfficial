@@ -45,10 +45,10 @@ public class Drivetrain {
         rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
         leftBack.setDirection(DcMotorSimple.Direction.FORWARD);
         rightBack.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightFront.setDirection(DcMotorSimple.Direction.FORWARD);
 
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -59,7 +59,7 @@ public class Drivetrain {
 
 
 
-        pinpoint.setOffsets(69.19, -154.75, DistanceUnit.MM); // TODO: TUNE
+        pinpoint.setOffsets(-120.65, -120.015, DistanceUnit.MM); // TODO: TUNED AS OF 3/21/2026
 
 
 
@@ -100,6 +100,7 @@ public class Drivetrain {
     // TELEOP CONTROL METHOD
     // -------------------------
     public void driveTeleOp(double strafe, double forward, double turn) {
+        state = State.TELEOP;
         teleopStrafe = strafe;
         teleopForward = forward;
         teleopTurn = turn;

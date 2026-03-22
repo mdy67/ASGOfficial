@@ -1,15 +1,21 @@
 package org.firstinspires.ftc.teamcode.VIPER;
 
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 public class Robot {
+    public HardwareMap hardwareMap;
+
     Pose2D targetGoal = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
-    Turret turret;
+    public Turret turret;
     SOTM sotm;
-    Intake intake;
-    Drivetrain drivetrain;
+    public Intake intake;
+    public Drivetrain drivetrain;
+    public Linkage linkage;
+    public Shooter shooter;
 
 
     /*
@@ -19,6 +25,15 @@ public class Robot {
     4 = IDLE
      */
 
+    public Robot(HardwareMap hardwareMap) {
+        this.hardwareMap = hardwareMap;
+        linkage = new Linkage(hardwareMap);
+        turret = new Turret(hardwareMap);
+        intake = new Intake(hardwareMap);
+        drivetrain = new Drivetrain(hardwareMap);
+        shooter = new Shooter(hardwareMap);
+        sotm = new SOTM();
+    }
 
     public void getTargetGoal() {
         if (alliance.isBlue()) {
@@ -28,11 +43,17 @@ public class Robot {
         }
     }
 
+    public void goToPoint(Pose2D targetPoint, double maxPower, double xyThreshold, double hThreshold) {
+        drivetrain.state = Drivetrain.State.GO_TO_POINT;
+        drivetrain.goToPoint(targetPoint, maxPower, xyThreshold, hThreshold);
+    }
+
     public void update(int turretState) {
+      //  intake.update();
         getTargetGoal();
         drivetrain.update();
         sotm.update(drivetrain.robotPose, targetGoal, drivetrain.XVel(), drivetrain.YVel());
-
+        shooter.update();
         if (turretState == 1) {
             turret.state = Turret.State.SOTM;
             turret.update(drivetrain.robotPose, sotm.virtualGoal, drivetrain.TVel());
