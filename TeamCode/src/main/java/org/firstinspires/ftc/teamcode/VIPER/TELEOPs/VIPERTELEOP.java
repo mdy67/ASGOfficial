@@ -9,7 +9,10 @@ import com.qualcomm.robotcore.util.Range;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.VIPER.Robot;
+import org.firstinspires.ftc.teamcode.VIPER.alliance;
 
 @TeleOp(name = "VIPER TeleOp", group = "GEN4")
 public class VIPERTELEOP extends OpMode {
@@ -19,7 +22,7 @@ public class VIPERTELEOP extends OpMode {
     double targetVel = 0;
     double targetIntakeVel = 0;
     double tempHoodAngle = 0;
-    double kTime = 0.44;
+    double kTime = 0.41;
 
     boolean trigger = false;
     ElapsedTime timer;
@@ -35,11 +38,13 @@ public class VIPERTELEOP extends OpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         FtcDashboard.getInstance().setTelemetryTransmissionInterval(25); // smoother live graphs
 
-        robot.update(0); // 0 = IDLE
+        robot.update(3); // 0 = IDLE
         telemetry.addLine("Robot initialized. Waiting for start...");
         telemetry.update();
-    }
 
+        alliance.set(alliance.Color.BLUE);
+
+    }
 
 
     @Override
@@ -58,6 +63,8 @@ public class VIPERTELEOP extends OpMode {
 
         robot.drivetrain.driveTeleOp(strafe, drive, turn);
 
+
+        robot.turret.HEIGHT_OFFSET = 2 / robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
         // Intake & Arms
         if (gamepad1.left_bumper) {
             trigger = false;
@@ -69,7 +76,7 @@ public class VIPERTELEOP extends OpMode {
                 timer.reset();
                 trigger = true;
             }
-            robot.intake.setPower(Range.clip(-1 + (timer.seconds() * kTime), -1, -0.7));
+            robot.intake.setPower(Range.clip(-1 + (timer.seconds() * kTime), -1, -0.76));
 
         } else if (gamepad1.a) {
             trigger = false;
@@ -101,18 +108,19 @@ public class VIPERTELEOP extends OpMode {
          */
 
         if (gamepad1.dpad_up) {
-            targetVel += 5;
+            robot.shooter.VEL_ADJUST += 4;
         } else if (gamepad1.dpad_down) {
-            targetVel -= 5;
+            robot.shooter.VEL_ADJUST -= 4;
         }
+
+
 
         if (gamepad1.dpad_right) {
-            targetTurretAngle -= 1;
+            robot.turret.ANGLE_ADJUST -= 1;
         } else if (gamepad1.dpad_left) {
-            targetTurretAngle += 1;
+            robot.turret.ANGLE_ADJUST += 1;
         }
-
-        robot.turret.setAngle(targetTurretAngle);
+        /*
 
         if (gamepad1.y) {
             tempHoodAngle += 0.01;
@@ -121,6 +129,8 @@ public class VIPERTELEOP extends OpMode {
         }
         robot.shooter.setHoodAngle(tempHoodAngle);
 
+
+         */
         /*
         if (gamepad1.right_trigger > 0.1) {
             robot.intake.kV += 0.0001;
@@ -132,13 +142,38 @@ public class VIPERTELEOP extends OpMode {
          */
 
 
+        /*
+        if (gamepad1.left_trigger > 0.1) {
+            robot.update(2); // TRACKING WHEN PRESSED
+        } else {
+            robot.update(0); // IDLE WHEN NOT PRESSED
+        }
 
-
-        robot.update(0);
+         */
+        robot.update(2);
+        /*
         robot.shooter.setTargetVelocity(targetVel);
 
+         */
+
+        if (gamepad1.b) {
+            robot.drivetrain.setPosition(-63, -60, 0);
+        }
+
+        // Distance to goal
+        double goalX = robot.targetGoal.getX(DistanceUnit.INCH);
+        double goalY = robot.targetGoal.getY(DistanceUnit.INCH);
+
+        double robotX = robot.drivetrain.robotPose.getX(DistanceUnit.INCH);
+        double robotY = robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
+
+        double dx = goalX - robotX;
+        double dy = goalY - robotY;
+
+        double distanceToGoal = Math.hypot(dx, dy);
+
         // === TELEMETRY (NOW ALSO GOES TO DASHBOARD) ===
-        telemetry.addData("Target Velocity:", targetVel);
+        telemetry.addData("Target Velocity:", robot.shooter.getTargetVelocity());
         telemetry.addData("CUR VEL MAIN:", robot.shooter.getVelocityL());
         telemetry.addData("CUR VEL ROLLERS:", robot.shooter.getVelocityR());
         telemetry.addLine();
@@ -154,7 +189,7 @@ public class VIPERTELEOP extends OpMode {
         telemetry.addData("HOOD ANGLE:", tempHoodAngle);
         telemetry.addLine();
         telemetry.addData("TARGET TURRET ANGLE:", robot.turret.getTargetAngle());
-        telemetry.addData("Teleop Target Turret:", targetTurretAngle);
+    //    telemetry.addData("Teleop Target Turret:", targetTurretAngle);
         telemetry.addData("SERVO POS:", robot.turret.getServoPos());
         //  telemetry.addData("INTAKE kP:", robot.intake.kP);
         //  telemetry.addData("INTAKE kV:", robot.intake.kV);
@@ -162,6 +197,11 @@ public class VIPERTELEOP extends OpMode {
         //  telemetry.addData("INTAKE VELOCITY:", robot.intake.currentVel);
         telemetry.addData("INTAKE POWER:", robot.intake.getPower());
         telemetry.addData("INTAKE CURRENT:", robot.intake.current());
+        telemetry.addLine();
+        telemetry.addData("ROBOT X:", robot.drivetrain.robotPose.getX(DistanceUnit.INCH));
+        telemetry.addData("ROBOT Y:", robot.drivetrain.robotPose.getY(DistanceUnit.INCH));
+        telemetry.addData("ROBOT HEADING:", robot.drivetrain.robotPose.getHeading(AngleUnit.DEGREES));
+        telemetry.addData("DIST TO GOAL (in):", distanceToGoal);
         /**
          *
          *             Y

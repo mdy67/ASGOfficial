@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 public class Robot {
     public HardwareMap hardwareMap;
 
-    Pose2D targetGoal = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
+    public Pose2D targetGoal = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
     public Turret turret;
     SOTM sotm;
     public Intake intake;
@@ -60,6 +60,7 @@ public class Robot {
         } else if (turretState == 2) {
             turret.state = Turret.State.TRACKING;
             turret.update(drivetrain.robotPose, targetGoal, drivetrain.TVel());
+            shooter.aimToGoal(targetGoal, drivetrain.robotPose);
         } else if (turretState == 3) {
             turret.state = Turret.State.FIXED;
             turret.update(drivetrain.robotPose, targetGoal, drivetrain.TVel());

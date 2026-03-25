@@ -46,6 +46,11 @@ public class Turret {
 
     private double targetAngle = 0;
 
+    public double ANGLE_ADJUST = 0;
+    public double BLUE_OFFSET = 0;
+    public double RED_OFFSET = 0;
+    public double HEIGHT_OFFSET = 0;
+
     private double SOTM_OFFSET = 0;
     private static double kVel = 0.1;
 
@@ -132,23 +137,27 @@ public class Turret {
         double dy = targetGoal.getY(DistanceUnit.INCH) - robotPos.getY(DistanceUnit.INCH);
 
         double fieldAngle = Math.toDegrees(Math.atan2(dy, dx));
-        fieldAngle = fieldAngle - robotPos.getHeading(AngleUnit.DEGREES);
+        fieldAngle -= robotPos.getHeading(AngleUnit.DEGREES);
 
-        double diff = fieldAngle - currentDegs;
-
-        if (diff > 180) {
-            fieldAngle -= 360;
-        } else if (diff < -180) {
-            fieldAngle += 360;
-        }
-
-        fieldAngle = Range.clip(fieldAngle, 55, 325);
+        // Normalize ONCE into 0–360
+        fieldAngle = (fieldAngle % 360 + 360) % 360;
 
         if (SOTM) {
             fieldAngle += SOTM_OFFSET;
         }
 
-        setAngle(fieldAngle);
+        // 🔥 HARD LIMITS (no wrap allowed past this point)
+        double min = 55;
+        double max = 315;
+
+        if (fieldAngle > max) {
+            fieldAngle = max;
+        } else if (fieldAngle < min) {
+            fieldAngle = min;
+        }
+
+        // NO more normalization or wrap logic after this
+        setAngle(fieldAngle + ANGLE_ADJUST + (alliance.isBlue() ? BLUE_OFFSET : RED_OFFSET) + HEIGHT_OFFSET);
     }
 
     // ---------------- DEBUG ----------------

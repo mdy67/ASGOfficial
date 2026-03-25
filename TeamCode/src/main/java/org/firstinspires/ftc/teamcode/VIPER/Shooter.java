@@ -1,57 +1,65 @@
 package org.firstinspires.ftc.teamcode.VIPER;
 
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
+import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.*;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.*;
 
 public class Shooter {
 
     private final DcMotorEx shooterL, shooterR;
     private final Servo hoodL, hoodR;
 
+    private boolean useExternalControl = false;
 
-    private static final double HOOD_TOP = 0.9;
-    private static final double HOOD_BOTTOM = 0.025;
+    // ---------------- LEFT (MAIN FLYWHEEL - TUNED) ----------------
 
-    private double targetVelocity = 0.0;
-    public double kPL = 0.083;
-    public double kVL = 0.002;
+    public double kP = 0.036;
+    public double kV = 0.002;
+    public double kS = 0.052;
+    public double kD = 0.0003;
+
+    private double lastErrorL = 0;
+
+    // ---------------- RIGHT (COUNTER ROLLERS - KEEP OLD) ----------------
+
     public double kPR = 0.0049;
     public double kVR = 0.0023;
 
+    // ---------------- GENERAL ----------------
+
+    private double lastControlTime = 0;
+
+    private static final double HOOD_TOP = 0.46;
+    private static final double HOOD_BOTTOM = 0.025;
+
+    private double targetVelocity = 0.0;
+
+    public double velocityModifier = 0.0;
+    public double MIN_VELOCITY = 210;
+    public double MAX_VELOCITY = 800;
+    public double VEL_ADJUST = 0;
+
+    public static final double THRESHOLD = 15;
+
+    // ---------------- VELOCITY ----------------
 
     private final Deque<Double> velBufferL = new ArrayDeque<>();
     private final Deque<Double> velBufferR = new ArrayDeque<>();
-    private final int BUFFER_SIZE = 18;
+    private final int BUFFER_SIZE = 5;
 
     private double smoothedVelocityL = 0.0;
     private double smoothedVelocityR = 0.0;
 
     private double lastTicksL = 0.0;
     private double lastTicksR = 0.0;
-    private double lastTime = 0.0;
-
-    public double velocityModifier = 0.0;
-    public double MIN_VELOCITY = 330;
-    public double MAX_VELOCITY = 800;
-
-    public static final double THRESHOLD = 15; // rad/s
+    private double lastVelocityTime = 0.0;
 
     boolean stoppage = false;
 
     public Shooter(HardwareMap hardwareMap) {
-        // L IS MAIN FLYWHEEL
-        // R IS COUNTER ROLLERS
-
 
         hoodL = hardwareMap.get(Servo.class, "hoodL");
         hoodR = hardwareMap.get(Servo.class, "hoodR");
@@ -62,56 +70,84 @@ public class Shooter {
         shooterL.setDirection(DcMotorSimple.Direction.FORWARD);
         shooterR.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        shooterL.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-        shooterR.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        shooterL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        shooterR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        shooterL.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        shooterR.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        shooterL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        shooterR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        lastTicksL = shooterL.getCurrentPosition(); // TODO: CHANGE
+        lastTicksL = -shooterL.getCurrentPosition();
         lastTicksR = -shooterR.getCurrentPosition();
-        lastTime = System.nanoTime() / 1e9;
+
+        double now = System.nanoTime() / 1e9;
+        lastVelocityTime = now;
+        lastControlTime = now;
     }
 
-    // ---------------- HOOD ----------------
+    // ---------------- TUNER CONTROL ----------------
 
-    public void setHoodAngle(double servoPos) {
-        servoPos = Range.clip(servoPos, HOOD_BOTTOM, HOOD_TOP);
-        hoodL.setPosition(servoPos);
-        hoodR.setPosition(servoPos);
+    // ONLY affects LEFT motor (important)
+    public void setRawPowerL(double power) {
+        useExternalControl = true;
+        shooterL.setPower(-power);
     }
 
-    public double getHoodAngle() {
-        return hoodL.getPosition();
+    // Optional (kept for compatibility)
+    public void setRawPower(double power) {
+        useExternalControl = true;
+        shooterL.setPower(-power);
+        shooterR.setPower(-power);
     }
 
-    // ---------------- TARGET ----------------
+    // ---------------- UPDATE ----------------
 
-    public void setTargetVelocity(double radPerSec) {
-        this.targetVelocity = radPerSec;
-        stoppage = false;
-    }
+    public void update() {
 
-    public double getTargetVelocity() {
-        return targetVelocity;
+        updateVelocity();
+
+        if (useExternalControl) return;
+
+        double now = System.nanoTime() / 1e9;
+        double dt = now - lastControlTime;
+        lastControlTime = now;
+
+        double errorL = targetVelocity - smoothedVelocityL;
+        double errorR = targetVelocity - smoothedVelocityR;
+
+        // ---------- LEFT (TUNABLE) ----------
+        double ffL = kS + (kV * targetVelocity);
+        double dL = (dt > 0) ? (errorL - lastErrorL) / dt : 0;
+
+        double powerL = ffL + (kP * errorL) + (kD * dL);
+        lastErrorL = errorL;
+
+        // ---------- RIGHT (UNCHANGED) ----------
+        double powerR = (kVR * targetVelocity) + (kPR * errorR);
+
+        powerL = Range.clip(powerL, -0.2, 1.0);
+        powerR = Range.clip(powerR, 0.0, 1.0);
+
+        if (!stoppage) {
+            shooterL.setPower(-powerL);
+            shooterR.setPower(-powerR);
+        }
     }
 
     // ---------------- VELOCITY ----------------
 
     public void updateVelocity() {
-        double currentTime = System.nanoTime() / 1e9;
 
-        double currentTicksL = -shooterL.getCurrentPosition();
-        double currentTicksR = -shooterR.getCurrentPosition();
+        double now = System.nanoTime() / 1e9;
+        double dt = now - lastVelocityTime;
 
-        double deltaTime = currentTime - lastTime;
+        double ticksL = -shooterL.getCurrentPosition();
+        double ticksR = -shooterR.getCurrentPosition();
 
-        double velL = 0.0;
-        double velR = 0.0;
+        double velL = 0, velR = 0;
 
-        if (deltaTime > 0) {
-            velL = (currentTicksL - lastTicksL) / deltaTime * 2 * Math.PI / 28.0;
-            velR = (currentTicksR - lastTicksR) / deltaTime * 2 * Math.PI / 28.0;
+        if (dt > 0) {
+            velL = (ticksL - lastTicksL) / dt * 2 * Math.PI / 28.0;
+            velR = (ticksR - lastTicksR) / dt * 2 * Math.PI / 28.0;
         }
 
         velBufferL.addLast(velL);
@@ -120,129 +156,82 @@ public class Shooter {
         if (velBufferL.size() > BUFFER_SIZE) velBufferL.removeFirst();
         if (velBufferR.size() > BUFFER_SIZE) velBufferR.removeFirst();
 
-        smoothedVelocityL = velBufferL.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
-        smoothedVelocityR = velBufferR.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+        smoothedVelocityL = velBufferL.stream().mapToDouble(d -> d).average().orElse(0);
+        smoothedVelocityR = velBufferR.stream().mapToDouble(d -> d).average().orElse(0);
 
-        lastTicksL = currentTicksL;
-        lastTicksR = currentTicksR;
-        lastTime = currentTime;
+        lastTicksL = ticksL;
+        lastTicksR = ticksR;
+        lastVelocityTime = now;
     }
 
-    public double getVelocityL() {
-        return smoothedVelocityL;
-    }
+    // ---------------- GETTERS ----------------
 
-    public double getVelocityR() {
-        return smoothedVelocityR;
-    }
+    public double getVelocityL() { return smoothedVelocityL; }
+    public double getVelocityR() { return smoothedVelocityR; }
 
     public double getVelocityRadPerSec() {
-        return (smoothedVelocityL + smoothedVelocityR) / 2.0;
+        return (smoothedVelocityL + smoothedVelocityR) / 2.0; // kept for compatibility
     }
 
-    public double getVelocityRPM() {
-        return getVelocityRadPerSec() * 60.0 / (2.0 * Math.PI);
+    public double getPowerL() { return shooterL.getPower(); }
+    public double getPowerR() { return shooterR.getPower(); }
+
+    public double getTargetVelocity() { return targetVelocity; }
+
+    // ---------------- TARGET ----------------
+
+    public void setTargetVelocity(double v) {
+        targetVelocity = v + VEL_ADJUST;
+        useExternalControl = false;
+        stoppage = false;
     }
 
-    public double getPowerL() {
-        return shooterL.getPower();
-    }
-
-    public double getPowerR() {
-        return shooterR.getPower();
-    }
-
-    public boolean atTargetVelocity() {
-        return Math.abs(targetVelocity - smoothedVelocityL) <= THRESHOLD &&
-                Math.abs(targetVelocity - smoothedVelocityR) <= THRESHOLD;
-    }
-
-    // ---------------- CONTROL LOOP ----------------
-
-    public void update() {
-        updateVelocity();
-
-        double feedforwardL = (kVL * targetVelocity);
-        double feedforwardR = (kVR * targetVelocity);
-
-        double errorL = targetVelocity - smoothedVelocityL;
-        double errorR = targetVelocity - smoothedVelocityR;
-
-        double powerL = feedforwardL + (kPL * errorL);
-        double powerR = feedforwardR + (kPR * errorR);
-
-        powerL = Range.clip(powerL, 0, 1.0);
-        powerR = Range.clip(powerR, 0, 1.0);
-
-        if (!stoppage) {
-            shooterL.setPower(-powerL);
-            shooterR.setPower(-powerR);
-        }
-    }
+    // ---------------- STOP ----------------
 
     public void stop() {
         stoppage = true;
-        shooterL.setPower(0.0);
-        shooterR.setPower(0.0);
+        shooterL.setPower(0);
+        shooterR.setPower(0);
     }
 
-    // ---------------- AIMING ----------------
+    // ---------------- HOOD + AIM ----------------
 
-    public void aimToGoal(Pose2D targetGoal, Pose2D currentPose) {
-        stoppage = false;
-
-        double a = 3.02129 * Math.pow(10, -8);
-        double b = 2.27752;
-        double c = 186.32838;
-
-        double tx = targetGoal.getX(DistanceUnit.INCH);
-        double ty = targetGoal.getY(DistanceUnit.INCH);
-        double x = currentPose.getX(DistanceUnit.INCH);
-        double y = currentPose.getY(DistanceUnit.INCH);
-
-        double dx = tx - x;
-        double dy = ty - y;
-        double distance = Math.sqrt(dx * dx + dy * dy);
-
-        double targetVel = (a * Math.pow(distance, 4)) + (b * distance) + c;
-
-        targetVel += velocityModifier;
-        targetVel = Range.clip(targetVel, MIN_VELOCITY, MAX_VELOCITY);
-
-        setTargetVelocity(targetVel);
-        angleHood(targetVel);
+    public void setHoodAngle(double pos) {
+        pos = Range.clip(pos, HOOD_BOTTOM, HOOD_TOP);
+        hoodL.setPosition(pos);
+        hoodR.setPosition(pos);
     }
 
-    // ---------------- HOOD INTERPOLATION ----------------
+    public double getHoodAngle() {
+        return hoodL.getPosition();
+    }
 
-    public void angleHood(double currentVelocity) {
+    public void angleHood(double v) {
+        double[] xs = {290,325,340,355,365,400,430,455,470};
+        double[] ys = {0.07,0.25,0.39,0.38,0.36,0.39,0.45,0.42,0.35};
 
-        double[] xs = {320, 345, 370, 395, 430, 440, 500, 520, 555, 560};
-        double[] ys = {0.79, 0.70, 0.57, 0.38, 0.37, 0.21, 0.17, 0.15, 0.39, 0.41};
-
-        double targetHoodAngle;
-
-        if (currentVelocity <= xs[0]) {
-            targetHoodAngle = ys[0];
-        } else if (currentVelocity >= xs[xs.length - 1]) {
-            targetHoodAngle = ys[ys.length - 1];
-        } else {
-            targetHoodAngle = ys[0];
-
-            for (int i = 0; i < xs.length - 1; i++) {
-                if (currentVelocity >= xs[i] && currentVelocity <= xs[i + 1]) {
-                    double x1 = xs[i];
-                    double x2 = xs[i + 1];
-                    double y1 = ys[i];
-                    double y2 = ys[i + 1];
-
-                    targetHoodAngle = y1 + (currentVelocity - x1) * (y2 - y1) / (x2 - x1);
-                    break;
-                }
+        double target = ys[0];
+        for (int i = 0; i < xs.length - 1; i++) {
+            if (v >= xs[i] && v <= xs[i+1]) {
+                double t = (v - xs[i])/(xs[i+1]-xs[i]);
+                target = ys[i] + t*(ys[i+1]-ys[i]);
+                break;
             }
         }
+        setHoodAngle(target);
+    }
 
-        targetHoodAngle = Range.clip(targetHoodAngle, HOOD_TOP, HOOD_BOTTOM);
-        setHoodAngle(targetHoodAngle);
+    public void aimToGoal(Pose2D goal, Pose2D pose) {
+        double dx = goal.getX(DistanceUnit.INCH) - pose.getX(DistanceUnit.INCH);
+        double dy = goal.getY(DistanceUnit.INCH) - pose.getY(DistanceUnit.INCH);
+
+        double d = Math.sqrt(dx*dx + dy*dy);
+
+        double v = (9.0484E-8*Math.pow(d,4)) + (1.20615*d) + 247.36231;
+
+        v = Range.clip(v + velocityModifier, MIN_VELOCITY, MAX_VELOCITY);
+
+        setTargetVelocity(v);
+        angleHood(v);
     }
 }
