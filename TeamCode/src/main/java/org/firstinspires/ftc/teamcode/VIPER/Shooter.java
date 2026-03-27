@@ -44,6 +44,18 @@ public class Shooter {
 
     public static final double THRESHOLD = 15;
 
+    // ---------------- NEW: VELOCITY LOOKUP TABLE ----------------
+
+    private final double[] DISTANCES = {44, 55, 67, 89.75, 98, 114, 127, 140, 150};
+    private final double[] VELOCITIES = {290, 325, 340, 355, 365, 400, 430, 455, 470};
+
+    // Zone control
+    public double Y_THRESHOLD = 0; // tune this
+    public double CLOSE_MIN = 250;
+    public double CLOSE_MAX = 380;
+    public double FAR_MIN = 390;
+    public double FAR_MAX = 500;
+
     // ---------------- VELOCITY ----------------
 
     private final Deque<Double> velBufferL = new ArrayDeque<>();
@@ -86,13 +98,11 @@ public class Shooter {
 
     // ---------------- TUNER CONTROL ----------------
 
-    // ONLY affects LEFT motor (important)
     public void setRawPowerL(double power) {
         useExternalControl = true;
         shooterL.setPower(-power);
     }
 
-    // Optional (kept for compatibility)
     public void setRawPower(double power) {
         useExternalControl = true;
         shooterL.setPower(-power);
@@ -114,14 +124,14 @@ public class Shooter {
         double errorL = targetVelocity - smoothedVelocityL;
         double errorR = targetVelocity - smoothedVelocityR;
 
-        // ---------- LEFT (TUNABLE) ----------
+        // LEFT
         double ffL = kS + (kV * targetVelocity);
         double dL = (dt > 0) ? (errorL - lastErrorL) / dt : 0;
 
         double powerL = ffL + (kP * errorL) + (kD * dL);
         lastErrorL = errorL;
 
-        // ---------- RIGHT (UNCHANGED) ----------
+        // RIGHT
         double powerR = (kVR * targetVelocity) + (kPR * errorR);
 
         powerL = Range.clip(powerL, -0.2, 1.0);
@@ -170,7 +180,7 @@ public class Shooter {
     public double getVelocityR() { return smoothedVelocityR; }
 
     public double getVelocityRadPerSec() {
-        return (smoothedVelocityL + smoothedVelocityR) / 2.0; // kept for compatibility
+        return (smoothedVelocityL + smoothedVelocityR) / 2.0;
     }
 
     public double getPowerL() { return shooterL.getPower(); }
@@ -194,7 +204,7 @@ public class Shooter {
         shooterR.setPower(0);
     }
 
-    // ---------------- HOOD + AIM ----------------
+    // ---------------- HOOD ----------------
 
     public void setHoodAngle(double pos) {
         pos = Range.clip(pos, HOOD_BOTTOM, HOOD_TOP);
@@ -221,15 +231,44 @@ public class Shooter {
         setHoodAngle(target);
     }
 
+    // ---------------- NEW: INTERPOLATION ----------------
+
+    private double interpolateVelocity(double d) {
+
+        if (d <= DISTANCES[0]) return VELOCITIES[0];
+        if (d >= DISTANCES[DISTANCES.length - 1]) return VELOCITIES[VELOCITIES.length - 1];
+
+        for (int i = 0; i < DISTANCES.length - 1; i++) {
+            if (d >= DISTANCES[i] && d <= DISTANCES[i + 1]) {
+
+                double t = (d - DISTANCES[i]) / (DISTANCES[i + 1] - DISTANCES[i]);
+                return VELOCITIES[i] + t * (VELOCITIES[i + 1] - VELOCITIES[i]);
+            }
+        }
+
+        return VELOCITIES[0];
+    }
+
+    // ---------------- AIM ----------------
+
     public void aimToGoal(Pose2D goal, Pose2D pose) {
+
         double dx = goal.getX(DistanceUnit.INCH) - pose.getX(DistanceUnit.INCH);
         double dy = goal.getY(DistanceUnit.INCH) - pose.getY(DistanceUnit.INCH);
 
-        double d = Math.sqrt(dx*dx + dy*dy);
+        double d = Math.sqrt(dx * dx + dy * dy);
 
-        double v = (9.0484E-8*Math.pow(d,4)) + (1.20615*d) + 247.36231;
+        double v = interpolateVelocity(d);
 
-        v = Range.clip(v + velocityModifier, MIN_VELOCITY, MAX_VELOCITY);
+        double robotY = pose.getY(DistanceUnit.INCH);
+
+        if (robotY < Y_THRESHOLD) {
+            v = Range.clip(v, FAR_MIN, FAR_MAX);
+        } else {
+            v = Range.clip(v, CLOSE_MIN, CLOSE_MAX);
+        }
+
+        v += velocityModifier;
 
         setTargetVelocity(v);
         angleHood(v);

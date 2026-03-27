@@ -64,7 +64,7 @@ public class VIPERTELEOP extends OpMode {
         robot.drivetrain.driveTeleOp(strafe, drive, turn);
 
 
-        robot.turret.HEIGHT_OFFSET = 2 / robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
+        robot.turret.HEIGHT_OFFSET = ((double) 3 / 72) * robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
         // Intake & Arms
         if (gamepad1.left_bumper) {
             trigger = false;
@@ -176,6 +176,8 @@ public class VIPERTELEOP extends OpMode {
         telemetry.addData("Target Velocity:", robot.shooter.getTargetVelocity());
         telemetry.addData("CUR VEL MAIN:", robot.shooter.getVelocityL());
         telemetry.addData("CUR VEL ROLLERS:", robot.shooter.getVelocityR());
+        telemetry.addData("VEL ADJUST:", robot.shooter.VEL_ADJUST);
+        telemetry.addData("ANGLE ADJUST:", robot.turret.ANGLE_ADJUST);
         telemetry.addLine();
         //  telemetry.addData("kPL:", robot.shooter.kPL);
         //     telemetry.addData("kVL:", robot.shooter.kVL);
