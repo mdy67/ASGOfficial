@@ -16,6 +16,7 @@ public class Robot {
     public Drivetrain drivetrain;
     public Linkage linkage;
     public Shooter shooter;
+    public LEDs leds;
 
 
     /*
@@ -27,6 +28,7 @@ public class Robot {
 
     public Robot(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
+        leds = new LEDs(hardwareMap);
         linkage = new Linkage(hardwareMap);
         turret = new Turret(hardwareMap);
         intake = new Intake(hardwareMap);
@@ -37,9 +39,9 @@ public class Robot {
 
     public void getTargetGoal() {
         if (alliance.isBlue()) {
-            targetGoal = new Pose2D(DistanceUnit.INCH, 63, 63, AngleUnit.DEGREES, 0);
-        } else {
             targetGoal = new Pose2D(DistanceUnit.INCH, -63, 63, AngleUnit.DEGREES, 0);
+        } else {
+            targetGoal = new Pose2D(DistanceUnit.INCH, 63, 63, AngleUnit.DEGREES, 0);
         }
     }
 
@@ -50,6 +52,13 @@ public class Robot {
 
     public void update(int turretState) {
       //  intake.update();
+        if (shooter.atVelocity() && !shooter.shooting && drivetrain.inZone()) {
+            leds.setOneColor(0.48);
+        } else if (shooter.shooting) {
+            leds.setOneColor(0.29);
+        } else {
+            leds.setOneColor(0);
+        }
         getTargetGoal();
         drivetrain.update();
         sotm.update(drivetrain.robotPose, targetGoal, drivetrain.XVel(), drivetrain.YVel());
@@ -57,6 +66,7 @@ public class Robot {
         if (turretState == 1) {
             turret.state = Turret.State.SOTM;
             turret.update(drivetrain.robotPose, sotm.virtualGoal, drivetrain.TVel());
+            shooter.aimToGoal(sotm.virtualGoal, drivetrain.robotPose);
         } else if (turretState == 2) {
             turret.state = Turret.State.TRACKING;
             turret.update(drivetrain.robotPose, targetGoal, drivetrain.TVel());

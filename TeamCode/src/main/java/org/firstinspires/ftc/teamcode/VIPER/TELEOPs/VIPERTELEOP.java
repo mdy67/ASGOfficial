@@ -36,13 +36,13 @@ public class VIPERTELEOP extends OpMode {
 
         // === DASHBOARD TELEMETRY (ADDED) ===
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        FtcDashboard.getInstance().setTelemetryTransmissionInterval(25); // smoother live graphs
+    //    FtcDashboard.getInstance().setTelemetryTransmissionInterval(25); // smoother live graphs
 
-        robot.update(3); // 0 = IDLE
+        robot.update(0); // 0 = IDLE
         telemetry.addLine("Robot initialized. Waiting for start...");
         telemetry.update();
-
-        alliance.set(alliance.Color.BLUE);
+    // TODO: CHANGE
+        alliance.set(alliance.Color.RED);
 
     }
 
@@ -70,12 +70,16 @@ public class VIPERTELEOP extends OpMode {
             trigger = false;
             robot.intake.setPower(-1);
             robot.linkage.ON();
+            if (robot.intake.current() >= 5.9) {
+                gamepad1.rumble(80);
+            }
         } else if (gamepad1.right_bumper) {
             robot.linkage.OFF();
             if (!trigger) {
                 timer.reset();
                 trigger = true;
             }
+            robot.shooter.shooting = true;
             robot.intake.setPower(Range.clip(-1 + (timer.seconds() * kTime), -1, -0.76));
 
         } else if (gamepad1.a) {
@@ -86,6 +90,7 @@ public class VIPERTELEOP extends OpMode {
             trigger = false;
             robot.intake.setPower(0);
             robot.linkage.ON();
+            robot.shooter.shooting = false;
         }
 
         /*
@@ -150,11 +155,20 @@ public class VIPERTELEOP extends OpMode {
         }
 
          */
-        robot.update(2);
+        robot.update(1);
+        /*
+            SOTM
+            TRACKING
+            FIXED
+            IDLE
+
+         */
         /*
         robot.shooter.setTargetVelocity(targetVel);
 
          */
+
+   //     if (robot.shooter.atVelocity() && robot.drivetrain.inZone()) { gamepad1.rumble(100); }
 
         if (gamepad1.b) {
             robot.drivetrain.setPosition(-63, -60, 0);

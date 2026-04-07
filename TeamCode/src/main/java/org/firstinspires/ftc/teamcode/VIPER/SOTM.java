@@ -14,10 +14,10 @@ public class SOTM {
      * @param XVel
      * @param YVel
      */
-    private double kXClose = 0.8;
-    private double kYClose = 0.8;
-    private double kXFar = 1.1;
-    private double kYFar = 1.1;
+    private double kXClose = 1.4;
+    private double kYClose = 1.4;
+    private double kXFar = 1.2;
+    private double kYFar = 1.2;
 
     private double farZoneMax = -24; // above this it will be close zone SOTM
 

@@ -37,6 +37,8 @@ public class Shooter {
 
     private double targetVelocity = 0.0;
 
+    public double MAIN_TOLERANCE = 20;
+
     public double velocityModifier = 0.0;
     public double MIN_VELOCITY = 210;
     public double MAX_VELOCITY = 800;
@@ -47,7 +49,7 @@ public class Shooter {
     // ---------------- NEW: VELOCITY LOOKUP TABLE ----------------
 
     private final double[] DISTANCES = {44, 55, 67, 89.75, 98, 114, 127, 140, 150};
-    private final double[] VELOCITIES = {290, 325, 340, 355, 365, 400, 430, 455, 470};
+    private final double[] VELOCITIES = {290, 325, 340, 355, 365, 415, 430, 485, 520};
 
     // Zone control
     public double Y_THRESHOLD = 0; // tune this
@@ -68,6 +70,8 @@ public class Shooter {
     private double lastTicksL = 0.0;
     private double lastTicksR = 0.0;
     private double lastVelocityTime = 0.0;
+
+    public boolean shooting = false;
 
     boolean stoppage = false;
 
@@ -101,6 +105,10 @@ public class Shooter {
     public void setRawPowerL(double power) {
         useExternalControl = true;
         shooterL.setPower(-power);
+    }
+
+    public boolean atVelocity() {
+        return (getVelocityL() - targetVelocity) <= MAIN_TOLERANCE;
     }
 
     public void setRawPower(double power) {
@@ -217,8 +225,8 @@ public class Shooter {
     }
 
     public void angleHood(double v) {
-        double[] xs = {290,325,340,355,365,400,430,455,470};
-        double[] ys = {0.07,0.25,0.39,0.38,0.36,0.39,0.45,0.42,0.35};
+        double[] xs = VELOCITIES;
+        double[] ys = {0.07,0.23,0.38,0.37,0.35,0.38,0.44,0.40,0.34, 0.33, 0.32};
 
         double target = ys[0];
         for (int i = 0; i < xs.length - 1; i++) {

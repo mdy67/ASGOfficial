@@ -148,7 +148,7 @@ public class Turret {
 
         // 🔥 HARD LIMITS (no wrap allowed past this point)
         double min = 55;
-        double max = 315;
+        double max = 300;
 
         if (fieldAngle > max) {
             fieldAngle = max;

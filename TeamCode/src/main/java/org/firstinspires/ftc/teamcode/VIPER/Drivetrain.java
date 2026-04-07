@@ -59,7 +59,7 @@ public class Drivetrain {
 
 
 
-        pinpoint.setOffsets(16, -120.015, DistanceUnit.MM); // TODO: TUNED AS OF 3/21/2026
+        pinpoint.setOffsets(-10, -118.415, DistanceUnit.MM); // TODO: TUNED AS OF 3/21/2026
 
 
 
@@ -70,6 +70,11 @@ public class Drivetrain {
         pinpoint.resetPosAndIMU();
     }
 
+
+    public boolean inZone() {
+        return Math.hypot(robotPose.getX(DistanceUnit.INCH), robotPose.getY(DistanceUnit.INCH) + 72) <= 33 ||
+                Math.hypot(robotPose.getX(DistanceUnit.INCH), robotPose.getY(DistanceUnit.INCH) - 72) <= 78;
+    }
 
     // -------------------------
     //  POSE / MOVEMENT TOOLS
@@ -105,6 +110,8 @@ public class Drivetrain {
         teleopForward = forward;
         teleopTurn = turn;
     }
+
+
 
 
     // -------------------------

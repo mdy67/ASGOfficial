@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.GEN4.Teleops;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -12,7 +13,7 @@ import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.OLDRobot;
 
 import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.OLDDrivetrain;
 import org.firstinspires.ftc.teamcode.VIPER.alliance;
-
+@Disabled
 @TeleOp(name = "GEN4 TeleOp", group = "GEN4")
 public class GEN4Teleop extends OpMode {
 
