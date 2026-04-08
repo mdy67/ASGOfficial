@@ -64,7 +64,6 @@ public class VIPERTELEOP extends OpMode {
         robot.drivetrain.driveTeleOp(strafe, drive, turn);
 
 
-        robot.turret.HEIGHT_OFFSET = ((double) 3 / 72) * robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
         // Intake & Arms
         if (gamepad1.left_bumper) {
             trigger = false;

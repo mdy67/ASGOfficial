@@ -44,7 +44,7 @@ public class Shooter {
     public double MAX_VELOCITY = 800;
     public double VEL_ADJUST = 0;
 
-    public static final double THRESHOLD = 15;
+    public static final double THRESHOLD = 10;
 
     // ---------------- NEW: VELOCITY LOOKUP TABLE ----------------
 

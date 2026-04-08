@@ -47,7 +47,7 @@ public class Turret {
     private double targetAngle = 0;
 
     public double ANGLE_ADJUST = 0;
-    public double BLUE_OFFSET = 0;
+    public double BLUE_OFFSET = 6.5;
     public double RED_OFFSET = 0;
     public double HEIGHT_OFFSET = 0;
 

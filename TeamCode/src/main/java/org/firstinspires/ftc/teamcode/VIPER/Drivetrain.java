@@ -128,23 +128,20 @@ public class Drivetrain {
     public double YVel() { return pinpoint.getVelY(DistanceUnit.INCH); }
     public double TVel() { return pinpoint.getHeadingVelocity(UnnormalizedAngleUnit.RADIANS); }
 
+    // REPLACE your goToPoint method with this:
+
     public void goToPoint(Pose2D targetPoint, double maxPower, double xyThreshold, double hThreshold) {
-        if (targetPoint != lastTarget) {
-            xShutoff = false;
-            yShutoff = false;
-            tShutoff = false;
-            targetPose = targetPoint;
-            lastTarget = targetPose;
 
-            targetX = targetPose.getX(DistanceUnit.INCH);
-            targetY = targetPose.getY(DistanceUnit.INCH);
-            targetT = Math.toRadians(targetPose.getHeading(AngleUnit.DEGREES));
+        // ALWAYS update target (fixes your original bug)
+        targetPose = targetPoint;
 
-            this.maxPower = maxPower;
+        targetX = targetPose.getX(DistanceUnit.INCH);
+        targetY = targetPose.getY(DistanceUnit.INCH);
+        targetT = Math.toRadians(targetPose.getHeading(AngleUnit.DEGREES));
 
-            this.xyThreshold = xyThreshold;
-            this.hThreshold = hThreshold;
-        }
+        this.maxPower = maxPower;
+        this.xyThreshold = xyThreshold;
+        this.hThreshold = hThreshold;
     }
 
 
@@ -156,6 +153,8 @@ public class Drivetrain {
 
     public boolean atX, atY, atT;
 
+    // ... unchanged parts above ...
+
     public void getErrors() {
         double heading = robotPose.getHeading(AngleUnit.RADIANS);
         tError = Utils.headingClip(targetT - heading);
@@ -166,7 +165,7 @@ public class Drivetrain {
         yError = globalYerror * Math.cos(heading) - globalXerror * Math.sin(heading);
 
         atX = (Math.abs(xError) <= xyThreshold / 2);
-        atY = (Math.abs(xError) <= xyThreshold / 2);
+        atY = (Math.abs(yError) <= xyThreshold / 2); // FIXED
         atT = (Math.abs(tError) <= hThreshold);
     }
 
