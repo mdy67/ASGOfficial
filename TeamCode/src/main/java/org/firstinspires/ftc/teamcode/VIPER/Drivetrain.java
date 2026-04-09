@@ -173,12 +173,12 @@ public class Drivetrain {
         return ((Math.abs(xError) + Math.abs(yError)) <= xyThreshold && Math.abs(tError) < hThreshold);
     }
 
-    public static final double xkP = 0.08;
+    public static final double xkP = 0.06;
     public static final double xkD = 0.01;
-    public static final double ykP = 0.07;
+    public static final double ykP = 0.1;
     public static final double ykD = 0.01;
-    public static final double tkP = 0.14;
-    public static final double tkD = 0.03;
+    public static final double tkP = 0.2;
+    public static final double tkD = 0.02;
 
     DTPID xPID = new DTPID(xkP,xkD);
     DTPID yPID = new DTPID(ykP, ykD);
