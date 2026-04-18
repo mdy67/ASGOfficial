@@ -59,7 +59,7 @@ public class Drivetrain {
 
 
 
-        pinpoint.setOffsets(-10, -118.415, DistanceUnit.MM); // TODO: TUNED AS OF 3/21/2026
+        pinpoint.setOffsets(16, -120.054, DistanceUnit.MM); // TODO: TUNED AS OF 3/21/2026
 
 
 
@@ -72,7 +72,7 @@ public class Drivetrain {
 
 
     public boolean inZone() {
-        return Math.hypot(robotPose.getX(DistanceUnit.INCH), robotPose.getY(DistanceUnit.INCH) + 72) <= 33 ||
+        return Math.hypot(robotPose.getX(DistanceUnit.INCH), robotPose.getY(DistanceUnit.INCH) + 72) <= 35 ||
                 Math.hypot(robotPose.getX(DistanceUnit.INCH), robotPose.getY(DistanceUnit.INCH) - 72) <= 78;
     }
 

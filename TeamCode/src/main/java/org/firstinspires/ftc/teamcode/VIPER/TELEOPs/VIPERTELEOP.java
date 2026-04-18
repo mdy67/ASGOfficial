@@ -11,6 +11,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.OLDs.CONFIG.RobotConfig;
 import org.firstinspires.ftc.teamcode.VIPER.Robot;
 import org.firstinspires.ftc.teamcode.VIPER.alliance;
 
@@ -42,7 +43,7 @@ public class VIPERTELEOP extends OpMode {
         telemetry.addLine("Robot initialized. Waiting for start...");
         telemetry.update();
     // TODO: CHANGE
-        alliance.set(alliance.Color.RED);
+    //    alliance.set(alliance.Color.BLUE);
 
     }
 
@@ -124,7 +125,9 @@ public class VIPERTELEOP extends OpMode {
         } else if (gamepad1.dpad_left) {
             robot.turret.ANGLE_ADJUST += 1;
         }
-        /*
+
+
+/*
 
         if (gamepad1.y) {
             tempHoodAngle += 0.01;
@@ -134,7 +137,9 @@ public class VIPERTELEOP extends OpMode {
         robot.shooter.setHoodAngle(tempHoodAngle);
 
 
-         */
+ */
+
+
         /*
         if (gamepad1.right_trigger > 0.1) {
             robot.intake.kV += 0.0001;
@@ -154,6 +159,12 @@ public class VIPERTELEOP extends OpMode {
         }
 
          */
+        /*
+        robot.shooter.setHoodAngle(tempHoodAngle);
+        robot.shooter.setTargetVelocity(targetVel);
+        robot.update(4);
+
+        */
         robot.update(1);
         /*
             SOTM
@@ -170,7 +181,12 @@ public class VIPERTELEOP extends OpMode {
    //     if (robot.shooter.atVelocity() && robot.drivetrain.inZone()) { gamepad1.rumble(100); }
 
         if (gamepad1.b) {
-            robot.drivetrain.setPosition(-63, -60, 0);
+            if (alliance.isBlue()) {
+                robot.drivetrain.setPosition(63, -60, 180);
+            } else {
+                robot.drivetrain.setPosition(-63, -60, 0);
+            }
+
         }
 
         // Distance to goal

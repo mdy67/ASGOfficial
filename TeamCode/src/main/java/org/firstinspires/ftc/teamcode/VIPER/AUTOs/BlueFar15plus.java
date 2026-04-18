@@ -9,8 +9,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.*;
 import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.AutoToTeleop;
 import org.firstinspires.ftc.teamcode.VIPER.*;
 
-@Autonomous(name= "Blue Far Zone", group = "GEN4")
-public class BlueFarZone extends LinearOpMode {
+@Autonomous(name= "Blue Far 15plus", group = "GEN4")
+public class BlueFar15plus extends LinearOpMode {
 
     private Robot robot;
 
@@ -33,6 +33,7 @@ public class BlueFarZone extends LinearOpMode {
         CORNER_INTAKES,
         CORNER_INTAKES_2,
         THIRD_SPIKE,
+        SECOND_SPIKE,
         OFF_LINE_POS
     }
 
@@ -151,11 +152,11 @@ public class BlueFarZone extends LinearOpMode {
                             } else if (goonCounter == 1) {
                                 state = State.THIRD_SPIKE;
                             } else if (goonCounter == 2) {
-                                state = State.CORNER_INTAKES;
+                                state = State.SECOND_SPIKE;
                             } else if (goonCounter == 3) {
-                                state = State.CORNER_INTAKES;
-                            } else if (goonCounter == 4) {
                                 state = State.CORNER_INTAKES_2;
+                            } else if (goonCounter == 4) {
+                                state = State.CORNER_INTAKES;
                             } else if (goonCounter == 5) {
                                 state = State.CORNER_INTAKES;
                             } else if (goonCounter == 6) {
@@ -192,9 +193,9 @@ public class BlueFarZone extends LinearOpMode {
 
                 } else if (splineCounter == 1) {
 
-                        splineCounter = 0;
-                        dtStallTimer.reset();
-                        state = State.SHOOTING_POSE_1;
+                    splineCounter = 0;
+                    dtStallTimer.reset();
+                    state = State.SHOOTING_POSE_1;
                 }
 
                 break;
@@ -214,7 +215,7 @@ public class BlueFarZone extends LinearOpMode {
                     }
 
                     robot.goToPoint(
-                            new Pose2D(DistanceUnit.INCH, -50, -35, AngleUnit.DEGREES, 180),
+                            new Pose2D(DistanceUnit.INCH, -50, -55, AngleUnit.DEGREES, 180),
                             1, 5, 0.25
                     );
 
@@ -229,7 +230,7 @@ public class BlueFarZone extends LinearOpMode {
                 } else if (splineCounter == 1) {
 
                     robot.goToPoint(
-                            new Pose2D(DistanceUnit.INCH, -66, -35, AngleUnit.DEGREES, 180),
+                            new Pose2D(DistanceUnit.INCH, -66, -55, AngleUnit.DEGREES, 180),
                             1, 3, 0.25
                     );
 
@@ -274,6 +275,65 @@ public class BlueFarZone extends LinearOpMode {
                     );
 
                     if (robot.drivetrain.DTatTarget() && dtStallTimer.seconds() > 0.5 || dtStallTimer.seconds() > 1.5) {
+                        splineCounter = 0;
+                        dtStallTimer.reset();
+                        state = State.SHOOTING_POSE_1;
+                    }
+                }
+
+                break;
+
+            case SECOND_SPIKE:
+
+                robot.intake.setPower(-1);
+                robot.linkage.ON();
+                if (splineCounter == 0) {
+
+                    if (dtStallTimer.seconds() == 0) {
+                        dtStallTimer.reset(); // ensure started once
+                    }
+
+                    robot.goToPoint(
+                            new Pose2D(DistanceUnit.INCH, -48, -24, AngleUnit.DEGREES, 90),
+                            1, 3, 0.08
+                    );
+
+                    // 🔒 REQUIRE MIN TIME BEFORE ALLOWING TRANSITION
+                    if ((robot.drivetrain.DTatTarget() && dtStallTimer.seconds() > 0.2)
+                            || dtStallTimer.seconds() > 1.0) {
+
+                        splineCounter = 1;
+                        dtStallTimer.reset();
+                    }
+
+                } else if (splineCounter == 1) {
+
+                    if (dtStallTimer.seconds() == 0) {
+                        dtStallTimer.reset(); // ensure started once
+                    }
+
+                    robot.goToPoint(
+                            new Pose2D(DistanceUnit.INCH, -43, -2, AngleUnit.DEGREES, 90),
+                            1, 3, 0.15
+                    );
+
+                    // 🔒 REQUIRE MIN TIME BEFORE ALLOWING TRANSITION
+                    if ((robot.drivetrain.DTatTarget() && dtStallTimer.seconds() > 0.2)
+                            || dtStallTimer.seconds() > 1.0) {
+
+                        splineCounter = 1;
+                        dtStallTimer.reset();
+                    }
+
+                } else if (splineCounter == 2) {
+                    robot.intake.setPower(0);
+
+                    robot.goToPoint(
+                            new Pose2D(DistanceUnit.INCH, -48, -2, AngleUnit.DEGREES, 90),
+                            1, 2, 0.08
+                    );
+
+                    if (robot.drivetrain.DTatTarget() && dtStallTimer.seconds() > 0.2 || dtStallTimer.seconds() > 0.75) {
                         splineCounter = 0;
                         dtStallTimer.reset();
                         state = State.SHOOTING_POSE_1;

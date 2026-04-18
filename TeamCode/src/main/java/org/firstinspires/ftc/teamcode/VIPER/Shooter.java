@@ -44,12 +44,12 @@ public class Shooter {
     public double MAX_VELOCITY = 800;
     public double VEL_ADJUST = 0;
 
-    public static final double THRESHOLD = 7;
+    public static final double THRESHOLD = 10;
 
     // ---------------- NEW: VELOCITY LOOKUP TABLE ----------------
 
-    private final double[] DISTANCES = {44, 55, 67, 89.75, 98, 114, 127, 140, 150};
-    private final double[] VELOCITIES = {290, 325, 340, 355, 365, 415, 430, 485, 520};
+    private final double[] DISTANCES = {40, 45, 58.3, 72.97, 90, 109.6, 125.9, 135.3, 142};
+    private final double[] VELOCITIES = {264, 296, 308, 324, 348, 384, 392, 420, 480};
 
     // Zone control
     public double Y_THRESHOLD = 0; // tune this
@@ -226,7 +226,7 @@ public class Shooter {
 
     public void angleHood(double v) {
         double[] xs = VELOCITIES;
-        double[] ys = {0.07,0.23,0.38,0.37,0.35,0.38,0.44,0.40,0.34, 0.33, 0.32};
+        double[] ys = {0.025, 0.21, 0.31, 0.38, 0.46, 0.46, 0.45, 0.45, 0.41};
 
         double target = ys[0];
         for (int i = 0; i < xs.length - 1; i++) {

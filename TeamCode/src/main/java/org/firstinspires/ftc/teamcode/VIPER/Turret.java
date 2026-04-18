@@ -41,13 +41,13 @@ public class Turret {
     private double zeroServoPos = 0.0566; // no longer used for output
 
     private double currentTicks = 0;
-    private final double TOLERANCE_DEGS = 5;
+    private final double TOLERANCE_DEGS = 10;
     private double TOLERANCE_TICKS = (REVCODER_SCALE / TOTALDEGS) * TOLERANCE_DEGS;
 
     private double targetAngle = 0;
 
     public double ANGLE_ADJUST = 0;
-    public double BLUE_OFFSET = 8.5;
+    public double BLUE_OFFSET = 5.8;
     public double RED_OFFSET = 0;
     public double HEIGHT_OFFSET = 0;
 
@@ -56,6 +56,8 @@ public class Turret {
 
     private double tgtServoPos = 0;
     private double currentDegs = 0;
+
+    public double offset = 0.0;
 
     public Turret(HardwareMap hardwareMap) {
         turret1 = hardwareMap.get(Servo.class, "turret1");
@@ -106,9 +108,9 @@ public class Turret {
     }
 
     private void setServoPos(double pos) {
-        turret1.setPosition(pos);
+        turret1.setPosition(pos - offset);
         turret2.setPosition(pos);
-        turret3.setPosition(pos);
+        turret3.setPosition(pos + offset);
     }
 
     // ---------------- NEW CORRECT MAPPING ----------------
@@ -157,7 +159,7 @@ public class Turret {
         }
 
         // NO more normalization or wrap logic after this
-        setAngle(fieldAngle + ANGLE_ADJUST + (alliance.isBlue() ? BLUE_OFFSET : RED_OFFSET) + HEIGHT_OFFSET);
+        setAngle(fieldAngle + ANGLE_ADJUST + (alliance.isBlue() ? BLUE_OFFSET + HEIGHT_OFFSET : RED_OFFSET - HEIGHT_OFFSET));
     }
 
     // ---------------- DEBUG ----------------

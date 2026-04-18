@@ -43,9 +43,9 @@ public class Robot {
 
     public void getTargetGoal() {
         if (alliance.isBlue()) {
-            targetGoal = new Pose2D(DistanceUnit.INCH, -63, 63, AngleUnit.DEGREES, 0);
+            targetGoal = new Pose2D(DistanceUnit.INCH, -65, 72, AngleUnit.DEGREES, 0);
         } else {
-            targetGoal = new Pose2D(DistanceUnit.INCH, 63, 63, AngleUnit.DEGREES, 0);
+            targetGoal = new Pose2D(DistanceUnit.INCH, 65, 72, AngleUnit.DEGREES, 0);
         }
     }
 
@@ -110,14 +110,19 @@ public class Robot {
 
     public void update(int turretState) {
         if (shooter.atVelocity() && !shooter.shooting && drivetrain.inZone()) {
-            leds.setOneColor(0.48);
+            if (alliance.isBlue()) {
+                leds.setOneColor(0.611);
+            } else {
+                leds.setOneColor(0.28);
+            }
+
         } else if (shooter.shooting) {
-            leds.setOneColor(0.29);
+            leds.setOneColor(0.500);
         } else {
             leds.setOneColor(0);
         }
 
-        turret.HEIGHT_OFFSET = ((double) 3 / 72) * drivetrain.robotPose.getY(DistanceUnit.INCH);
+        turret.HEIGHT_OFFSET = ((double) 2 / 72) * drivetrain.robotPose.getY(DistanceUnit.INCH);
 
         getTargetGoal();
         drivetrain.update();
@@ -136,10 +141,11 @@ public class Robot {
         } else if (turretState == 3) {
             turret.state = Turret.State.FIXED;
             turret.update(drivetrain.robotPose, targetGoal, drivetrain.TVel());
+            shooter.aimToGoal(targetGoal, drivetrain.robotPose);
         } else {
             turret.state = Turret.State.IDLE;
             turret.update(drivetrain.robotPose, targetGoal, drivetrain.TVel());
-            shooter.aimToGoal(targetGoal, drivetrain.robotPose);
+          //  shooter.aimToGoal(targetGoal, drivetrain.robotPose);
         }
     }
 }
