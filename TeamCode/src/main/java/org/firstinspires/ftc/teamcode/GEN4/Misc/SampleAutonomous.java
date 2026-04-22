@@ -21,7 +21,7 @@ public class SampleAutonomous extends LinearOpMode {
         INITIALIZED,
         START_POSE,
         SHOOTING_POSE_1,
-        CORNER_INTAKES,
+        TOP_SPIKE,
         POINT_3,
         POINT_4,
         OFFLINE,
@@ -95,10 +95,10 @@ public class SampleAutonomous extends LinearOpMode {
                 robot.differential.aimToGoal(robot.drivetrain.robotPose, robot.getTargetGoal());
                 robot.update();
                 atPosition = robot.drivetrain.DTatTarget();
-                if (atPosition) { state = State.CORNER_INTAKES; }
+                if (atPosition) { state = State.TOP_SPIKE; }
                 break;
 
-            case CORNER_INTAKES:
+            case TOP_SPIKE:
                 robot.goToPoint(new Pose2D(DistanceUnit.INCH, -18, 12, AngleUnit.DEGREES, 180),
                         0.25, 4, 5);
                 robot.update();

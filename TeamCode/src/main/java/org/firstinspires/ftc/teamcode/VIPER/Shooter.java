@@ -16,17 +16,22 @@ public class Shooter {
 
     // ---------------- LEFT (MAIN FLYWHEEL - TUNED) ----------------
 
-    public double kP = 0.036;
-    public double kV = 0.002;
-    public double kS = 0.052;
-    public double kD = 0.0003;
+    public double kPfar = 0.036;
+    public double kVfar = 0.002;
+    public double kSfar = 0.052;
+    public double kDfar = 0.0003;
+
+    public double kPclose = 0.036;
+    public double kVclose = 0.002;
+    public double kSclose = 0.052;
+    public double kDclose = 0.0003;
 
     private double lastErrorL = 0;
 
     // ---------------- RIGHT (COUNTER ROLLERS - KEEP OLD) ----------------
 
-    public double kPR = 0.0049;
-    public double kVR = 0.0023;
+    public double kPRfar = 0.0049;
+    public double kVRfar = 0.0023;
 
     // ---------------- GENERAL ----------------
 
@@ -52,11 +57,13 @@ public class Shooter {
     private final double[] VELOCITIES = {264, 296, 308, 324, 348, 384, 392, 420, 480};
 
     // Zone control
-    public double Y_THRESHOLD = 0; // tune this
+    public double Y_THRESHOLD = -14; // FIXED
     public double CLOSE_MIN = 250;
     public double CLOSE_MAX = 380;
     public double FAR_MIN = 390;
     public double FAR_MAX = 500;
+
+    private boolean isClose = false; // NEW
 
     // ---------------- VELOCITY ----------------
 
@@ -132,15 +139,21 @@ public class Shooter {
         double errorL = targetVelocity - smoothedVelocityL;
         double errorR = targetVelocity - smoothedVelocityR;
 
+        // SELECT CONSTANTS BASED ON ZONE
+        double kP = isClose ? kPclose : kPfar;
+        double kV = isClose ? kVclose : kVfar;
+        double kS = isClose ? kSclose : kSfar;
+        double kD_use = isClose ? kDclose : kDfar;
+
         // LEFT
         double ffL = kS + (kV * targetVelocity);
         double dL = (dt > 0) ? (errorL - lastErrorL) / dt : 0;
 
-        double powerL = ffL + (kP * errorL) + (kD * dL);
+        double powerL = ffL + (kP * errorL) + (kD_use * dL);
         lastErrorL = errorL;
 
-        // RIGHT
-        double powerR = (kVR * targetVelocity) + (kPR * errorR);
+        // RIGHT (unchanged)
+        double powerR = (kVRfar * targetVelocity) + (kPRfar * errorR);
 
         powerL = Range.clip(powerL, -0.2, 1.0);
         powerR = Range.clip(powerR, 0.0, 1.0);
@@ -226,7 +239,7 @@ public class Shooter {
 
     public void angleHood(double v) {
         double[] xs = VELOCITIES;
-        double[] ys = {0.025, 0.21, 0.31, 0.38, 0.46, 0.46, 0.45, 0.45, 0.41};
+        double[] ys = {0.025, 0.21, 0.31, 0.38, 0.46, 0.46, 0.45, 0.45, 0.43};
 
         double target = ys[0];
         for (int i = 0; i < xs.length - 1; i++) {
@@ -270,10 +283,13 @@ public class Shooter {
 
         double robotY = pose.getY(DistanceUnit.INCH);
 
-        if (robotY < Y_THRESHOLD) {
-            v = Range.clip(v, FAR_MIN, FAR_MAX);
-        } else {
+        // FIXED LOGIC
+        isClose = robotY > Y_THRESHOLD;
+
+        if (isClose) {
             v = Range.clip(v, CLOSE_MIN, CLOSE_MAX);
+        } else {
+            v = Range.clip(v, FAR_MIN, FAR_MAX);
         }
 
         v += velocityModifier;

@@ -46,7 +46,7 @@ public class BlueFar15plus extends LinearOpMode {
 
         while (opModeInInit()) {
             robot.shooter.stop();
-            robot.drivetrain.setPosition(-8, -63, 180);
+            robot.drivetrain.setPosition(-8, -62.5, 180); // TODO: TUNE AT WORLDS
             robot.update(1);
         }
 
@@ -313,7 +313,7 @@ public class BlueFar15plus extends LinearOpMode {
                     }
 
                     robot.goToPoint(
-                            new Pose2D(DistanceUnit.INCH, -43, -2, AngleUnit.DEGREES, 90),
+                            new Pose2D(DistanceUnit.INCH, -48, -2, AngleUnit.DEGREES, 90),
                             1, 3, 0.15
                     );
 
@@ -321,7 +321,7 @@ public class BlueFar15plus extends LinearOpMode {
                     if ((robot.drivetrain.DTatTarget() && dtStallTimer.seconds() > 0.2)
                             || dtStallTimer.seconds() > 1.0) {
 
-                        splineCounter = 1;
+                        splineCounter = 2;
                         dtStallTimer.reset();
                     }
 
@@ -329,7 +329,7 @@ public class BlueFar15plus extends LinearOpMode {
                     robot.intake.setPower(0);
 
                     robot.goToPoint(
-                            new Pose2D(DistanceUnit.INCH, -48, -2, AngleUnit.DEGREES, 90),
+                            new Pose2D(DistanceUnit.INCH, -57, -2, AngleUnit.DEGREES, 90),
                             1, 2, 0.08
                     );
 

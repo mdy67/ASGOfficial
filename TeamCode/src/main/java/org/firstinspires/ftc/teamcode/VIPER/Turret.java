@@ -57,7 +57,7 @@ public class Turret {
     private double tgtServoPos = 0;
     private double currentDegs = 0;
 
-    public double offset = 0.0;
+    public double offset = 0.0185;
 
     public Turret(HardwareMap hardwareMap) {
         turret1 = hardwareMap.get(Servo.class, "turret1");
@@ -108,9 +108,9 @@ public class Turret {
     }
 
     private void setServoPos(double pos) {
-        turret1.setPosition(pos - offset);
+        turret1.setPosition(pos);
         turret2.setPosition(pos);
-        turret3.setPosition(pos + offset);
+        turret3.setPosition(pos - offset);
     }
 
     // ---------------- NEW CORRECT MAPPING ----------------
@@ -149,7 +149,7 @@ public class Turret {
         }
 
         // 🔥 HARD LIMITS (no wrap allowed past this point)
-        double min = 55;
+        double min = 95;
         double max = 300;
 
         if (fieldAngle > max) {

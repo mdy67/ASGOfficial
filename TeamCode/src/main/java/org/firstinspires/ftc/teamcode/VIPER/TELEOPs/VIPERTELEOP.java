@@ -11,6 +11,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.AutoToTeleop;
 import org.firstinspires.ftc.teamcode.OLDs.CONFIG.RobotConfig;
 import org.firstinspires.ftc.teamcode.VIPER.Robot;
 import org.firstinspires.ftc.teamcode.VIPER.alliance;
@@ -31,6 +32,7 @@ public class VIPERTELEOP extends OpMode {
     double targetTurretAngle = 180;
 
     @Override
+
     public void init() {
         timer = new ElapsedTime();
         robot = new Robot(hardwareMap);
@@ -38,12 +40,36 @@ public class VIPERTELEOP extends OpMode {
         // === DASHBOARD TELEMETRY (ADDED) ===
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
     //    FtcDashboard.getInstance().setTelemetryTransmissionInterval(25); // smoother live graphs
-
-        robot.update(0); // 0 = IDLE
         telemetry.addLine("Robot initialized. Waiting for start...");
         telemetry.update();
-    // TODO: CHANGE
+        robot.drivetrain.setPosition(AutoToTeleop.storedPose.getX(DistanceUnit.INCH), AutoToTeleop.storedPose.getY(DistanceUnit.INCH), AutoToTeleop.storedPose.getHeading(AngleUnit.DEGREES));
+
+        // TODO: CHANGE
     //    alliance.set(alliance.Color.BLUE);
+
+    }
+
+    double counter = 0;
+
+    @Override
+    public void init_loop() {
+        robot.turret.ANGLE_ADJUST = -3; // TODO: TUNE FOR AFTER AUTO POS
+        if (counter < 100) {
+            robot.drivetrain.setPosition(AutoToTeleop.storedPose.getX(DistanceUnit.INCH), AutoToTeleop.storedPose.getY(DistanceUnit.INCH), AutoToTeleop.storedPose.getHeading(AngleUnit.DEGREES));
+        }
+
+        robot.update(0); // 0 = IDLE
+
+        telemetry.addLine("IN INIT");
+        telemetry.addLine();
+        telemetry.addData("ROBOT X:", robot.drivetrain.robotPose.getX(DistanceUnit.INCH));
+        telemetry.addData("ROBOT Y:", robot.drivetrain.robotPose.getY(DistanceUnit.INCH));
+        telemetry.addData("ROBOT HEADING:", robot.drivetrain.robotPose.getHeading(AngleUnit.DEGREES));
+        telemetry.addData("savedPose X:", AutoToTeleop.storedPose.getX(DistanceUnit.INCH));
+        telemetry.addData("savedPose Y:", AutoToTeleop.storedPose.getY(DistanceUnit.INCH));
+        telemetry.addData("savedPose H:", AutoToTeleop.storedPose.getHeading(AngleUnit.DEGREES));
+        telemetry.addData("COUNTER:", counter);
+        telemetry.update();
 
     }
 
@@ -211,8 +237,8 @@ public class VIPERTELEOP extends OpMode {
         //  telemetry.addData("kPL:", robot.shooter.kPL);
         //     telemetry.addData("kVL:", robot.shooter.kVL);
         //    telemetry.addLine();
-        //     telemetry.addData("kPR:", robot.shooter.kPR);
-        //     telemetry.addData("kVR:", robot.shooter.kVR);
+        //     telemetry.addData("kPRfar:", robot.shooter.kPRfar);
+        //     telemetry.addData("kVRfar:", robot.shooter.kVRfar);
         //     telemetry.addLine();
         telemetry.addData("POWER MAIN:", robot.shooter.getPowerL());
         telemetry.addData("POWER ROLLERS:", robot.shooter.getPowerR());

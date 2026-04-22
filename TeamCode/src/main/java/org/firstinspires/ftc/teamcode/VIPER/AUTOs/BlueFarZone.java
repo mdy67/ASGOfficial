@@ -42,11 +42,30 @@ public class BlueFarZone extends LinearOpMode {
     public void runOpMode() {
         robot = new Robot(hardwareMap);
         alliance.set(alliance.Color.BLUE);
+        robot.drivetrain.setPosition(-8, -62.5, 180); // TODO: TUNE AT WORLDS
+        robot.update(1);
+        double counter = 0;
 
         while (opModeInInit()) {
+            if (counter < 200) {
+                robot.drivetrain.setPosition(-8, -62.5, 180); // TODO: TUNE AT WORLDS
+            }
+
+            telemetry.addLine("IN INIT");
+            telemetry.addLine();
+            telemetry.addData("ROBOT X:", robot.drivetrain.robotPose.getX(DistanceUnit.INCH));
+            telemetry.addData("ROBOT Y:", robot.drivetrain.robotPose.getY(DistanceUnit.INCH));
+            telemetry.addData("ROBOT HEADING:", robot.drivetrain.robotPose.getHeading(AngleUnit.DEGREES));
+            telemetry.update();
             robot.shooter.stop();
-            robot.drivetrain.setPosition(-8, -63, 180);
+            telemetry.addData("COUNTER:", counter);
             robot.update(1);
+
+
+            counter ++;
+
+
+
         }
 
         waitForStart();
