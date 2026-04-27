@@ -26,7 +26,8 @@ public class BlueCloseThingAuto extends LinearOpMode {
     private boolean atTarget = false;
     private boolean firing = false;
 
-    private double kTime = 0.41;
+    private double kTime = 0.34;
+    private double minReduc = -0.86;
 
     public enum State {
         SHOOTING_POSE_1,
@@ -45,13 +46,26 @@ public class BlueCloseThingAuto extends LinearOpMode {
         robot = new Robot(hardwareMap);
         alliance.set(alliance.Color.BLUE);
 
-        while (opModeInInit()) {
-            robot.shooter.stop();
-            robot.drivetrain.setPosition(-35, 64, 270);
-            robot.update(1);
-            robot.turret.ANGLE_ADJUST = 2;
-        }
+        double counter = 0;
 
+        while (opModeInInit()) {
+            if (counter < 200) {
+                robot.drivetrain.setPosition(35, 64, 270); // mirrored
+            }
+            robot.turret.ANGLE_ADJUST = 2; // TODO: CHAGNE IF NEEDED
+            telemetry.addLine("IN INIT");
+            telemetry.addLine();
+            telemetry.addData("ROBOT X:", robot.drivetrain.robotPose.getX(DistanceUnit.INCH));
+            telemetry.addData("ROBOT Y:", robot.drivetrain.robotPose.getY(DistanceUnit.INCH));
+            telemetry.addData("ROBOT HEADING:", robot.drivetrain.robotPose.getHeading(AngleUnit.DEGREES));
+            telemetry.update();
+            robot.shooter.stop();
+            telemetry.addData("COUNTER:", counter);
+            robot.update(1);
+
+            robot.turret.ANGLE_ADJUST = -2;
+            counter ++;
+        }
         waitForStart();
         gameTimer.reset();
 
@@ -86,8 +100,8 @@ public class BlueCloseThingAuto extends LinearOpMode {
 
                 if (!atTarget) {
 
-                    robot.intake.setPower(-0.4);
-
+                    robot.intake.setPower(-1);
+                    robot.linkage.ON();
                     robot.goToPoint(
                             new Pose2D(DistanceUnit.INCH, -22, 10, AngleUnit.DEGREES, 230),
                             1, 3, 0.08
@@ -102,7 +116,7 @@ public class BlueCloseThingAuto extends LinearOpMode {
                         atTarget = false;
 
                         robot.shooter.shooting = false;
-                        robot.intake.setPower(0);
+                    //    robot.intake.setPower(0);
                         robot.linkage.ON();
 
                         dtStallTimer.reset();
@@ -130,7 +144,7 @@ public class BlueCloseThingAuto extends LinearOpMode {
                         robot.shooter.shooting = true;
 
                         robot.intake.setPower(
-                                Range.clip(-1 + (rapidFireTimer.seconds() * kTime), -1, -0.76)
+                                Range.clip(-1 + (rapidFireTimer.seconds() * kTime), -1, minReduc)
                         );
 
                         // DONE FIRING

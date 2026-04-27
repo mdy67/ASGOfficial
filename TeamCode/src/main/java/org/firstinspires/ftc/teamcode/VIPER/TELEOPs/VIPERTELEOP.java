@@ -24,7 +24,7 @@ public class VIPERTELEOP extends OpMode {
     double targetVel = 0;
     double targetIntakeVel = 0;
     double tempHoodAngle = 0;
-    double kTime = 0.41;
+    double kTime = 0.34;
 
     boolean trigger = false;
     ElapsedTime timer;
@@ -69,6 +69,7 @@ public class VIPERTELEOP extends OpMode {
         telemetry.addData("savedPose Y:", AutoToTeleop.storedPose.getY(DistanceUnit.INCH));
         telemetry.addData("savedPose H:", AutoToTeleop.storedPose.getHeading(AngleUnit.DEGREES));
         telemetry.addData("COUNTER:", counter);
+        counter ++;
         telemetry.update();
 
     }
@@ -106,7 +107,7 @@ public class VIPERTELEOP extends OpMode {
                 trigger = true;
             }
             robot.shooter.shooting = true;
-            robot.intake.setPower(Range.clip(-1 + (timer.seconds() * kTime), -1, -0.76));
+            robot.intake.setPower(Range.clip(-1 + (timer.seconds() * kTime), -1, -0.86));
 
         } else if (gamepad1.a) {
             trigger = false;
@@ -213,6 +214,10 @@ public class VIPERTELEOP extends OpMode {
                 robot.drivetrain.setPosition(-63, -60, 0);
             }
 
+        }
+
+        if (gamepad1.x) {
+            robot.drivetrain.setY(-60);
         }
 
         // Distance to goal

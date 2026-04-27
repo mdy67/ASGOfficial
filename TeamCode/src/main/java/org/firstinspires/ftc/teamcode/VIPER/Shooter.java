@@ -54,7 +54,7 @@ public class Shooter {
     // ---------------- NEW: VELOCITY LOOKUP TABLE ----------------
 
     private final double[] DISTANCES = {40, 45, 58.3, 72.97, 90, 109.6, 125.9, 135.3, 142};
-    private final double[] VELOCITIES = {264, 296, 308, 324, 348, 384, 392, 420, 480};
+    private final double[] VELOCITIES = {264, 296, 308, 324, 348, 384, 392, 420, 460};
 
     // Zone control
     public double Y_THRESHOLD = -14; // FIXED
@@ -239,7 +239,7 @@ public class Shooter {
 
     public void angleHood(double v) {
         double[] xs = VELOCITIES;
-        double[] ys = {0.025, 0.21, 0.31, 0.38, 0.46, 0.46, 0.45, 0.45, 0.43};
+        double[] ys = {0.025, 0.21, 0.31, 0.38, 0.46, 0.46, 0.44, 0.42, 0.41};
 
         double target = ys[0];
         for (int i = 0; i < xs.length - 1; i++) {

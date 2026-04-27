@@ -83,6 +83,18 @@ public class Drivetrain {
         pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, x, y, AngleUnit.DEGREES, heading));
     }
 
+    public void setHeading(double heading) {
+        pinpoint.setHeading(heading, AngleUnit.DEGREES);
+    }
+
+    public void setX(double x) {
+        pinpoint.setPosX(x, DistanceUnit.INCH);
+    }
+
+    public void setY(double y) {
+        pinpoint.setPosY(y, DistanceUnit.INCH);
+    }
+
     private void setMotorPowers(double lf, double lb, double rb, double rf) {
         leftFront.setPower(lf);
         leftBack.setPower(lb);

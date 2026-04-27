@@ -26,7 +26,8 @@ public class BlueFarZone extends LinearOpMode {
     private boolean atTarget = false;
     private boolean firing = false;
 
-    private double kTime = 0.41;
+    private double kTime = 0.34;
+    private double minReduc = -0.86;
 
     public enum State {
         SHOOTING_POSE_1,
@@ -47,7 +48,8 @@ public class BlueFarZone extends LinearOpMode {
         double counter = 0;
 
         while (opModeInInit()) {
-            if (counter < 200) {
+            robot.turret.ANGLE_ADJUST = 2; // TODO: CHAGNE IF NEEDED
+            if (counter < 100) {
                 robot.drivetrain.setPosition(-8, -62.5, 180); // TODO: TUNE AT WORLDS
             }
 
@@ -105,8 +107,8 @@ public class BlueFarZone extends LinearOpMode {
 
                 if (!atTarget) {
 
-                    robot.intake.setPower(-0.4);
-
+                    robot.intake.setPower(-1);
+                    robot.linkage.ON();
                     robot.goToPoint(
                             new Pose2D(DistanceUnit.INCH, -22, -56, AngleUnit.DEGREES, 210),
                             1, 3, 0.08
@@ -121,7 +123,7 @@ public class BlueFarZone extends LinearOpMode {
                         atTarget = false;
 
                         robot.shooter.shooting = false;
-                        robot.intake.setPower(0);
+                      //  robot.intake.setPower(0);
                         robot.linkage.ON();
 
                         dtStallTimer.reset();
@@ -149,7 +151,7 @@ public class BlueFarZone extends LinearOpMode {
                         robot.shooter.shooting = true;
 
                         robot.intake.setPower(
-                                Range.clip(-1 + (rapidFireTimer.seconds() * kTime), -1, -0.76)
+                                Range.clip(-1 + (rapidFireTimer.seconds() * kTime), -1, minReduc)
                         );
 
                         // DONE FIRING

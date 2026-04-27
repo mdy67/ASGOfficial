@@ -7,7 +7,7 @@ public class Linkage {
 
     Servo Linkage2, Linkage1;
 
-    final double ON_POS = 0.265;
+    final double ON_POS = 0.22;
     final double OFF_POS = 0.11;
 
     final double OFFSET = 0.0084;

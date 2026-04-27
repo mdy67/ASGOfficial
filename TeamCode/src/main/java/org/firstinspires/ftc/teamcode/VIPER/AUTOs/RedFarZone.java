@@ -9,8 +9,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.*;
 import org.firstinspires.ftc.teamcode.GEN4.OLDsubsystems.AutoToTeleop;
 import org.firstinspires.ftc.teamcode.VIPER.*;
 
-@Autonomous(name= "Blue Far 15plus", group = "GEN4")
-public class BlueFar15plus extends LinearOpMode {
+@Autonomous(name= "Red Far Zone", group = "GEN4")
+public class RedFarZone extends LinearOpMode {
 
     private Robot robot;
 
@@ -34,7 +34,6 @@ public class BlueFar15plus extends LinearOpMode {
         CORNER_INTAKES,
         CORNER_INTAKES_2,
         THIRD_SPIKE,
-        SECOND_SPIKE,
         OFF_LINE_POS
     }
 
@@ -43,14 +42,14 @@ public class BlueFar15plus extends LinearOpMode {
     @Override
     public void runOpMode() {
         robot = new Robot(hardwareMap);
-        alliance.set(alliance.Color.BLUE);
-
+        alliance.set(alliance.Color.RED);
+        robot.drivetrain.setPosition(8, -62.5, 0); // mirrored
+        robot.update(1);
         double counter = 0;
 
         while (opModeInInit()) {
-            robot.turret.ANGLE_ADJUST = 2; // TODO: CHAGNE IF NEEDED
-            if (counter < 100) {
-                robot.drivetrain.setPosition(-8, -62.5, 180); // TODO: TUNE AT WORLDS
+            if (counter < 200) {
+                robot.drivetrain.setPosition(8, -62.5, 0); // mirrored
             }
 
             telemetry.addLine("IN INIT");
@@ -63,14 +62,12 @@ public class BlueFar15plus extends LinearOpMode {
             telemetry.addData("COUNTER:", counter);
             robot.update(1);
 
+            robot.turret.ANGLE_ADJUST = -2;// TODO: CHAGNE IF NEEDED
             counter ++;
-
-
         }
 
         waitForStart();
         gameTimer.reset();
-
 
         while (opModeIsActive()) {
             telemetry.addData("LOOP TIME:", loopCountTimer.seconds());
@@ -88,9 +85,8 @@ public class BlueFar15plus extends LinearOpMode {
                 goonCounter = 7;
             }
 
-            alliance.set(alliance.Color.BLUE);
+            alliance.set(alliance.Color.RED);
             AutoToTeleop.storedPose = robot.drivetrain.robotPose;
-
         }
     }
 
@@ -98,9 +94,6 @@ public class BlueFar15plus extends LinearOpMode {
 
         switch (state) {
 
-            // =========================
-            // 🔥 SHOOTING
-            // =========================
             case SHOOTING_POSE_1:
 
                 if (!atTarget) {
@@ -108,7 +101,7 @@ public class BlueFar15plus extends LinearOpMode {
                     robot.intake.setPower(-1);
                     robot.linkage.ON();
                     robot.goToPoint(
-                            new Pose2D(DistanceUnit.INCH, -22, -56, AngleUnit.DEGREES, 210),
+                            new Pose2D(DistanceUnit.INCH, 22, -56, AngleUnit.DEGREES, 330),
                             1, 3, 0.08
                     );
 
@@ -121,7 +114,6 @@ public class BlueFar15plus extends LinearOpMode {
                         atTarget = false;
 
                         robot.shooter.shooting = false;
-                      //  robot.intake.setPower(0);
                         robot.linkage.ON();
 
                         dtStallTimer.reset();
@@ -136,7 +128,6 @@ public class BlueFar15plus extends LinearOpMode {
 
                 else {
 
-                    // MUST STILL BE STABLE
                     if (settleTimer.seconds() > 0.2 && robot.drivetrain.DTatTarget() && robot.shooter.atVelocity()) {
 
                         robot.linkage.OFF();
@@ -152,7 +143,6 @@ public class BlueFar15plus extends LinearOpMode {
                                 Range.clip(-1 + (rapidFireTimer.seconds() * kTime), -1, minReduc)
                         );
 
-                        // DONE FIRING
                         if (rapidFireTimer.seconds() > 0.9) {
 
                             firing = false;
@@ -170,11 +160,11 @@ public class BlueFar15plus extends LinearOpMode {
                             } else if (goonCounter == 1) {
                                 state = State.THIRD_SPIKE;
                             } else if (goonCounter == 2) {
-                                state = State.SECOND_SPIKE;
-                            } else if (goonCounter == 3) {
-                                state = State.CORNER_INTAKES_2;
-                            } else if (goonCounter == 4) {
                                 state = State.CORNER_INTAKES;
+                            } else if (goonCounter == 3) {
+                                state = State.CORNER_INTAKES;
+                            } else if (goonCounter == 4) {
+                                state = State.CORNER_INTAKES_2;
                             } else if (goonCounter == 5) {
                                 state = State.CORNER_INTAKES;
                             } else if (goonCounter == 6) {
@@ -183,16 +173,12 @@ public class BlueFar15plus extends LinearOpMode {
                                 state = State.OFF_LINE_POS;
                             }
 
-
                             goonCounter++;
                         }
                     }
                 }
                 break;
 
-            // =========================
-            // 🟦 CORNER INTAKE (FIXED)
-            // =========================
             case CORNER_INTAKES:
 
                 robot.intake.setPower(-1);
@@ -201,7 +187,7 @@ public class BlueFar15plus extends LinearOpMode {
                 if (splineCounter == 0) {
 
                     robot.goToPoint(
-                            new Pose2D(DistanceUnit.INCH, -66, -65, AngleUnit.DEGREES, 180),
+                            new Pose2D(DistanceUnit.INCH, 66, -65, AngleUnit.DEGREES, 0),
                             1, 3, 0.15
                     );
 
@@ -218,9 +204,6 @@ public class BlueFar15plus extends LinearOpMode {
 
                 break;
 
-            // =========================
-            // 🟦 CORNER INTAKE 2 (UNCHANGED)
-            // =========================
             case CORNER_INTAKES_2:
 
                 robot.intake.setPower(-1);
@@ -229,15 +212,14 @@ public class BlueFar15plus extends LinearOpMode {
                 if (splineCounter == 0) {
 
                     if (dtStallTimer.seconds() == 0) {
-                        dtStallTimer.reset(); // ensure started once
+                        dtStallTimer.reset();
                     }
 
                     robot.goToPoint(
-                            new Pose2D(DistanceUnit.INCH, -50, -55, AngleUnit.DEGREES, 180),
+                            new Pose2D(DistanceUnit.INCH, 50, -35, AngleUnit.DEGREES, 0),
                             1, 5, 0.25
                     );
 
-                    // 🔒 REQUIRE MIN TIME BEFORE ALLOWING TRANSITION
                     if ((robot.drivetrain.DTatTarget() && dtStallTimer.seconds() > 0.2)
                             || dtStallTimer.seconds() > 1.0) {
 
@@ -248,7 +230,7 @@ public class BlueFar15plus extends LinearOpMode {
                 } else if (splineCounter == 1) {
 
                     robot.goToPoint(
-                            new Pose2D(DistanceUnit.INCH, -66, -55, AngleUnit.DEGREES, 180),
+                            new Pose2D(DistanceUnit.INCH, 66, -35, AngleUnit.DEGREES, 0),
                             1, 3, 0.25
                     );
 
@@ -269,15 +251,14 @@ public class BlueFar15plus extends LinearOpMode {
                 if (splineCounter == 0) {
 
                     if (dtStallTimer.seconds() == 0) {
-                        dtStallTimer.reset(); // ensure started once
+                        dtStallTimer.reset();
                     }
 
                     robot.goToPoint(
-                            new Pose2D(DistanceUnit.INCH, -48, -48, AngleUnit.DEGREES, 90),
+                            new Pose2D(DistanceUnit.INCH, 48, -48, AngleUnit.DEGREES, 90),
                             1, 3, 0.08
                     );
 
-                    // 🔒 REQUIRE MIN TIME BEFORE ALLOWING TRANSITION
                     if ((robot.drivetrain.DTatTarget() && dtStallTimer.seconds() > 0.8)
                             || dtStallTimer.seconds() > 1.0) {
 
@@ -288,7 +269,7 @@ public class BlueFar15plus extends LinearOpMode {
                 } else if (splineCounter == 1) {
 
                     robot.goToPoint(
-                            new Pose2D(DistanceUnit.INCH, -48, -30, AngleUnit.DEGREES, 90),
+                            new Pose2D(DistanceUnit.INCH, 48, -30, AngleUnit.DEGREES, 90),
                             1, 3, 0.08
                     );
 
@@ -301,74 +282,12 @@ public class BlueFar15plus extends LinearOpMode {
 
                 break;
 
-            case SECOND_SPIKE:
-
-                robot.intake.setPower(-1);
-                robot.linkage.ON();
-                if (splineCounter == 0) {
-
-                    if (dtStallTimer.seconds() == 0) {
-                        dtStallTimer.reset(); // ensure started once
-                    }
-
-                    robot.goToPoint(
-                            new Pose2D(DistanceUnit.INCH, -48, -24, AngleUnit.DEGREES, 90),
-                            1, 3, 0.08
-                    );
-
-                    // 🔒 REQUIRE MIN TIME BEFORE ALLOWING TRANSITION
-                    if ((robot.drivetrain.DTatTarget() && dtStallTimer.seconds() > 0.2)
-                            || dtStallTimer.seconds() > 1.0) {
-
-                        splineCounter = 1;
-                        dtStallTimer.reset();
-                    }
-
-                } else if (splineCounter == 1) {
-
-                    if (dtStallTimer.seconds() == 0) {
-                        dtStallTimer.reset(); // ensure started once
-                    }
-
-                    robot.goToPoint(
-                            new Pose2D(DistanceUnit.INCH, -48, -2, AngleUnit.DEGREES, 90),
-                            1, 3, 0.15
-                    );
-
-                    // 🔒 REQUIRE MIN TIME BEFORE ALLOWING TRANSITION
-                    if ((robot.drivetrain.DTatTarget() && dtStallTimer.seconds() > 0.2)
-                            || dtStallTimer.seconds() > 1.0) {
-
-                        splineCounter = 2;
-                        dtStallTimer.reset();
-                    }
-
-                } else if (splineCounter == 2) {
-                    robot.intake.setPower(0);
-
-                    robot.goToPoint(
-                            new Pose2D(DistanceUnit.INCH, -57, -2, AngleUnit.DEGREES, 90),
-                            1, 2, 0.08
-                    );
-
-                    if (robot.drivetrain.DTatTarget() && dtStallTimer.seconds() > 0.2 || dtStallTimer.seconds() > 0.75) {
-                        splineCounter = 0;
-                        dtStallTimer.reset();
-                        state = State.SHOOTING_POSE_1;
-                    }
-                }
-
-                break;
-
-            // =========================
-            // 🟩 PARK
-            // =========================
             case OFF_LINE_POS:
 
                 robot.intake.setPower(0);
 
                 robot.goToPoint(
-                        new Pose2D(DistanceUnit.INCH, -40, -40, AngleUnit.DEGREES, 180),
+                        new Pose2D(DistanceUnit.INCH, 40, -40, AngleUnit.DEGREES, 0),
                         1, 3, 0.25
                 );
 
