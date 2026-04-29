@@ -26,8 +26,8 @@ public class BlueFar15plus extends LinearOpMode {
     private boolean atTarget = false;
     private boolean firing = false;
 
-    private double kTime = 0.34;
-    private double minReduc = -0.86;
+    private double kTime;
+    private double minReduc;
 
     public enum State {
         SHOOTING_POSE_1,
@@ -43,6 +43,8 @@ public class BlueFar15plus extends LinearOpMode {
     @Override
     public void runOpMode() {
         robot = new Robot(hardwareMap);
+        kTime = robot.shooter.kTime;
+        minReduc = robot.shooter.maxPower;
         alliance.set(alliance.Color.BLUE);
 
         double counter = 0;

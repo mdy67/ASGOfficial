@@ -26,8 +26,8 @@ public class BlueFarZone extends LinearOpMode {
     private boolean atTarget = false;
     private boolean firing = false;
 
-    private double kTime = 0.34;
-    private double minReduc = -0.86;
+    private double kTime;
+    private double minReduc;
 
     public enum State {
         SHOOTING_POSE_1,
@@ -42,13 +42,15 @@ public class BlueFarZone extends LinearOpMode {
     @Override
     public void runOpMode() {
         robot = new Robot(hardwareMap);
+        kTime = robot.shooter.kTime;
+        minReduc = robot.shooter.maxPower;
         alliance.set(alliance.Color.BLUE);
         robot.drivetrain.setPosition(-8, -62.5, 180); // TODO: TUNE AT WORLDS
         robot.update(1);
         double counter = 0;
 
         while (opModeInInit()) {
-            robot.turret.ANGLE_ADJUST = 2; // TODO: CHAGNE IF NEEDED
+            robot.turret.ANGLE_ADJUST = 3; // TODO: CHAGNE IF NEEDED
             if (counter < 100) {
                 robot.drivetrain.setPosition(-8, -62.5, 180); // TODO: TUNE AT WORLDS
             }

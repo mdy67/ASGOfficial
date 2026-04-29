@@ -26,8 +26,8 @@ public class BlueCloseThingAuto extends LinearOpMode {
     private boolean atTarget = false;
     private boolean firing = false;
 
-    private double kTime = 0.34;
-    private double minReduc = -0.86;
+    private double kTime;
+    private double minReduc;
 
     public enum State {
         SHOOTING_POSE_1,
@@ -44,6 +44,8 @@ public class BlueCloseThingAuto extends LinearOpMode {
     @Override
     public void runOpMode() {
         robot = new Robot(hardwareMap);
+        kTime = robot.shooter.kTime;
+        minReduc = robot.shooter.maxPower;
         alliance.set(alliance.Color.BLUE);
 
         double counter = 0;
@@ -52,7 +54,7 @@ public class BlueCloseThingAuto extends LinearOpMode {
             if (counter < 200) {
                 robot.drivetrain.setPosition(35, 64, 270); // mirrored
             }
-            robot.turret.ANGLE_ADJUST = 2; // TODO: CHAGNE IF NEEDED
+            robot.turret.ANGLE_ADJUST = 1; // TODO: CHAGNE IF NEEDED
             telemetry.addLine("IN INIT");
             telemetry.addLine();
             telemetry.addData("ROBOT X:", robot.drivetrain.robotPose.getX(DistanceUnit.INCH));

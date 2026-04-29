@@ -24,7 +24,8 @@ public class VIPERTELEOP extends OpMode {
     double targetVel = 0;
     double targetIntakeVel = 0;
     double tempHoodAngle = 0;
-    double kTime = 0.34;
+    private double kTime;
+    private double minReduc;
 
     boolean trigger = false;
     ElapsedTime timer;
@@ -36,6 +37,8 @@ public class VIPERTELEOP extends OpMode {
     public void init() {
         timer = new ElapsedTime();
         robot = new Robot(hardwareMap);
+        kTime = robot.shooter.kTime;
+        minReduc = robot.shooter.maxPower;
 
         // === DASHBOARD TELEMETRY (ADDED) ===
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -53,7 +56,12 @@ public class VIPERTELEOP extends OpMode {
 
     @Override
     public void init_loop() {
-        robot.turret.ANGLE_ADJUST = -3; // TODO: TUNE FOR AFTER AUTO POS
+        if (alliance.isBlue()) {
+            robot.turret.ANGLE_ADJUST = -3; // TODO: TUNE FOR AFTER AUTO POS
+        } else {
+            robot.turret.ANGLE_ADJUST = 1; // TODO: TUNE FOR AFTER AUTO POS
+        }
+
         if (counter < 100) {
             robot.drivetrain.setPosition(AutoToTeleop.storedPose.getX(DistanceUnit.INCH), AutoToTeleop.storedPose.getY(DistanceUnit.INCH), AutoToTeleop.storedPose.getHeading(AngleUnit.DEGREES));
         }
@@ -107,7 +115,7 @@ public class VIPERTELEOP extends OpMode {
                 trigger = true;
             }
             robot.shooter.shooting = true;
-            robot.intake.setPower(Range.clip(-1 + (timer.seconds() * kTime), -1, -0.86));
+            robot.intake.setPower(Range.clip(-1 + (timer.seconds() * kTime), -1, minReduc));
 
         } else if (gamepad1.a) {
             trigger = false;
