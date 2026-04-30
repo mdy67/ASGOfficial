@@ -47,7 +47,7 @@ public class Shooter {
     public double velocityModifier = 0.0;
     public double MIN_VELOCITY = 210;
     public double MAX_VELOCITY = 800;
-    public double VEL_ADJUST = -25;
+    public double VEL_ADJUST = -17;
 
     public static final double THRESHOLD = 10;
 
@@ -57,7 +57,7 @@ public class Shooter {
     private final double[] VELOCITIES = {264, 296, 308, 324, 348, 384, 392, 420, 460, 470};
 
     // Zone control
-    public double Y_THRESHOLD = -14; // FIXED
+    public double Y_THRESHOLD = -15; // FIXED
     public double CLOSE_MIN = 250;
     public double CLOSE_MAX = 380;
     public double FAR_MIN = 390;
@@ -79,8 +79,8 @@ public class Shooter {
     private double lastVelocityTime = 0.0;
 
     public boolean shooting = false;
-    public double kTime = 0.05;
-    public double maxPower = -0.86;
+    public double kTime = 0.4;
+    public double maxPower = -0.65;
 
     boolean stoppage = false;
 
@@ -241,7 +241,7 @@ public class Shooter {
 
     public void angleHood(double v) {
         double[] xs = VELOCITIES;
-        double[] ys = {0.025, 0.21, 0.31, 0.38, 0.445, 0.445, 0.425, 0.405, 0.395, 0.35};
+        double[] ys = {0.025, 0.21, 0.31, 0.38, 0.445, 0.445, 0.415, 0.395, 0.385, 0.36};
 
         double target = ys[0];
         for (int i = 0; i < xs.length - 1; i++) {

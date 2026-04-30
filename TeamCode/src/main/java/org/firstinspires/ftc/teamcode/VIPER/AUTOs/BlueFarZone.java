@@ -50,7 +50,7 @@ public class BlueFarZone extends LinearOpMode {
         double counter = 0;
 
         while (opModeInInit()) {
-            robot.turret.ANGLE_ADJUST = 3; // TODO: CHAGNE IF NEEDED
+            robot.turret.ANGLE_ADJUST = 4; // TODO: CHAGNE IF NEEDED
             if (counter < 100) {
                 robot.drivetrain.setPosition(-8, -62.5, 180); // TODO: TUNE AT WORLDS
             }

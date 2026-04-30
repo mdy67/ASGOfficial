@@ -57,7 +57,7 @@ public class VIPERTELEOP extends OpMode {
     @Override
     public void init_loop() {
         if (alliance.isBlue()) {
-            robot.turret.ANGLE_ADJUST = -3; // TODO: TUNE FOR AFTER AUTO POS
+            robot.turret.ANGLE_ADJUST = 2; // TODO: TUNE FOR AFTER AUTO POS
         } else {
             robot.turret.ANGLE_ADJUST = 1; // TODO: TUNE FOR AFTER AUTO POS
         }
@@ -217,9 +217,9 @@ public class VIPERTELEOP extends OpMode {
 
         if (gamepad1.b) {
             if (alliance.isBlue()) {
-                robot.drivetrain.setPosition(63, -60, 180);
+                robot.drivetrain.setX(63);
             } else {
-                robot.drivetrain.setPosition(-63, -60, 0);
+                robot.drivetrain.setX(-63);
             }
 
         }
@@ -227,6 +227,38 @@ public class VIPERTELEOP extends OpMode {
         if (gamepad1.x) {
             robot.drivetrain.setY(-60);
         }
+
+        if (gamepad1.y) {
+            if (alliance.isBlue()) {
+                robot.drivetrain.setHeading(180);
+                robot.drivetrain.setHeading(180);
+                robot.drivetrain.setHeading(180);
+                robot.drivetrain.setHeading(180);
+                robot.drivetrain.setHeading(180);
+                robot.drivetrain.setHeading(180);
+                robot.drivetrain.setHeading(180);
+                robot.drivetrain.setHeading(180);
+
+            } else {
+                robot.drivetrain.setHeading(0);
+                robot.drivetrain.setHeading(0);
+                robot.drivetrain.setHeading(0);
+                robot.drivetrain.setHeading(0);
+                robot.drivetrain.setHeading(0);
+                robot.drivetrain.setHeading(0);
+                robot.drivetrain.setHeading(0);
+
+            }
+        }
+
+        /*
+
+                          TOP - HEADING (INTAKE AWAY)
+                LEFT - Y POS (BOTTOM WALL)        RIGHT - X POS (CLOSE WALL)
+                            BOTTOM - OUTTAKE
+
+
+         */
 
         // Distance to goal
         double goalX = robot.targetGoal.getX(DistanceUnit.INCH);
