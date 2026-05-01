@@ -42,19 +42,19 @@ public class Shooter {
 
     private double targetVelocity = 0.0;
 
-    public double MAIN_TOLERANCE = 20;
+    public double MAIN_TOLERANCE = 12;
 
-    public double velocityModifier = 0.0;
+    public double velocityModifier = -53.0;
     public double MIN_VELOCITY = 210;
     public double MAX_VELOCITY = 800;
-    public double VEL_ADJUST = -17;
+    public double VEL_ADJUST = 0;
 
     public static final double THRESHOLD = 10;
 
     // ---------------- NEW: VELOCITY LOOKUP TABLE ----------------
 
-    private final double[] DISTANCES = {40, 45, 58.3, 72.97, 90, 109.6, 125.9, 135.3, 142, 148};
-    private final double[] VELOCITIES = {264, 296, 308, 324, 348, 384, 392, 420, 460, 470};
+    private final double[] DISTANCES = {40, 45, 58.3, 72.97, 90, 109.6, 125.9, 135.3, 142, 147, 150};
+    private final double[] VELOCITIES = {264, 296, 308, 324, 348, 384, 405, 429, 455, 466, 480};
 
     // Zone control
     public double Y_THRESHOLD = -15; // FIXED
@@ -79,8 +79,8 @@ public class Shooter {
     private double lastVelocityTime = 0.0;
 
     public boolean shooting = false;
-    public double kTime = 0.4;
-    public double maxPower = -0.65;
+    public double kTime = 0.5;
+    public double maxPower = -0.55;
 
     boolean stoppage = false;
 
@@ -240,8 +240,8 @@ public class Shooter {
     }
 
     public void angleHood(double v) {
-        double[] xs = VELOCITIES;
-        double[] ys = {0.025, 0.21, 0.31, 0.38, 0.445, 0.445, 0.415, 0.395, 0.385, 0.36};
+        double[] xs = VELOCITIES; // acc distances
+        double[] ys = {0.025, 0.21, 0.31, 0.38, 0.435, 0.435, 0.408, 0.389, 0.379, 0.377, 0.394};
 
         double target = ys[0];
         for (int i = 0; i < xs.length - 1; i++) {
@@ -256,7 +256,7 @@ public class Shooter {
 
     // ---------------- NEW: INTERPOLATION ----------------
 
-    private double interpolateVelocity(double d) {
+    private double interpolateVelocity(double d) { // 466 at 147
 
         if (d <= DISTANCES[0]) return VELOCITIES[0];
         if (d >= DISTANCES[DISTANCES.length - 1]) return VELOCITIES[VELOCITIES.length - 1];
@@ -289,7 +289,7 @@ public class Shooter {
         isClose = robotY > Y_THRESHOLD;
 
         if (isClose) {
-            v = Range.clip(v, CLOSE_MIN, CLOSE_MAX);
+            v = Range.clip(v, CLOSE_MIN, CLOSE_MAX) - velocityModifier * 0.7; // TODO: goon on the niggas in our div
         } else {
             v = Range.clip(v, FAR_MIN, FAR_MAX);
         }

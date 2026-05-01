@@ -27,6 +27,7 @@ public class VIPERTELEOP extends OpMode {
     private double kTime;
     private double minReduc;
 
+    private double maxReduc = -0.78;
     boolean trigger = false;
     ElapsedTime timer;
 
@@ -57,9 +58,9 @@ public class VIPERTELEOP extends OpMode {
     @Override
     public void init_loop() {
         if (alliance.isBlue()) {
-            robot.turret.ANGLE_ADJUST = 2; // TODO: TUNE FOR AFTER AUTO POS
+            robot.turret.ANGLE_ADJUST = 5; // TODO: TUNE FOR AFTER AUTO POS
         } else {
-            robot.turret.ANGLE_ADJUST = 1; // TODO: TUNE FOR AFTER AUTO POS
+            robot.turret.ANGLE_ADJUST = 0; // TODO: TUNE FOR AFTER AUTO POS
         }
 
         if (counter < 100) {
@@ -115,7 +116,7 @@ public class VIPERTELEOP extends OpMode {
                 trigger = true;
             }
             robot.shooter.shooting = true;
-            robot.intake.setPower(Range.clip(-1 + (timer.seconds() * kTime), -1, minReduc));
+            robot.intake.setPower(Range.clip(maxReduc + (timer.seconds() * kTime), maxReduc, minReduc));
 
         } else if (gamepad1.a) {
             trigger = false;
