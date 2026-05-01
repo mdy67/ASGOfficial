@@ -165,7 +165,7 @@ public class RedFarZone extends LinearOpMode {
                             } else if (goonCounter == 2) {
                                 state = State.CORNER_INTAKES;
                             } else if (goonCounter == 3) {
-                                state = State.CORNER_INTAKES;
+                                state = State.CORNER_INTAKES_2;
                             } else if (goonCounter == 4) {
                                 state = State.CORNER_INTAKES_2;
                             } else if (goonCounter == 5) {
