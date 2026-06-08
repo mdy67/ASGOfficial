@@ -232,7 +232,7 @@ public class Shooter {
     public void setHoodAngle(double pos) {
         pos = Range.clip(pos, HOOD_BOTTOM, HOOD_TOP);
         hoodL.setPosition(pos);
-        hoodR.setPosition(pos - 0.03);
+        hoodR.setPosition(pos - 0.15);
     }
 
     public double getHoodAngle() {

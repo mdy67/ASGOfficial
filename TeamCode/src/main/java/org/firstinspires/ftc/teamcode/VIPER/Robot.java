@@ -144,6 +144,7 @@ public class Robot {
             shooter.aimToGoal(targetGoal, drivetrain.robotPose);
         } else {
             turret.state = Turret.State.IDLE;
+            shooter.stop();
             turret.update(drivetrain.robotPose, targetGoal, drivetrain.TVel());
           //  shooter.aimToGoal(targetGoal, drivetrain.robotPose);
         }

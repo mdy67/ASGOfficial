@@ -65,7 +65,7 @@ public class RedFarZone extends LinearOpMode {
             telemetry.addData("COUNTER:", counter);
             robot.update(1);
 
-            robot.turret.ANGLE_ADJUST = -1;// TODO: CHAGNE IF NEEDED
+            robot.turret.ANGLE_ADJUST = -3;// TODO: CHAGNE IF NEEDED
             counter ++;
         }
 

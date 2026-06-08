@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.VIPER.TELEOPs;
 
-
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -16,8 +16,9 @@ import org.firstinspires.ftc.teamcode.OLDs.CONFIG.RobotConfig;
 import org.firstinspires.ftc.teamcode.VIPER.Robot;
 import org.firstinspires.ftc.teamcode.VIPER.alliance;
 
-@TeleOp(name = "VIPER TeleOp", group = "GEN4")
-public class VIPERTELEOP extends OpMode {
+@Config
+@TeleOp(name = "AimToGoalTeleOP", group = "GEN4")
+public class AimToGoalTeleOP extends OpMode {
 
     private Robot robot;
 
@@ -29,6 +30,8 @@ public class VIPERTELEOP extends OpMode {
 
     private double maxReduc = -0.78;
     boolean trigger = false;
+
+    public static double headingkP = 0.01;
     ElapsedTime timer;
 
     double targetTurretAngle = 180;
@@ -41,15 +44,12 @@ public class VIPERTELEOP extends OpMode {
         kTime = robot.shooter.kTime;
         minReduc = robot.shooter.maxPower;
 
-        // === DASHBOARD TELEMETRY (ADDED) ===
-        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-    //    FtcDashboard.getInstance().setTelemetryTransmissionInterval(25); // smoother live graphs
         telemetry.addLine("Robot initialized. Waiting for start...");
         telemetry.update();
         robot.drivetrain.setPosition(AutoToTeleop.storedPose.getX(DistanceUnit.INCH), AutoToTeleop.storedPose.getY(DistanceUnit.INCH), AutoToTeleop.storedPose.getHeading(AngleUnit.DEGREES));
 
         // TODO: CHANGE
-    //    alliance.set(alliance.Color.BLUE);
+        //    alliance.set(alliance.Color.BLUE);
 
     }
 
@@ -91,13 +91,32 @@ public class VIPERTELEOP extends OpMode {
         double drive = -gamepad1.left_stick_y;
         double strafe = -gamepad1.left_stick_x;
         double turn = -gamepad1.right_stick_x;
-
+/*
         if (gamepad1.right_trigger > 0.01) {
             drive *= 0.4;
             strafe *= 0.4;
             turn *= 0.4;
         }
-        robot.drivetrain.driveTeleOp(strafe, drive, turn);
+
+ */
+
+        double goalX = robot.targetGoal.getX(DistanceUnit.INCH);
+        double goalY = robot.targetGoal.getY(DistanceUnit.INCH);
+
+        double robotX = robot.drivetrain.robotPose.getX(DistanceUnit.INCH);
+        double robotY = robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
+
+        double dx = goalX - robotX;
+        double dy = goalY - robotY;
+
+        double fieldAngle = Math.toDegrees(Math.atan2(dy, dx));
+
+        if (!(gamepad1.right_trigger > 0.1)) {
+            robot.drivetrain.driveTeleOp(strafe, drive, turn);
+        } else {
+            robot.drivetrain.driveTeleOp(strafe, drive, (fieldAngle - robot.drivetrain.robotPose.getHeading(AngleUnit.DEGREES))*headingkP);
+        }
+
 
         if (gamepad1.left_bumper) {
             trigger = false;
@@ -139,7 +158,7 @@ public class VIPERTELEOP extends OpMode {
         }
 
 
-        robot.update(1);
+        robot.update(0);
 
 
         if (gamepad1.b) {
@@ -186,14 +205,9 @@ public class VIPERTELEOP extends OpMode {
 
          */
 
-        double goalX = robot.targetGoal.getX(DistanceUnit.INCH);
-        double goalY = robot.targetGoal.getY(DistanceUnit.INCH);
 
-        double robotX = robot.drivetrain.robotPose.getX(DistanceUnit.INCH);
-        double robotY = robot.drivetrain.robotPose.getY(DistanceUnit.INCH);
 
-        double dx = goalX - robotX;
-        double dy = goalY - robotY;
+
 
         double distanceToGoal = Math.hypot(dx, dy);
 
