@@ -185,12 +185,12 @@ public class Drivetrain {
         return ((Math.abs(xError) + Math.abs(yError)) <= xyThreshold && Math.abs(tError) < hThreshold);
     }
 
-    public static final double xkP = 0.06;
-    public static final double xkD = 0.01;
-    public static final double ykP = 0.1;
-    public static final double ykD = 0.01;
-    public static final double tkP = 0.2;
-    public static final double tkD = 0.02;
+    public static double xkP = 0.06;
+    public static double xkD = 0.01;
+    public static double ykP = xkP;
+    public static double ykD = xkD;
+    public static double tkP = 0.2;
+    public static double tkD = 0.02;
 
     DTPID xPID = new DTPID(xkP,xkD);
     DTPID yPID = new DTPID(ykP, ykD);
@@ -205,24 +205,39 @@ public class Drivetrain {
     private double yONmult = 1.5;
     private double tONmult = 1.5;
 
+    public static double fullSendDist = 8.0;
+
     public void applyPIDPowers() {
         getErrors();
 
-        xPower = xPID.newPDPower(xError, maxPower);
-        yPower = yPID.newPDPower(yError, maxPower);
-        tPower = tPID.newPDPower(tError, maxPower);
+        double dist = Math.hypot(globalXerror, globalYerror);
+        double heading = robotPose.getHeading(AngleUnit.RADIANS);
 
-        //   if (xShutoff && Math.abs(xError) > xyThreshold * xONmult) { xShutoff = false; }
-        //  if (yShutoff && Math.abs(yError) > xyThreshold * yONmult) { yShutoff = false; }
-        //  if (tShutoff && Math.abs(tError) > hThreshold * tONmult) { tShutoff = false; }
+        double fullSendDist = 8.0; // inches
 
-        //  if (atX) { xShutoff = true; xPower = 0; }
-        //  if (atY) { yShutoff = true; yPower = 0; }
-        //   if (atT) { tShutoff = true; tPower = 0; }
+        if (dist > fullSendDist) {
+            // FULL SEND MODE
+            double angleToTarget = Math.atan2(globalYerror, globalXerror);
 
-        if (atX) { xPower *= 0.8; }
-        if (atY) { yPower *= 0.8; }
-        if (atT) { tPower *= 0.8; }
+            // convert to robot-relative
+            double relX = Math.cos(angleToTarget - heading);
+            double relY = Math.sin(angleToTarget - heading);
+
+            xPower = relX * maxPower;
+            yPower = relY * maxPower;
+            // still use PID for heading so it doesn't ignore rotation
+            tPower = tPID.newPDPower(tError, maxPower);
+
+        } else {
+            // NORMAL PID MODE (close to target)
+            xPower = xPID.newPDPower(xError, maxPower);
+            yPower = yPID.newPDPower(yError, maxPower);
+            tPower = tPID.newPDPower(tError, maxPower);
+            // your existing soft slowdown near target
+            if (atX) { xPower *= 0.8; }
+            if (atY) { yPower *= 0.8; }
+            if (atT) { tPower *= 0.8; }
+        }
 
         setWeightedMotorPowers(yPower, xPower, tPower);
     }
