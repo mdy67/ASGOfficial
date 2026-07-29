@@ -1,4 +1,1 @@
-# Road Runner Quickstart
-
-Check out the [docs](https://rr.brott.dev/docs/v1-0/tuning/).
-READ DEEZ BALLS LOLLLL
+this whole shit is diddy bruh
